@@ -1,0 +1,23 @@
+body {
+	margin: 0;
+	overflow:hidden;
+	background-color: black;
+}
+
+#html5 {
+  position: absolute;
+  left: 16px;
+  bottom: 16px;
+  width: 64px;
+  height: 64px;
+  background-image: url('../../i/html5.png');
+  background-repeat: no-repeat;
+  cursor: pointer;
+  filter: grayscale(100%);
+  -webkit-filter: grayscale(100%);
+}
+
+#html5:hover {
+  filter: grayscale(0%);
+  -webkit-filter: grayscale(0%);
+}
