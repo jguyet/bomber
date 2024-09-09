@@ -61,7 +61,7 @@ var interval = function()
 			world.updateplayers();
 		if (world.updatebombs != null)
 			world.updatebombs();
-		//dup = world.dup;
+		dup = world.dup;
 		if (world.havechange)
 		{
 			fosfo0.update(dup);

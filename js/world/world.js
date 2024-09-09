@@ -38,8 +38,16 @@ var World = function(data)
 		var x = 0;
 		var first = true;
 		var noput = false;
-		//this.dup.push([-(this.width * 32), 0]);
-		//this.dup.push([0, -(40 * 12)]);
+		this.dup.push([-(this.width * 32), 0]); // left
+		this.dup.push([0, -(this.height * 32)]); // top
+		this.dup.push([(this.width * 32), 0]); // right
+		this.dup.push([0, (this.height * 32)]); // bottom
+
+		this.dup.push([-(this.width * 32), (this.height * 32)]); // bottom left
+		this.dup.push([(this.width * 32), (this.height * 32)]); // bottom right
+		this.dup.push([-(this.width * 32), -(this.height * 32)]); // top left
+		this.dup.push([(this.width * 32), -(this.height * 32)]); // top right
+
 		while (county < (this.height * 32))
 		{
 			countx = 0;
