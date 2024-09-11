@@ -54,6 +54,9 @@ public class DataProcessor {
 					case 'L':
 						client.aks.worldmessage.loadWorld(message, client);
 						break ;
+					case 'E': // entities
+						client.aks.worldmessage.loadEntities(message, client);
+						break ;
 				}
 				break ;
 			}

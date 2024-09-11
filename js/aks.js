@@ -14,8 +14,8 @@ function InitializeSocket()
 		socket.onopen = function()
 		{
 			sendSocketMessage("WL");
-			console.log("Connection OK");
 			initWorld();
+			console.log("Connection OK");
 		};
 
 		socket.onmessage = function (evt) 
@@ -45,14 +45,44 @@ function InitializeSocket()
 							var left = Number(received_msg.substring(2).split("|")[3]);
 							var right = Number(received_msg.substring(2).split("|")[4]);
 							var bomb = world.getBomb(id);
-							bomb.exsup = sup;
-							bomb.exleft = left;
-							bomb.exdown = down;
-							bomb.exright = right;
-							bomb.explode();
+							if (bomb != undefined) {
+								bomb.exsup = sup;
+								bomb.exleft = left;
+								bomb.exdown = down;
+								bomb.exright = right;
+								bomb.explode();
+							}
 						break ;
 					}
 				break ;
+				case "I":
+					switch (action)
+					{
+						case "A": // add item
+							var id = Number(received_msg.substring(2).split("|")[0]);
+							var templateId = Number(received_msg.substring(2).split("|")[1]);
+							var x = Number(received_msg.substring(2).split("|")[2]);
+							var y = Number(received_msg.substring(2).split("|")[3]);
+							var item = new Item(id, templateId, x, y);
+							item.start();
+							world.additem(item);
+						break ;
+						case "D": // delete item
+							var id = Number(received_msg.substring(2).split("|")[0]);
+							var templateId = Number(received_msg.substring(2).split("|")[1]);
+							var x = Number(received_msg.substring(2).split("|")[2]);
+							var y = Number(received_msg.substring(2).split("|")[3]);
+							var item = world.getItem(id);
+							if (item != undefined) {
+								item.delete();
+							}
+						break ;
+						case "S": // item speed
+							var id = Number(received_msg.substring(2).split("|")[0]);
+							var speed = Number(received_msg.substring(2).split("|")[1]);
+							world.setPlayerSpeed(id, speed);
+						break ;
+					}
 				case "M":
 					switch (action)
 					{
@@ -70,8 +100,9 @@ function InitializeSocket()
 							var y = Number(received_msg.substring(2).split("|")[2]);
 							var dir = Number(received_msg.substring(2).split("|")[3]);
 							var skin = Number(received_msg.substring(2).split("|")[4]);
-							var bcurrent = Number(received_msg.substring(2).split("|")[5]);
-							world.addplayer(id, x, y, dir, skin, bcurrent);
+							var speed = Number(received_msg.substring(2).split("|")[5]);
+							var bcurrent = Number(received_msg.substring(2).split("|")[6]);
+							world.addplayer(id, x, y, dir, skin, speed, bcurrent);
 						break ;
 						case "D":
 							var id = Number(received_msg.substring(2).split("|")[0]);
@@ -104,6 +135,7 @@ function InitializeSocket()
 							fosfo0.clear();
 							world = new World(received_msg.substring(2));
 							world.loadWorld();
+							sendSocketMessage("WE"); // load entities
 						break ;
 						case "C":
 							var x = Number(received_msg.substring(2).split("|")[1]);

@@ -25,15 +25,15 @@ function onrool()
 	var delta = Math.max(-1, Math.min(1, (event.wheelDelta || -event.detail )));
 	if (delta == -1)
 	{
-		if (SIZE < -19)
+		if (SIZE < -10)
 			return ;
-		SIZE--;
+		SIZE -= 0.1;
 	}
 	else
 	{
-		if (SIZE > 15)
+		if (SIZE > 10)
 			return ;
-		SIZE++;
+		SIZE += 0.1;
 	}
 }
 function onMouseMove()

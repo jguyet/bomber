@@ -6,6 +6,7 @@ import org.web.Start;
 import org.web.client.Client;
 import org.web.client.message.SocketSender;
 import org.web.entity.Bomb;
+import org.web.entity.Item;
 import org.web.entity.Player;
 
 public class Case {
@@ -16,6 +17,7 @@ public class Case {
 	private double		x;
 	private double		y;
 	private Bomb		bomb = null;
+	private Item 		item = null;
 	
 	public Case(int id, boolean walkable, int ground, double x, double y)
 	{
@@ -96,4 +98,33 @@ public class Case {
 	{
 		return (this.bomb);
 	}
+
+	public void addItem(Item item) {
+		this.item = item;
+	}
+
+	public boolean hasItem() {
+		return (this.item != null);
+	}
+
+	public Item getItem() {
+		return (this.item);
+	}
+
+	public Case getLeftCell() {
+		return World.map.getCell(this.getx() - 1, this.gety());
+	}
+
+	public Case getRightCell() {
+		return World.map.getCell(this.getx() + 1, this.gety());
+	}
+
+	public Case getTopCell() {
+		return World.map.getCell(this.getx(), this.gety() - 1);
+	}
+
+	public Case getBottomCell() {
+		return World.map.getCell(this.getx(), this.gety() + 1);
+	}
+
 }

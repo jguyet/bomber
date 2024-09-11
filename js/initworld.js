@@ -12,7 +12,7 @@ function preload()
 	fosfo1.x = (window.innerWidth - (40 * 32)) / 2;
 	fosfo1.y = 32;
 	fosfo0.loadimage(['assets/maps/1.png']).done(function() {
-		fosfo1.loadimage(['assets/bombs/1.png', 'assets/bombs/explode/1.png']).done(function() {
+		fosfo1.loadimage(['assets/bombs/1.png', 'assets/bombs/explode/1.png', 'assets/items/1.png']).done(function() {
 			InitializeSocket();
 		});
 	});
@@ -33,6 +33,7 @@ function initWorld()
 	fosfo0.setFramesToImg('assets/maps/1.png', 8, 24);
 	fosfo1.setFramesToImg('assets/bombs/1.png', 1, 9);
 	fosfo1.setFramesToImg('assets/bombs/explode/1.png', 4, 2);
+	fosfo1.setFramesToImg('assets/items/1.png', 3, 9);
 	setInterval(interval, 1000 / 60);
 	resize(false);
 }
@@ -61,12 +62,16 @@ var interval = function()
 			world.updateplayers();
 		if (world.updatebombs != null)
 			world.updatebombs();
+		if (world.updateitems != null)
+			world.updateitems();
+		world.setDup();
 		dup = world.dup;
-		if (world.havechange)
-		{
+		// if (world.havechange)
+		// {
+			
 			fosfo0.update(dup);
 			world.havechange = false;
-		}
+		// }
 	}
 	updatelayer1();
 	requestAnimFrame();

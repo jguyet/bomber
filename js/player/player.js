@@ -46,7 +46,26 @@ var Player = function(id, x, y)
 	this.print = function()
 	{
 		fosfo1.undraw('player' + this.id);
-		fosfo1.drawframe("player" + this.id, 'assets/characters/' + this.skin + '.png', this.currentanim.frames[this.currentanimid], this.x, this.y - (this.img.height - 20));
+		//////////////////////////////////////////////
+		// MAP MOVE MODE (Disable for normal mode)
+		//////////////////////////////////////////////
+		if (this.id == currentPlayer.id) {
+
+			let tileSize = 32;
+			let baseX = (window.innerWidth - (world.width * tileSize)) / 2;
+			let baseY = (window.innerHeight - (world.height * tileSize)) / 2;
+			let worldWidthPxs = (world.width * tileSize);
+			let worldHeightPxs = (world.height * tileSize);
+			let middleWorldWidth = (worldWidthPxs / 2);
+			let middleWorldHeight = (worldHeightPxs / 2);
+			[fosfo0, fosfo1].forEach(f => {
+				f.x = (baseX + middleWorldWidth) - (currentPlayer.x % worldWidthPxs);
+				f.y = (baseY + middleWorldHeight) - (currentPlayer.y % worldHeightPxs);
+			});
+		}
+		//////////////////////////////////////////////
+
+		fosfo1.drawframe3("player" + this.id, 'assets/characters/' + this.skin + '.png', this.currentanim.frames[this.currentanimid], (this.x % (world.width * 32)), (this.y % (world.height * 32)) - (this.img.height - 20));
 	}
 	
 	this.move = function()

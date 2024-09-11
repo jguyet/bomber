@@ -23,7 +23,7 @@ public class Client{
 		System.out.println("NEW CLIENT");
 		this.session = session;
 		Case walkable = World.map.getRandomWalkableCellStart();
-		this.player = new Player(World.getnextPlayerId(), (walkable.getx() * 32) - 5, (walkable.gety() * 32) + 10, 1, this);
+		this.player = new Player(World.getnextPlayerId(), (walkable.getx() * 32) - 5, (walkable.gety() * 32) + 10, 8, this, null);
 		this.aks = new Aks(this);
 	}
 	

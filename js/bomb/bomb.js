@@ -5,9 +5,9 @@ var Bomb = function(id, x, y, range)
 	this.y = Math.round(y);
 	this.skin = 1;
 	this.anims = {
-		'state1' : { 'frames' : [8, 8, 8, 8, 7, 7, 7, 7, 6, 6, 6, 6], 'size' : [17.5, 15, 12.5, 10, 7.5, 5, 4, 5, 7.5, 10, 12.5, 15], 'name' : 'state1', 'time' : 2000},
-		'state2' : { 'frames' : [5, 5, 5, 5, 4, 4, 4, 4, 3, 3, 3, 3], 'size' : [17.5, 15, 12.5, 10, 7.5, 5, 4, 5, 7.5, 10, 12.5, 15], 'name' : 'state2', 'time' : 2000},
-		'state3' : { 'frames' : [2, 2, 2, 2, 1, 1, 1, 1, 0, 0, 0, 0], 'size' : [17.5, 15, 12.5, 10, 7.5, 5, 4, 5, 7.5, 10, 12.5, 15], 'name' : 'state3', 'time' : 1000},
+		'state1' : { 'frames' : [8, 8, 8, 8, 8, 8, 8, 8, 7, 7, 7, 7, 7, 7, 7, 7, 6, 6, 6, 6, 6, 6, 6, 6], 'size' : [17.5, 16.25, 15, 13.25, 12.5, 11.25, 10, 9.25, 7.5, 6.25, 5, 4.5, 4, 4.5, 5, 6.25, 7.5, 9.25, 10, 11.25, 12.5, 13.25, 15, 16.25], 'name' : 'state1', 'time' : 2000},
+		'state2' : { 'frames' : [5, 5, 5, 5, 5, 5, 5, 5, 4, 4, 4, 4, 4, 4, 4, 4, 3, 3, 3, 3, 3, 3, 3, 3], 'size' : [17.5, 16.25, 15, 13.25, 12.5, 11.25, 10, 9.25, 7.5, 6.25, 5, 4.5, 4, 4.5, 5, 6.25, 7.5, 9.25, 10, 11.25, 12.5, 13.25, 15, 16.25], 'name' : 'state2', 'time' : 2000},
+		'state3' : { 'frames' : [2, 2, 2, 2, 2, 2, 2, 2, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0], 'size' : [17.5, 16.25, 15, 13.25, 12.5, 11.25, 10, 9.25, 7.5, 6.25, 5, 4.5, 4, 4.5, 5, 6.25, 7.5, 9.25, 10, 11.25, 12.5, 13.25, 15, 16.25], 'name' : 'state3', 'time' : 1000},
 		'state4' : { 'rotate' : [0, 180], 'name' : 'state3'}
 	};
 	this.startTime = 0;
@@ -41,7 +41,7 @@ var Bomb = function(id, x, y, range)
 			this.start();
 			this.currentanim = this.anims['state' + this.anim];
 		}
-		if (this.currentanimid >= this.currentanim.frames.length)
+		if (this.currentanimid >= this.currentanim.frames.length - 1)
 			this.currentanimid = -1;
 		this.currentanimid++;
 		this.print(this.currentanim.size[this.currentanimid]);
@@ -60,6 +60,9 @@ var Bomb = function(id, x, y, range)
 			fosfo1.undraw('bomb' + this.id);
 			this.explo.push(fosfo1.drawframe("explode" + this.id, 'assets/bombs/explode/1.png', 0, this.x, this.y));
 			var ids = 1;
+			///////////////////////////////////////////
+			// RANGES
+			///////////////////////////////////////////
 			for (var i = 1; i < this.range; i++)
 			{
 				if (this.exright > i)
@@ -80,31 +83,34 @@ var Bomb = function(id, x, y, range)
 					this.explo.push(null);
 				ids += 4;
 			}
-			//console.log(this.exright + " " + this.range);
-			if (this.exright < this.range - 1)
+			///////////////////////////////////////////
+			// POINTES
+			///////////////////////////////////////////
+			if (this.exright < this.range - 1 && this.exright > 0)
 				this.explo.push(fosfo1.drawframe("explode" + this.id + "right" + ids, 'assets/bombs/explode/1.png', 1, this.x + (this.exright * 32), this.y, 32, 32, this.currentanim[this.currentanimid]));
 			else if (this.exright > 0)
 				this.explo.push(fosfo1.drawframe("explode" + this.id + "right" + ids, 'assets/bombs/explode/1.png', 3, this.x + (this.exright * 32), this.y));
 			else
 				this.explo.push(null);
-			if (this.exleft < this.range - 1)
+			if (this.exleft < this.range - 1 && this.exleft > 0)
 				this.explo.push(fosfo1.drawframe("explode" + this.id + "left" + (ids + 1), 'assets/bombs/explode/1.png', 1, this.x - (this.exleft * 32), this.y, 32, 32, 180));
 			else if (this.exleft > 0)
 				this.explo.push(fosfo1.drawframe("explode" + this.id + "left" + (ids + 1), 'assets/bombs/explode/1.png', 3, this.x - (this.exleft * 32), this.y, 32, 32, 180));
 			else
 				this.explo.push(null);
-			if (this.exdown < this.range - 1)
+			if (this.exdown < this.range - 1 && this.exdown > 0)
 				this.explo.push(fosfo1.drawframe("explode" + this.id + "down" + (ids + 2), 'assets/bombs/explode/1.png', 1, this.x, this.y + 32 + (this.exdown * 32), 32, 32, 90));
 			else if (this.exdown > 0)
 				this.explo.push(fosfo1.drawframe("explode" + this.id + "down" + (ids + 2), 'assets/bombs/explode/1.png', 3, this.x, this.y + 32 + (this.exdown * 32), 32, 32, 90));
 			else
 				this.explo.push(null);
-			if (this.exsup < this.range - 1)
+			if (this.exsup < this.range - 1 && this.exsup > 0)
 				this.explo.push(fosfo1.drawframe("explode" + this.id + "up" + (ids + 3), 'assets/bombs/explode/1.png', 1, this.x + 32, this.y - (this.exsup * 32), 32, 32, 270));
 			else if (this.exsup > 0)
 				this.explo.push(fosfo1.drawframe("explode" + this.id + "up" + (ids + 3), 'assets/bombs/explode/1.png', 3, this.x + 32, this.y - (this.exsup * 32), 32, 32, 270));
 			else
 				this.explo.push(null);
+			///////////////////////////////////////////
 		}
 		else
 		{

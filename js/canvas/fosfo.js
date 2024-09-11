@@ -65,6 +65,68 @@ var fosfo = function(canvas)
 		img.fh = fh;
 		return (img);
 	}
+
+	this.drawframe2 = function(name, url, id, dx, dy, zoom)
+	{
+		var img = _.find(this.images, { 'url': url });
+		if (img == null)
+			return ;
+		if (img.isloaded == false)
+		{
+			var tmp = this;
+			setTimeout(function() {
+				tmp.drawframe(name, url, id, dx, dy);
+			}, 1000 / this.fps);
+			return ;
+		}
+		var sizew = (img.image.width / img.fw);
+		var sizeh = (img.image.height / img.fh);
+		var total = img.fw * img.fh;
+		
+		img.id = id;
+		if (id > total)
+			id = 0;
+		var line = 0;
+		while (id >= img.fw)
+		{
+			line++;
+			id -= img.fw;
+		}
+		drotate = typeof drotate !== 'undefined' ? drotate : null;
+		return this.draw(name, url, dx / zoom, dy / zoom, sizew, sizeh, (id * sizew), (line * sizeh), sizew, sizeh, drotate);
+	}
+
+	this.drawframe3 = function(name, url, id, dx, dy, dLargeur, dHauteur, drotate)
+	{
+		var img = _.find(this.images, { 'url': url });
+		if (img == null)
+			return ;
+		if (img.isloaded == false)
+		{
+			var tmp = this;
+			setTimeout(function() {
+				tmp.drawframe3(name, url, id, dx, dy);
+			}, 1000 / this.fps);
+			return ;
+		}
+		var sizew = img.image.width / img.fw;
+		var sizeh = img.image.height / img.fh;
+		var total = img.fw * img.fh;
+		
+		img.id = id;
+		if (id > total)
+			id = 0;
+		var line = 0;
+		while (id >= img.fw)
+		{
+			line++;
+			id -= img.fw;
+		}
+		dLargeur = typeof dLargeur !== 'undefined' ? dLargeur : sizew;
+		dHauteur = typeof dHauteur !== 'undefined' ? dHauteur : sizeh;
+		drotate = typeof drotate !== 'undefined' ? drotate : null;
+		return this.draw(name, url, dx, dy, dLargeur, dHauteur, id * sizew, line * sizeh, sizew, sizeh, drotate);
+	}
 	
 	this.drawframe = function(name, url, id, dx, dy, dLargeur, dHauteur, drotate)
 	{
@@ -144,19 +206,23 @@ var fosfo = function(canvas)
 				}
 				else
 				{
-					if ((tmp.x + value.x) < -32)
-						return ;
-					if ((tmp.y + value.y) < -32)
-						return ;
-					//if ((tmp.x + value.x) > tmp.canvas.width + 32)
-					//		return ;
-					//if ((tmp.y + value.y) > tmp.canvas.height + 32)
-					//	return ;
+					let x = value.x;
+					let y = value.y;
+					if (typeof(value.x) == 'function') {
+						x = value.x();
+					}
+					if (typeof(value.y) == 'function') {
+						y = value.y();
+					}
+					// if ((tmp.x + x) < -32)
+					// 	return ;
+					// if ((tmp.y + y) < -32)
+					// 	return ;
 					tmp.ctx.drawImage(value.image, value.sx, value.sy, value.sLargeur,
-						value.sHauteur, tmp.x + value.x, (tmp.y + value.y), value.width, value.height);
+						value.sHauteur, tmp.x + x, (tmp.y + y), value.width, value.height);
 					_.forEach(dup, function(duplicat) {
 						tmp.ctx.drawImage(value.image, value.sx, value.sy, value.sLargeur,
-							value.sHauteur, duplicat[0] + tmp.x + value.x, duplicat[1] + tmp.y + value.y, value.width, value.height);
+							value.sHauteur, duplicat[0] + tmp.x + x, duplicat[1] + tmp.y + y, value.width, value.height);
 					});
 				}
 		});

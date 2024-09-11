@@ -62,12 +62,12 @@ public class Map {
 				int g = 0;
 				boolean walk = true;
 				
-				if (Formulas.getRandomValue(1, 2) == 1)
+				if (Formulas.getRandomValue(1, 3) == 1)
 				{
 					g = 104;
 					walk = false;
 				}
-				else if (Formulas.getRandomValue(1, 4) == 1)
+				else if (Formulas.getRandomValue(1, 5) == 1)
 				{
 					g = 80;
 					walk = false;
@@ -96,9 +96,15 @@ public class Map {
 	
 	public Case getCell(double x, double y)
 	{
+		if (x < 0) {
+			x = (this.width) - (-x);
+		}
+		if (y < 0) {
+			y = (this.height) - (-y);
+		}
 		for (Case c : cases)
 		{
-			if (c.getx() == x && c.gety() == y)
+			if ((c.getx() % this.width) == (x % this.width) && (c.gety() % this.height) == (y % this.height))
 				return (c);
 		}
 		return (null);
