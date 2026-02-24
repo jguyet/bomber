@@ -23,13 +23,13 @@
 <body class="ng-scope">
 	
 	<div id="viewport" ng-controller="KeyboardCtrl" class="ng-scope" style="left: 0px;">
-	<div style="position: absolute; left: 0px; top: 0px; margin-left: -160px;">
-		<canvas id="layer0" style="position: absolute; left: 160px; top: 0px;background-color: black;"></canvas>
-		<canvas id="layer1" style="position: absolute; left: 160px; top: 0px;"></canvas>
+	<div style="position: absolute; left: 0px; top: 0px;">
+		<canvas id="layer0" style="position: absolute; left: 0px; top: 0px;background-color: black;"></canvas>
+		<canvas id="layer1" style="position: absolute; left: 0px; top: 0px;"></canvas>
 	</div>
 	</div>
-	
-	<div id="chat" ng-show="showGame &amp;&amp; !showMenu" ng-controller="ChatCtrl" class="ng-scope" style="display:none">
+
+	<div id="chat" ng-show="showGame &amp;&amp; !showMenu" ng-controller="ChatCtrl" class="ng-scope">
 		<div id="dropDownChat" dropdown-on-event="nicknamePopup">
 			<ul>
             <li class="nicknameChat ng-binding" ng-click="chatClickHandler()">@ </li>
