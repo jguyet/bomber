@@ -9760,3 +9760,36 @@ ul.list-players li.empty i.rank-icon-small {
 .select_room ul.rooms-list li .txt-room {
   border: none;
 }
+
+/* ── Game layout overrides ─────────────────────────── */
+body {
+  margin: 0;
+  padding: 0;
+  overflow: hidden;
+}
+
+#viewport {
+  position: fixed !important;
+  top: 0 !important;
+  left: 0 !important;
+  right: 0 !important;
+  bottom: 0 !important;
+  width: 100vw !important;
+  height: 100vh !important;
+  overflow: hidden;
+}
+
+#chat {
+  display: block;
+  position: fixed !important;
+  bottom: 0 !important;
+  right: 0 !important;
+  left: auto !important;
+  top: auto !important;
+  width: 280px;
+  max-height: 50vh;
+  overflow-y: auto;
+  background: rgba(0,0,0,0.6);
+  z-index: 1000;
+  color: #fff;
+}
