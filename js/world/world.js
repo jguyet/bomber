@@ -115,6 +115,8 @@ var World = function(data)
 		p.currentanim = p.anims[dir];
 		p.currentanimid = 0;
 		p.skin = skin;
+		p.targetX = x;
+		p.targetY = y;
 		p.load();
 		if (bcurrent == 1)
 			currentPlayer = p;
@@ -159,7 +161,7 @@ var World = function(data)
 		}
 		else
 		{
-			// Remote player: set lerp target (lerp applied in update/updateplayers)
+			// Remote player: set lerp target (lerp applied in updateplayers)
 			player.targetX = x;
 			player.targetY = y;
 			player.move();
@@ -176,9 +178,18 @@ var World = function(data)
 	
 	this.updateplayers = function()
 	{
+		var LERP_FACTOR = 0.3; // 0=no movement, 1=instant snap
 		_.forEach(this.players, function(value) {
 			if (currentPlayer != null && value.id == currentPlayer.id)
-				return ;
+				return ; // local player: server will send authoritative position via PM
+			// Lerp remote player toward server target (replaces bytedir movement)
+			if (value.targetX !== undefined)
+			{
+				value.x += (value.targetX - value.x) * LERP_FACTOR;
+				value.y += (value.targetY - value.y) * LERP_FACTOR;
+			}
+			// Zero bytedir so player.update() doesn't double-move remote players
+			value.bytedir = 0;
 			value.update();
 		});
 	};
