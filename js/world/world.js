@@ -124,25 +124,46 @@ var World = function(data)
 	this.moveplayer = function(id, x, y, dir, skin, bstop, bytedir)
 	{
 		var player = this.getPlayer(id);
-		
+
 		if (player == null)
 		{
 			this.addplayer(id, x, y, dir, skin, 0);
 			return ;
 		}
+
+		// Update animation direction
 		if (player.currentanim != null && player.currentanim.id != dir)
 		{
 			player.currentanim = player.anims[dir];
 			player.currentanimid = 0;
 		}
-		player.x = x;
-		player.y = y;
 		player.skin = skin;
-		player.bytedir = bytedir;
-		if (bytedir != 0)
-			player.move();
-		else
+
+		var isLocal = (currentPlayer != null && player.id == currentPlayer.id);
+
+		if (bstop)
+		{
+			// Snap to exact position on stop (both local and remote)
+			player.x = x;
+			player.y = y;
+			player.targetX = x;
+			player.targetY = y;
 			player.onmove = false;
+		}
+		else if (isLocal)
+		{
+			// Local player: apply server position directly (server is authoritative)
+			player.x = x;
+			player.y = y;
+			player.onmove = true;
+		}
+		else
+		{
+			// Remote player: set lerp target (lerp applied in update/updateplayers)
+			player.targetX = x;
+			player.targetY = y;
+			player.move();
+		}
 	};
 	
 	this.removeplayer = function(id)
