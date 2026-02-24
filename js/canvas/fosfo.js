@@ -175,12 +175,8 @@ var fosfo = function(canvas)
 	this.undraw = function(name)
 	{
 		var img = _.find(this.imagesDrawed, { 'name': name });
-		if (img == null)
-		{
-			console.warn("undraw: sprite not found: " + name);
-			return ;
-		}
-		this.ctx.clearRect(img.x, img.y, img.width, img.height);
+		if (img == null) return; // silently skip — sprite not yet drawn
+		this.ctx.clearRect(this.x + img.x, this.y + img.y, img.width, img.height);
 		this.imagesDrawed.splice(this.imagesDrawed.indexOf(img), 1);
 	}
 	
@@ -190,7 +186,7 @@ var fosfo = function(canvas)
 		{
 			return ;
 		}
-		this.ctx.clearRect(img.x, img.y, img.width, img.height);
+		this.ctx.clearRect(this.x + img.x, this.y + img.y, img.width, img.height);
 		this.imagesDrawed.splice(this.imagesDrawed.indexOf(img), 1);
 	}
 	
