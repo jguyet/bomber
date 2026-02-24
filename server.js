@@ -141,7 +141,8 @@ function getMapData() {
 
 // ─── Map Lookups ─────────────────────────────────────────────────────────────
 function getCellByGridPos(x, y) {
-  return cases.find(c => c.x === x && c.y === y) || null;
+  if (x < 0 || x >= MAP_WIDTH || y < 0 || y >= MAP_HEIGHT) return null;
+  return cases[y * MAP_WIDTH + x] || null;
 }
 
 // Convert pixel coordinates to cell (matching Java: getCellPos)

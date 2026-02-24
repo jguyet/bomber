@@ -34,7 +34,11 @@ function initWorld()
 	fosfo0.setFramesToImg('assets/maps/1.png', 8, 24);
 	fosfo1.setFramesToImg('assets/bombs/1.png', 1, 9);
 	fosfo1.setFramesToImg('assets/bombs/explode/1.png', 4, 2);
-	setInterval(interval, 1000 / 60);
+	function loop() {
+		interval();
+		requestAnimationFrame(loop);
+	}
+	requestAnimationFrame(loop);
 	resize(false);
 }
 

@@ -61,13 +61,15 @@ var resize = function(bool){
 	layer1.width = SCREENWIDTH;// - 212;
 	layer0.height = SCREENHEIGHT;
 	layer1.height = SCREENHEIGHT;
-	fosfo0.x = (window.innerWidth - (40 * 32)) / 2;
+	fosfo0.x = Math.max(0, (window.innerWidth - (40 * 32)) / 2);
 	fosfo0.y = 32;
-	fosfo1.x = (window.innerWidth - (40 * 32)) / 2;
+	fosfo1.x = Math.max(0, (window.innerWidth - (40 * 32)) / 2);
 	fosfo1.y = 32;
 	if (world != null)
 	{
 		world.havechange = true;
+		// Force immediate redraw after resize clears canvas buffers
+		fosfo0.update(world.dup);
 	}
 };
 
