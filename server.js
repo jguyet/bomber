@@ -456,37 +456,19 @@ function handleKeyDown(message, player, socket, io) {
   }
 
   let d = null;
-  const speed = PLAYER_SPEED;
-
-  if (key === 38 || key === 87) { // up
-    d = DIR.up;
-    const c = player.getPossibleCell(0, -speed);
-    if (c !== null && !c.isWalkableCheckBomb(player)) d = null;
-  }
-  if (key === 40 || key === 83) { // down
-    d = DIR.down;
-    const c = player.getPossibleCell(0, speed + 2);
-    if (c !== null && !c.isWalkableCheckBomb(player)) d = null;
-  }
-  if (key === 37 || key === 65) { // left
-    d = DIR.left;
-    const c = player.getPossibleCell(-speed, 0);
-    if (c !== null && !c.isWalkableCheckBomb(player)) d = null;
-  }
-  if (key === 39 || key === 68) { // right
-    d = DIR.right;
-    const c = player.getPossibleCell(speed + 12, 0);
-    if (c !== null && !c.isWalkableCheckBomb(player)) d = null;
-  }
+  if (key === 38 || key === 87) d = DIR.up;
+  if (key === 40 || key === 83) d = DIR.down;
+  if (key === 37 || key === 65) d = DIR.left;
+  if (key === 39 || key === 68) d = DIR.right;
 
   if (d === null) return;
-  if ((d & player.dir) !== 0) return; // already moving in this direction
+  if ((d & player.dir) !== 0) return; // already active
 
-  player.setDirection(player.dir + d);
+  player.setDirection(player.dir | d); // bitwise OR — safe for multi-direction bitmask
   player.onmove = true;
   player.startMoving(io);
 
-  broadcast(io, `PM${player.id}|${player.x}|${player.y}|${player.getClientDirection()}|${player.skin}|${player.dir}`);
+  broadcast(io, `PM${player.id}|${Math.round(player.x)}|${Math.round(player.y)}|${player.getClientDirection()}|${player.skin}|${player.dir}`);
 }
 
 function handleKeyUp(message, player, io) {
