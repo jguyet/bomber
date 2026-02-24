@@ -14,7 +14,8 @@ function sendSocketMessage(message)
 function InitializeSocket()
 {
 	// Connect to the game server via socket.io
-	socket = io('http://localhost:9998', {
+	socket = io('http://localhost:8060', {
+		path: '/ws',
 		transports: ['websocket']
 	});
 
