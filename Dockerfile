@@ -25,6 +25,7 @@ COPY js/ ./js/
 COPY css/ ./css/
 COPY assets/ ./assets/
 COPY background/ ./background/
+COPY util/ ./util/
 COPY package.json ./
 
 # Set ownership
