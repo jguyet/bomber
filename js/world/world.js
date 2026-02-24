@@ -42,9 +42,11 @@ var World = function(data)
 		var canvasW = layer0.width;
 		var canvasH = layer0.height;
 
-		// Rebuild dup: all tile offsets that cover the canvas, skip [0,0] (primary copy)
+		// Rebuild dup: all tile offsets that cover the canvas, including left of fosfo0.x offset
 		this.dup = [];
-		for (var ox = 0; ox < canvasW; ox += mapW)
+		var offsetX = fosfo0 ? fosfo0.x : 0;
+		var startOx = -Math.ceil(offsetX / mapW) * mapW;
+		for (var ox = startOx; ox < canvasW; ox += mapW)
 		{
 			for (var oy = 0; oy < canvasH; oy += mapH)
 			{
