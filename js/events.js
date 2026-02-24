@@ -63,22 +63,8 @@ var resize = function(bool){
 	layer1.height = SCREENHEIGHT;
 	if (world != null)
 	{
-		// Recompute dup to cover full canvas including area left of fosfo0.x offset
-		var mapW = world.width * 32;
-		var mapH = world.height * 32;
-		var offsetX = fosfo0.x;
-		var newDup = [];
-		// Start from negative offset to cover pixels left of offsetX
-		var startOx = -Math.ceil(offsetX / mapW) * mapW;
-		for (var ox = startOx; ox < SCREENWIDTH; ox += mapW)
-		{
-			for (var oy = 0; oy < SCREENHEIGHT; oy += mapH)
-			{
-				if (ox !== 0 || oy !== 0)
-					newDup.push([ox, oy]);
-			}
-		}
-		world.dup = newDup;
+		// Recompute dup using the same logic as interval() — consistent with camera system
+		world.updateDup(cameraX, cameraY, SCREENWIDTH, SCREENHEIGHT);
 		world.havechange = true;
 		// Force immediate redraw after resize clears canvas buffers
 		fosfo0.update(world.dup);
