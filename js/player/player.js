@@ -51,7 +51,13 @@ var Player = function(id, x, y)
 	
 	this.getpos = function()
 	{
-		return ({x: Math.round((Math.round(this.x) / 32) % world.width), y: Math.round((Math.round(this.y) / 32) % world.height)});
+		// Double-modulo handles negative coords: JS % can return negative values,
+		// so (v % size + size) % size always yields a positive result.
+		var gx = Math.round(this.x) / 32;
+		var gy = Math.round(this.y) / 32;
+		var w = parseInt(world.width);
+		var h = parseInt(world.height);
+		return ({x: ((gx % w) + w) % w, y: ((gy % h) + h) % h});
 	}
 	
 	this.load = function()
