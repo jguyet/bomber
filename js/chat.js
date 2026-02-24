@@ -1,31 +1,17 @@
 
-var current_line = "";
-
 var onchatpress = function(event)
 {
 	var key = event.keyCode;
 	if (key == 13)
 	{
-		sendSocketMessage('MN' + current_line);
-		current_line = "";
-		setTimeout(function()
-		{
-			document.getElementById("msgText").value = "";
-		}, 10);
-	}
-	else
-	{
-		var txt = String.fromCharCode(key);
-		current_line += txt;
+		var msg = document.getElementById("msgText").value;
+		sendSocketMessage('MN' + msg);
+		document.getElementById("msgText").value = "";
 	}
 };
 
 var onchatdelete = function(event)
 {
-	var key = event.keyCode;
-	
-	if (key == 8 && current_line != "")
-		current_line = current_line.substr(0, current_line.length - 1);
 };
 
 var addmessagetochat = function(data)

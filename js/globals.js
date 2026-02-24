@@ -5,8 +5,8 @@ var fosfo0, fosfo1;
 //nombre de bloc a afficher hauteur height / bloc_size
 var BLOCSIZE = 32;
 
-var SCREENWIDTH = 100000;
-var SCREENHEIGHT = 100000;
+var SCREENWIDTH = window.innerWidth;
+var SCREENHEIGHT = window.innerHeight;
 var MOUSEPOS = [0,0];
 var SIZE = 0;
 var keyState = [0];
