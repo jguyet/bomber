@@ -11,6 +11,7 @@ function preload()
 	fosfo0.y = 32;
 	fosfo1.x = (window.innerWidth - (40 * 32)) / 2;
 	fosfo1.y = 32;
+	resize(false);
 	fosfo0.loadimage(['assets/maps/1.png']).done(function() {
 		fosfo1.loadimage(['assets/bombs/1.png', 'assets/bombs/explode/1.png']).done(function() {
 			InitializeSocket();
@@ -37,21 +38,6 @@ function initWorld()
 	resize(false);
 }
 
-var lastCalledTime;
-var fps;
-
-function requestAnimFrame() {
-
-  if(!lastCalledTime) {
-     lastCalledTime = Date.now();
-     fps = 0;
-     return;
-  }
-  delta = (Date.now() - lastCalledTime)/1000;
-  lastCalledTime = Date.now();
-  fps = 1/delta;
-} 
-
 var interval = function()
 {
 	var dup = [];
@@ -69,7 +55,6 @@ var interval = function()
 		}
 	}
 	updatelayer1();
-	requestAnimFrame();
 	fosfo1.update(dup);
 }
 

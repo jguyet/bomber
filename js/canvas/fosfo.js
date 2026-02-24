@@ -31,7 +31,6 @@ var fosfo = function(canvas)
 			im.url = urls[i];
 			im.onload = function()
 			{
-				console.log("IMG " + this.url + " loaded.");
 				var ddd = _.find(tmp.images, { 'url': this.url });
 				ddd.isloaded = true;
 				ddd.width = this.width;
@@ -106,7 +105,6 @@ var fosfo = function(canvas)
 		var img = _.find(this.images, { 'url': url });
 		if (img == null)
 		{
-			console.log("IMG " + url + " == null.");
 			img = this.loadimage(url);
 		}
 		if (img.isloaded == false)
@@ -185,8 +183,7 @@ var fosfo = function(canvas)
 		var img = _.find(this.imagesDrawed, { 'name': name });
 		if (img == null)
 		{
-			var tmp = this;
-			setTimeout(function(){tmp.undraw(name);}, 2000);
+			console.warn("undraw: sprite not found: " + name);
 			return ;
 		}
 		this.ctx.clearRect(img.x, img.y, img.width, img.height);

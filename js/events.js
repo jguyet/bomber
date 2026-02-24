@@ -4,17 +4,8 @@ function onMouseClick()
 }
 function onMouseDown(event)
 {
-	if(navigator.appName=="Microsoft Internet Explorer")
-	{
-		var x = event.x+document.body.scrollLeft;
-		var y = event.y+document.body.scrollTop;
-	}
-	else
-	{
-		var x =  event.pageX;
-		var y =  event.pageY;
-	}
-	console.log(fosfo0.getelementPos(x, y));
+	var x = event.pageX;
+	var y = event.pageY;
 }
 function onMouseUp()
 {
@@ -80,45 +71,6 @@ var resize = function(bool){
 	}
 };
 
-var checkKeyStates = function(){
-
-	var press = false;
-	var key = 0;
-    if (keyState[38] || keyState[87]) {
-        // up arrow or 'w' - move forward
-		key += 4;
-		press = true;
-    }
-    if (keyState[40] || keyState[83]) {
-        // down arrow or 's' - move backward
-		key += 16;
-		press = true;
-    }
-    if (keyState[37] || keyState[65]) {
-        // left arrow or 'a' - rotate left
-		key += 32;
-		press = true;
-    }
-    if (keyState[39] || keyState[68]) {
-        // right arrow or 'd' - rotate right
-		key += 8;
-		press = true;
-    }
-    if (keyState[81]) {
-        // 'q' - strafe left
-		console.log("strafe left");
-    }
-    if (keyState[69]) {
-        // 'e' - strage right
-		console.log("strafe right");
-    }
-	if (keyState[32]) {
-		keyState[32] = false;
-		key += 128;
-		press = true;
-    }
-};
-
 var updatelayer1 = function()
 {
 	if (currentPlayer == null)
@@ -126,7 +78,3 @@ var updatelayer1 = function()
 	currentPlayer.update();
 };
 
-var sendpos = function()
-{
-	currentPlayer.sendpos();
-};
