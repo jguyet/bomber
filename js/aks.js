@@ -127,13 +127,15 @@ function InitializeSocket()
 						world.loadWorld();
 					break ;
 					case "C":
+						var ground = Number(received_msg.substring(2).split("|")[0]);
 						var x = Number(received_msg.substring(2).split("|")[1]);
 						var y = Number(received_msg.substring(2).split("|")[2]);
-						var id = Number(received_msg.substring(2).split("|")[0]);
-						var img = world.dataimg[y][x];
-						//fosfo0.undraw(img.name);
-						world.dataimg[y][x] = fosfo0.drawframe(img.name, 'assets/maps/1.png', id, img.x, img.y);
-						world.havechange = true;
+						// x, y are TILE coordinates (grid), not pixel — no camera adjustment needed
+						if (world.dataimg[y] && world.dataimg[y][x]) {
+							var img = world.dataimg[y][x];
+							world.dataimg[y][x] = fosfo0.drawframe(img.name, 'assets/maps/1.png', ground, img.x, img.y);
+							world.havechange = true;
+						}
 					break ;
 				}
 			break ;
