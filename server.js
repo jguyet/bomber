@@ -28,7 +28,7 @@ const { Server } = require('socket.io');
 const path = require('path');
 
 // ─── Configuration ──────────────────────────────────────────────────────────
-const PORT = 8060;
+const PORT = parseInt(process.env.PORT, 10) || 8060;
 const MAP_WIDTH = 40;
 const MAP_HEIGHT = 22;
 const TILE_SIZE = 32;
