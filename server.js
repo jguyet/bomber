@@ -1,6 +1,5 @@
 /**
- * Bomber - Node.js Game Server (Socket.io rewrite of the original Java server)
- * Port: 9998 (WebSocket)
+ * Bomber - Node.js Game Server (Express + Socket.io unified on port 8060)
  *
  * Protocol: all messages use 2-char prefix [TYPE][ACTION] + data
  *
@@ -13,7 +12,7 @@
  * Outgoing to client:
  *   WL[w|h|data]              - World data (cells: "id,ground;...")
  *   WC[ground|x|y|walkable]  - Cell updated
- *   PA[id|x|y|dir|skin|bcurrent] - Player added
+ *   PA[id|x|y|dir|skin|bcurrent] - Player added (bcurrent=1 = "this is you")
  *   PD[id]                   - Player disconnected
  *   PM[id|x|y|dir|skin|bytedir]  - Player moving
  *   PS[id|x|y|dir|skin|bytedir]  - Player stopped
@@ -23,11 +22,13 @@
  *   GK                       - Game kick (disconnect)
  */
 
+const express = require('express');
+const { createServer } = require('http');
 const { Server } = require('socket.io');
-const http = require('http');
+const path = require('path');
 
 // ─── Configuration ──────────────────────────────────────────────────────────
-const PORT = 9998;
+const PORT = 8060;
 const MAP_WIDTH = 40;
 const MAP_HEIGHT = 22;
 const TILE_SIZE = 32;
@@ -530,18 +531,26 @@ function addBomb(player, io) {
   broadcast(io, `BA${bomb.id}|${bomb.x}|${bomb.y}|${bomb.range}`);
 }
 
-// ─── Socket.io Server ────────────────────────────────────────────────────────
+// ─── Express App ─────────────────────────────────────────────────────────────
+const app = express();
 
-// Create a minimal HTTP server (socket.io needs it)
-const httpServer = http.createServer();
+// Serve static files (index.html, js/, css/, assets/)
+app.use(express.static(path.join(__dirname)));
+
+// API stub — future REST routes
+app.get('/api/ping', (req, res) => {
+  res.json({ ok: true });
+});
+
+// ─── HTTP + Socket.io Server ─────────────────────────────────────────────────
+const httpServer = createServer(app);
 
 const io = new Server(httpServer, {
+  path: '/ws',
   cors: {
     origin: '*',
     methods: ['GET', 'POST']
   },
-  // Allow raw WebSocket connections (for backwards compatibility with existing client)
-  // The client currently uses plain WebSocket, so we add socket.io transport adapter
   transports: ['websocket', 'polling']
 });
 
@@ -608,5 +617,8 @@ io.on('connection', (socket) => {
 });
 
 httpServer.listen(PORT, () => {
-  console.log(`Bomber game server running on port ${PORT}`);
+  console.log(`Bomber unified server running on port ${PORT}`);
+  console.log(`  Static files: http://localhost:${PORT}/`);
+  console.log(`  Socket.io:    ws://localhost:${PORT}/ws`);
+  console.log(`  API ping:     http://localhost:${PORT}/api/ping`);
 });
