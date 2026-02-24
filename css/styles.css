@@ -9780,13 +9780,15 @@ body {
 }
 
 #chat {
-  display: block;
+  display: flex !important;
+  flex-direction: column;
   position: fixed !important;
   bottom: 0 !important;
   right: 0 !important;
   left: auto !important;
   top: auto !important;
   width: 280px;
+  min-height: 80px;
   max-height: 50vh;
   overflow-y: auto;
   background: rgba(0,0,0,0.6);
