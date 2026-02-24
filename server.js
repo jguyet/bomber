@@ -244,9 +244,10 @@ class Player {
   }
 
   getPossibleCell(dx, dy) {
-    if ((this.y + 12 + dy) < 0) return null;
-    if ((this.x + 13.5 + dx) < 0) return null;
-    return getCellPos(this.x + 10 + dx, this.y + 10 + dy);
+    const nx = this.x + 10 + dx;
+    const ny = this.y + 10 + dy;
+    if (nx < 0 || ny < 0 || nx >= MAP_WIDTH * TILE_SIZE || ny >= MAP_HEIGHT * TILE_SIZE) return null;
+    return getCellPos(nx, ny);
   }
 
   move(io) {
