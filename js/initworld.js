@@ -33,24 +33,13 @@ function initWorld()
 	fosfo0.setFramesToImg('assets/maps/1.png', 8, 24);
 	fosfo1.setFramesToImg('assets/bombs/1.png', 1, 9);
 	fosfo1.setFramesToImg('assets/bombs/explode/1.png', 4, 2);
-	setInterval(interval, 1000 / 60);
+	function loop() {
+		interval();
+		requestAnimationFrame(loop);
+	}
+	requestAnimationFrame(loop);
 	resize(false);
 }
-
-var lastCalledTime;
-var fps;
-
-function requestAnimFrame() {
-
-  if(!lastCalledTime) {
-     lastCalledTime = Date.now();
-     fps = 0;
-     return;
-  }
-  delta = (Date.now() - lastCalledTime)/1000;
-  lastCalledTime = Date.now();
-  fps = 1/delta;
-} 
 
 var interval = function()
 {
@@ -69,7 +58,6 @@ var interval = function()
 		}
 	}
 	updatelayer1();
-	requestAnimFrame();
 	fosfo1.update(dup);
 }
 
