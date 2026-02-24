@@ -394,19 +394,6 @@ class Bomb {
   }
 }
 
-// ─── Game Tick Loop ───────────────────────────────────────────────────────────
-const TICK_MS = 16; // ~60 FPS
-
-function serverTick(io) {
-  for (const [, player] of players) {
-    if (player.onmove) {
-      player.move(io);
-      // Broadcast authoritative position every tick while moving
-      broadcast(io, `PM${player.id}|${Math.round(player.x)}|${Math.round(player.y)}|${player.getClientDirection()}|${player.skin}|${player.dir}`);
-    }
-  }
-}
-
 // ─── Broadcast helpers ───────────────────────────────────────────────────────
 function broadcast(io, message) {
   io.emit('msg', message);
