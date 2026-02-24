@@ -35,8 +35,6 @@ const TILE_SIZE = 32;
 const PLAYER_SPEED = 1.5;
 const BOMB_RANGE = 4;
 const BOMB_TIMER_MS = 3000;
-const MOVE_INTERVAL_MS = Math.round(1000 / 60); // ~16ms = 60 FPS
-
 // Direction bitmasks (same as Java BinaryDirection enum)
 const DIR = {
   up:    4,
@@ -147,9 +145,9 @@ function getCellByGridPos(x, y) {
 
 // Convert pixel coordinates to cell (matching Java: getCellPos)
 function getCellPos(px, py) {
-  const gx = Math.round(Math.round(px) / TILE_SIZE) % MAP_WIDTH;
-  const gy = Math.round(Math.round(py) / TILE_SIZE) % MAP_HEIGHT;
-  return getCellByGridPos(gx, gy);
+  const gx = Math.floor(px / TILE_SIZE);
+  const gy = Math.floor(py / TILE_SIZE);
+  return getCellByGridPos(gx, gy); // getCellByGridPos already clamps/returns null if out of bounds
 }
 
 // Get cells in a direction (matching Java: getdircell)
@@ -225,7 +223,6 @@ class Player {
     this.dir = 0;       // bitmask of active directions
     this.olddir = 1;    // last visual direction (0=up,1=right,2=down,3=left)
     this.onmove = false;
-    this.moveInterval = null;
   }
 
   getClientDirection() {
@@ -250,18 +247,6 @@ class Player {
     if ((this.y + 12 + dy) < 0) return null;
     if ((this.x + 13.5 + dx) < 0) return null;
     return getCellPos(this.x + 10 + dx, this.y + 10 + dy);
-  }
-
-  startMoving(io) {
-    if (this.moveInterval) return;
-    this.moveInterval = setInterval(() => this.move(io), MOVE_INTERVAL_MS);
-  }
-
-  stopMoving() {
-    if (this.moveInterval) {
-      clearInterval(this.moveInterval);
-      this.moveInterval = null;
-    }
   }
 
   move(io) {
@@ -484,7 +469,6 @@ function handleKeyDown(message, player, socket, io) {
 
   player.setDirection(player.dir + d);
   player.onmove = true;
-  player.startMoving(io);
 
   broadcast(io, `PM${player.id}|${player.x}|${player.y}|${player.getClientDirection()}|${player.skin}|${player.dir}`);
 }
@@ -506,7 +490,6 @@ function handleKeyUp(message, player, io) {
   if (player.dir < 0) player.setDirection(0);
   if (player.dir === 0) {
     player.onmove = false;
-    player.stopMoving();
   }
 
   broadcast(io, `PS${player.id}|${player.x}|${player.y}|${player.getClientDirection()}|${player.skin}|${player.dir}`);
@@ -559,6 +542,19 @@ const io = new Server(httpServer, {
 initializeMap();
 console.log(`Map initialized: ${MAP_WIDTH}x${MAP_HEIGHT} tiles`);
 
+// ─── Single shared game tick loop (~60 FPS) ───────────────────────────────────
+const TICK_MS = 16;
+
+function serverTick(io) {
+  for (const [, player] of players) {
+    if (player.onmove) {
+      player.move(io);
+    }
+  }
+}
+
+setInterval(() => serverTick(io), TICK_MS);
+
 io.on('connection', (socket) => {
   console.log(`[+] Client connected: ${socket.id}`);
 
@@ -609,7 +605,6 @@ io.on('connection', (socket) => {
   // Handle disconnect
   socket.on('disconnect', () => {
     console.log(`[-] Client disconnected: ${socket.id}`);
-    player.stopMoving();
     players.delete(socket.id);
 
     // Notify other players
