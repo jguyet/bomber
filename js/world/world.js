@@ -36,31 +36,34 @@ var World = function(data)
 		var countx = 0;
 		var y = 0;
 		var x = 0;
-		var first = true;
-		var noput = false;
-		
-		// this.dup.push([-(this.width * 32), 0]);
-		// this.dup.push([0, -(40 * 12)]);
 
-		while (county < (this.height * 32))
+		var mapW = this.width * 32;
+		var mapH = this.height * 32;
+		var canvasW = layer0.width;
+		var canvasH = layer0.height;
+
+		// Rebuild dup: all tile offsets that cover the canvas, skip [0,0] (primary copy)
+		this.dup = [];
+		for (var ox = 0; ox < canvasW; ox += mapW)
+		{
+			for (var oy = 0; oy < canvasH; oy += mapH)
+			{
+				if (ox !== 0 || oy !== 0)
+					this.dup.push([ox, oy]);
+			}
+		}
+
+		while (county < canvasH)
 		{
 			countx = 0;
 			x = 0;
 			var tmp = [];
-			while (countx < (this.width * 32))
+			while (countx < canvasW)
 			{
 				var c = this.data[y % this.height][x % this.width];
-				
 				var id = c.split(",")[0];
 				var ground = c.split(",")[1];
-				//if (county < this.height * 32 && countx < this.width * 32)
-					tmp.push(fosfo0.drawframe("case" + id, 'assets/maps/1.png', ground, countx, county));
-				if ((y % this.height) == 0 && (x % this.width) == 0)
-				{
-					if (!first)
-						this.dup.push([countx, county]);
-					first = false;
-				}
+				tmp.push(fosfo0.drawframe("case" + id, 'assets/maps/1.png', ground, countx, county));
 				countx += 32;
 				x++;
 			}
@@ -84,13 +87,10 @@ var World = function(data)
 			x = 0;
 			while (countx < layer0.width)
 			{
-				var c = this.data[y % this.height][x % this.width];
-				
-				if (y > -1 && x > -1 && this.dataimg[y] != null && this.dataimg[x] != null)
+				if (this.dataimg[y] != null && this.dataimg[y][x] != null)
 				{
 					var img = this.dataimg[y][x];
-					//if (county < this.height * 32 && countx < this.width * 32)
-						this.dataimg[y][x] = fosfo0.drawframe(img.name, 'assets/maps/1.png', img.id, countx, county);
+					this.dataimg[y][x] = fosfo0.drawframe(img.name, 'assets/maps/1.png', img.id, countx, county);
 				}
 				countx += 32;
 				x++;
