@@ -4,7 +4,6 @@ var Player = function(id, x, y)
 	this.skin = 1;
 	this.x = x;
 	this.y = y;
-	this.speed = 1.5;
 	this.anims = [
 		{'frames' : [0, 1, 2, 3], 'name' : 'up', 'id' : 0},
 		{ 'frames' : [4, 5, 6, 7], 'name' : 'right', 'id' : 1},
@@ -21,26 +20,22 @@ var Player = function(id, x, y)
 	
 	this.update = function()
 	{
-		if (this.currentanimid >= this.currentanim.frames.length || !this.onmove)
+		if (!this.onmove)
+		{
 			this.currentanimid = 0;
+		}
 		if (this.onmove)
 		{
-			if ((this.bytedir & 4) != 0)
-				this.y -= this.speed;
-			if ((this.bytedir & 8) != 0)
-				this.x += this.speed;
-			if ((this.bytedir & 16) != 0)
-				this.y += this.speed;
-			if ((this.bytedir & 32) != 0)
-				this.x -= this.speed;
+			this.nmoveanim++;
+			if (this.nmoveanim > 8)
+			{
+				this.nmoveanim = 0;
+				this.currentanimid++;
+			}
+			if (this.currentanimid >= this.currentanim.frames.length)
+				this.currentanimid = 0;
 		}
 		this.print();
-		if (this.nmoveanim > 8)
-		{
-			this.nmoveanim = 0;
-			this.currentanimid++;
-		}
-		this.nmoveanim++;
 	};
 	
 	this.print = function()
