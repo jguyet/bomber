@@ -483,9 +483,8 @@ function handleKeyUp(message, player, io) {
   if (d === null) return;
 
   if ((d & player.dir) !== 0) {
-    player.setDirection(player.dir - d);
+    player.setDirection(player.dir & ~d); // bitwise AND NOT — safe bitmask removal
   }
-  if (player.dir < 0) player.setDirection(0);
   if (player.dir === 0) {
     player.onmove = false;
     player.stopMoving();
