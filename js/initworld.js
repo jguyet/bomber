@@ -47,6 +47,7 @@ var interval = function()
 	var dup = [];
 	if (world != null)
 	{
+		flushPendingMoves(); // apply buffered PM messages (at most 1 per player per frame)
 		if (world.updateplayers != null)
 			world.updateplayers();
 		if (world.updatebombs != null)

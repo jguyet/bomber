@@ -5,6 +5,19 @@
  * This matches the Node.js server's socket.emit('msg', ...) / socket.on('msg', ...)
  */
 
+// Per-player move buffer: stores latest PM data per player ID.
+// Flushed once per rAF frame by flushPendingMoves() called from interval().
+var pendingMoves = {};
+
+function flushPendingMoves() {
+	if (world == null) return;
+	for (var id in pendingMoves) {
+		var m = pendingMoves[id];
+		world.moveplayer(Number(id), m.x, m.y, m.dir, m.skin, false, m.bytedir);
+	}
+	pendingMoves = {};
+}
+
 function sendSocketMessage(message)
 {
 	socket.emit('msg', message);
@@ -89,7 +102,8 @@ function InitializeSocket()
 						var dir = Number(received_msg.substring(2).split("|")[3]);
 						var skin = Number(received_msg.substring(2).split("|")[4]);
 						var bytedir = Number(received_msg.substring(2).split("|")[5]);
-						world.moveplayer(id, x, y, dir, skin, false, bytedir);
+						// Buffer latest position — overwrite any previous unprocessed update for this player
+						pendingMoves[id] = { x: x, y: y, dir: dir, skin: skin, bytedir: bytedir };
 					break ;
 					case "S":
 						var id = Number(received_msg.substring(2).split("|")[0]);
@@ -98,7 +112,9 @@ function InitializeSocket()
 						var dir = Number(received_msg.substring(2).split("|")[3]);
 						var skin = Number(received_msg.substring(2).split("|")[4]);
 						var bytedir = Number(received_msg.substring(2).split("|")[5]);
+						// PS (stop) is always applied immediately — authoritative position snap
 						world.moveplayer(id, x, y, dir, skin, true, bytedir);
+						delete pendingMoves[id];
 					break ;
 				}
 			break ;
