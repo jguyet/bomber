@@ -54,11 +54,6 @@ var Player = function(id, x, y)
 		this.onmove = true;
 	}
 	
-	this.sendpos = function()
-	{
-		sendSocketMessage("PM1|" + this.x + "|" + this.y + "|" + this.currentanim.name + "|" + this.currentanimid);
-	}
-	
 	this.getpos = function()
 	{
 		return ({x: Math.round((Math.round(this.x) / 32) % world.width), y: Math.round((Math.round(this.y) / 32) % world.height)});
@@ -71,10 +66,4 @@ var Player = function(id, x, y)
 		this.img = img; 
 	};
 	
-	this.load2 = function()
-	{
-		fosfo1.loadimage('assets/characters/' + this.skin + '.png');
-		var img = fosfo1.setFramesToImg('assets/characters/' + this.skin + '.png', 4, 4);
-		this.img = img; 
-	};
 };

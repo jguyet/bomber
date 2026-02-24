@@ -7,7 +7,6 @@
 
 function sendSocketMessage(message)
 {
-	console.log("send : " + message);
 	socket.emit('msg', message);
 }
 
@@ -30,7 +29,6 @@ function InitializeSocket()
 	{
 		var type = received_msg.charAt(0);
 		var action = received_msg.charAt(1);
-		console.log("received : " + received_msg);
 		switch (type)
 		{
 			case "B":

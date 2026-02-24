@@ -143,8 +143,11 @@ var World = function(data)
 			player.onmove = false;
 	};
 	
-	this.removeplayer = function(player)
+	this.removeplayer = function(id)
 	{
+		var player = this.getPlayer(id);
+		if (player == null)
+			return ;
 		this.players.splice(this.players.indexOf(player), 1);
 	};
 	
