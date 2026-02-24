@@ -174,10 +174,15 @@ var fosfo = function(canvas)
 	
 	this.undraw = function(name)
 	{
-		var img = _.find(this.imagesDrawed, { 'name': name });
-		if (img == null) return; // silently skip — sprite not yet drawn
-		this.ctx.clearRect(this.x + img.x, this.y + img.y, img.width, img.height);
-		this.imagesDrawed.splice(this.imagesDrawed.indexOf(img), 1);
+		var tmp = this;
+		// Remove ALL entries with this name (prevents ghost accumulation from setTimeout retries)
+		this.imagesDrawed = this.imagesDrawed.filter(function(img) {
+			if (img.name === name) {
+				tmp.ctx.clearRect(tmp.x + img.x, tmp.y + img.y, img.width, img.height);
+				return false;
+			}
+			return true;
+		});
 	}
 	
 	this.undrawimg = function(img)
