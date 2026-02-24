@@ -143,11 +143,23 @@ function getCellByGridPos(x, y) {
   return cases[y * MAP_WIDTH + x] || null;
 }
 
+// Wrap pixel coordinates into the canonical map space (handles dup navigation)
+const MAP_WIDTH_PX  = MAP_WIDTH  * TILE_SIZE; // 1280
+const MAP_HEIGHT_PX = MAP_HEIGHT * TILE_SIZE; // 704
+function wrapCoord(px, py) {
+  return {
+    wx: ((px % MAP_WIDTH_PX)  + MAP_WIDTH_PX)  % MAP_WIDTH_PX,
+    wy: ((py % MAP_HEIGHT_PX) + MAP_HEIGHT_PX) % MAP_HEIGHT_PX
+  };
+}
+
 // Convert pixel coordinates to cell (matching Java: getCellPos)
+// Wraps coordinates so players on visually-duplicated tiles still collide correctly
 function getCellPos(px, py) {
-  const gx = Math.floor(px / TILE_SIZE);
-  const gy = Math.floor(py / TILE_SIZE);
-  return getCellByGridPos(gx, gy); // getCellByGridPos already clamps/returns null if out of bounds
+  const { wx, wy } = wrapCoord(px, py);
+  const gx = Math.floor(wx / TILE_SIZE);
+  const gy = Math.floor(wy / TILE_SIZE);
+  return getCellByGridPos(gx, gy);
 }
 
 // Get cells in a direction (matching Java: getdircell)
@@ -240,13 +252,14 @@ class Player {
   }
 
   getCurCell() {
-    return getCellPos(this.x + 10, this.y + 10);
+    const { wx, wy } = wrapCoord(this.x + 10, this.y + 10);
+    return getCellPos(wx, wy);
   }
 
   getPossibleCell(dx, dy) {
     const nx = this.x + 10 + dx;
     const ny = this.y + 10 + dy;
-    if (nx < 0 || ny < 0 || nx >= MAP_WIDTH * TILE_SIZE || ny >= MAP_HEIGHT * TILE_SIZE) return null;
+    // No hard boundary check — getCellPos wraps internally to support dup navigation
     return getCellPos(nx, ny);
   }
 
