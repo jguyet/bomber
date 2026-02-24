@@ -35,6 +35,7 @@ const TILE_SIZE = 32;
 const PLAYER_SPEED = 1.5;
 const BOMB_RANGE = 4;
 const BOMB_TIMER_MS = 3000;
+const CHAIN_EXPLOSION_DELAY_MS = 350; // delay between chained bomb explosions (ms)
 // Direction bitmasks (same as Java BinaryDirection enum)
 const DIR = {
   up:    4,
@@ -359,8 +360,11 @@ class Bomb {
       if (playerDied) break;
 
       if (cell.hasBomb()) {
-        // Chain reaction
-        cell.bomb.explode(io);
+        // Chain reaction — deferred so players have a dodge window between explosions
+        const chainBomb = cell.bomb;
+        setTimeout(() => {
+          if (!chainBomb.haveExploded) chainBomb.explode(io);
+        }, CHAIN_EXPLOSION_DELAY_MS);
         count++;
         break;
       } else if (!cell.isWalkable() && cell.ground === 104) {
