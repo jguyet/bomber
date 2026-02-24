@@ -38,8 +38,10 @@ var World = function(data)
 		var x = 0;
 		var first = true;
 		var noput = false;
+		
 		// this.dup.push([-(this.width * 32), 0]);
 		// this.dup.push([0, -(40 * 12)]);
+
 		while (county < (this.height * 32))
 		{
 			countx = 0;
