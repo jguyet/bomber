@@ -4,6 +4,10 @@ var fosfo0, fosfo1;
 //nombre de bloc a afficher longueur width / bloc_size
 //nombre de bloc a afficher hauteur height / bloc_size
 var BLOCSIZE = 32;
+var MAP_WIDTH_PX = 40 * 32;   // 1280
+var MAP_HEIGHT_PX = 22 * 32;  // 704
+var cameraX = 0;
+var cameraY = 0;
 
 var SCREENWIDTH = window.innerWidth;
 var SCREENHEIGHT = window.innerHeight;
