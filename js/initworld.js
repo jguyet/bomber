@@ -7,10 +7,6 @@ function preload()
 	ctx1 = layer1.getContext("2d");
 	fosfo0 = new fosfo(layer0);
 	fosfo1 = new fosfo(layer1);
-	fosfo0.x = (window.innerWidth - (40 * 32)) / 2;
-	fosfo0.y = 32;
-	fosfo1.x = (window.innerWidth - (40 * 32)) / 2;
-	fosfo1.y = 32;
 	resize(false);
 	fosfo0.loadimage(['assets/maps/1.png']).done(function() {
 		fosfo1.loadimage(['assets/bombs/1.png', 'assets/bombs/explode/1.png']).done(function() {
@@ -44,6 +40,22 @@ function initWorld()
 
 var interval = function()
 {
+	// Camera: follow currentPlayer, clamp to map bounds
+	if (currentPlayer != null) {
+		var targetCamX = currentPlayer.x - (layer0.width / 2);
+		var targetCamY = currentPlayer.y - (layer0.height / 2);
+		// Clamp so camera doesn't scroll past map edges
+		cameraX = Math.max(0, Math.min(MAP_WIDTH_PX - layer0.width, targetCamX));
+		cameraY = Math.max(0, Math.min(MAP_HEIGHT_PX - layer0.height, targetCamY));
+		// When map is smaller than canvas, center it instead of clamping
+		if (MAP_WIDTH_PX <= layer0.width)  cameraX = -(layer0.width - MAP_WIDTH_PX) / 2;
+		if (MAP_HEIGHT_PX <= layer0.height) cameraY = -(layer0.height - MAP_HEIGHT_PX) / 2;
+		// Apply camera to both layers (fosfo uses .x/.y as draw offset)
+		fosfo0.x = -cameraX;
+		fosfo0.y = -cameraY + 32; // keep the +32 y offset from original preload
+		fosfo1.x = -cameraX;
+		fosfo1.y = -cameraY + 32;
+	}
 	var dup = [];
 	if (world != null)
 	{
