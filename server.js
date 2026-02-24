@@ -147,6 +147,9 @@ function getCellByGridPos(x, y) {
 const MAP_WIDTH_PX  = MAP_WIDTH  * TILE_SIZE; // 1280
 const MAP_HEIGHT_PX = MAP_HEIGHT * TILE_SIZE; // 704
 function wrapCoord(px, py) {
+  // Double-modulo pattern: JS % returns negative for negative inputs
+  // (e.g. -1.5 % 1280 === -1.5), so we add the size then mod again to
+  // guarantee a positive result in [0, size).
   return {
     wx: ((px % MAP_WIDTH_PX)  + MAP_WIDTH_PX)  % MAP_WIDTH_PX,
     wy: ((py % MAP_HEIGHT_PX) + MAP_HEIGHT_PX) % MAP_HEIGHT_PX
