@@ -115,6 +115,8 @@ var World = function(data)
 		p.currentanim = p.anims[dir];
 		p.currentanimid = 0;
 		p.skin = skin;
+		p.targetX = x;
+		p.targetY = y;
 		p.load();
 		if (bcurrent == 1)
 			currentPlayer = p;
@@ -124,25 +126,36 @@ var World = function(data)
 	this.moveplayer = function(id, x, y, dir, skin, bstop, bytedir)
 	{
 		var player = this.getPlayer(id);
-		
+
 		if (player == null)
 		{
 			this.addplayer(id, x, y, dir, skin, 0);
 			return ;
 		}
+		// Update animation direction
 		if (player.currentanim != null && player.currentanim.id != dir)
 		{
 			player.currentanim = player.anims[dir];
 			player.currentanimid = 0;
 		}
-		player.x = x;
-		player.y = y;
 		player.skin = skin;
-		player.bytedir = bytedir;
-		if (bytedir != 0)
-			player.move();
-		else
+
+		if (bstop)
+		{
+			// On stop: snap to exact server position
+			player.x = x;
+			player.y = y;
+			player.targetX = x;
+			player.targetY = y;
 			player.onmove = false;
+		}
+		else
+		{
+			// On move: set target, interpolate in updateplayers()
+			player.targetX = x;
+			player.targetY = y;
+			player.move(); // sets onmove = true
+		}
 	};
 	
 	this.removeplayer = function(id)
@@ -155,9 +168,18 @@ var World = function(data)
 	
 	this.updateplayers = function()
 	{
+		var LERP_FACTOR = 0.3; // 0=no movement, 1=instant snap
 		_.forEach(this.players, function(value) {
 			if (currentPlayer != null && value.id == currentPlayer.id)
-				return ;
+				return ; // local player: server will send authoritative position via PM
+			// Lerp remote player toward server target (replaces bytedir movement)
+			if (value.targetX !== undefined)
+			{
+				value.x += (value.targetX - value.x) * LERP_FACTOR;
+				value.y += (value.targetY - value.y) * LERP_FACTOR;
+			}
+			// Zero bytedir so player.update() doesn't double-move remote players
+			value.bytedir = 0;
 			value.update();
 		});
 	};
