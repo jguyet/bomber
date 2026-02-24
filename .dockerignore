@@ -1,0 +1,38 @@
+# Version control
+.git
+.gitignore
+
+# Dependencies (installed fresh in Docker)
+node_modules
+
+# Dev/local files
+.env
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# OS artifacts
+.DS_Store
+Thumbs.db
+
+# IDE
+.vscode
+.idea
+
+# CI/CD
+.github
+
+# Large media not needed at runtime
+1.gif
+
+# Legacy Java server (reference only)
+server/
+
+# Build/taskforce artifacts
+.taskforce/
+KANBAN.json
+
+# Deployment files (not needed inside container)
+Makefile
+scripts/

@@ -1,3 +1,20 @@
 node_modules/
 .taskforce/
 KANBAN.json
+
+# Environment secrets (use .env.example as template)
+.env
+
+# Logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# OS artifacts
+.DS_Store
+Thumbs.db
+
+# IDE
+.vscode/
+.idea/
