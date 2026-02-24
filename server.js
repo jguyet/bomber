@@ -490,7 +490,7 @@ function handleKeyUp(message, player, io) {
     player.stopMoving();
   }
 
-  broadcast(io, `PS${player.id}|${player.x}|${player.y}|${player.getClientDirection()}|${player.skin}|${player.dir}`);
+  broadcast(io, `PS${player.id}|${Math.round(player.x)}|${Math.round(player.y)}|${player.getClientDirection()}|${player.skin}|${player.dir}`);
 }
 
 function handleChat(message, io) {
