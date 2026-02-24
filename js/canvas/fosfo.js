@@ -142,19 +142,13 @@ var fosfo = function(canvas)
 				}
 				else
 				{
-					if ((tmp.x + value.x) < -32)
-						return ;
-					if ((tmp.y + value.y) < -32)
-						return ;
-					//if ((tmp.x + value.x) > tmp.canvas.width + 32)
-					//		return ;
-					//if ((tmp.y + value.y) > tmp.canvas.height + 32)
-					//	return ;
-					tmp.ctx.drawImage(value.image, value.sx, value.sy, value.sLargeur,
-						value.sHauteur, tmp.x + value.x, (tmp.y + value.y), value.width, value.height);
-					_.forEach(dup, function(duplicat) {
+					_.forEach([[0, 0]].concat(dup), function(duplicat) {
+						var dx = duplicat[0] + tmp.x + value.x;
+						var dy = duplicat[1] + tmp.y + value.y;
+						if (dx < -32 || dy < -32)
+							return ;
 						tmp.ctx.drawImage(value.image, value.sx, value.sy, value.sLargeur,
-							value.sHauteur, duplicat[0] + tmp.x + value.x, duplicat[1] + tmp.y + value.y, value.width, value.height);
+							value.sHauteur, dx, dy, value.width, value.height);
 					});
 				}
 		});
