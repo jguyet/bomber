@@ -25,6 +25,27 @@ body {
   -moz-box-sizing: border-box;
   box-sizing: border-box;
   margin: 0;
+  padding: 0;
+  overflow: hidden;
+}
+#viewport {
+  width: 100vw;
+  height: 100vh;
+  overflow: hidden;
+  position: relative;
+}
+#chat {
+  position: fixed;
+  bottom: 0;
+  right: 0;
+  width: 280px;
+  max-height: 60vh;
+  background: rgba(0, 0, 0, 0.6);
+  color: #eee;
+  display: flex;
+  flex-direction: column;
+  z-index: 1000;
+  overflow: hidden;
 }
 ul {
   list-style: none;
