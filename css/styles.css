@@ -9782,9 +9782,13 @@ body {
 #chat {
   display: block;
   position: fixed !important;
-  bottom: 0;
-  right: 0;
+  bottom: 0 !important;
+  right: 0 !important;
+  left: auto !important;
+  top: auto !important;
   width: 280px;
+  max-height: 50vh;
+  overflow-y: auto;
   background: rgba(0,0,0,0.6);
   z-index: 1000;
   color: #fff;
