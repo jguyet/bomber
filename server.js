@@ -300,8 +300,8 @@ class Player {
     this.x = (spawnCell.x * TILE_SIZE) - 5;
     this.y = (spawnCell.y * TILE_SIZE) + 10;
     this.olddir = 0;
-    // Broadcast new position
-    broadcast(io, `PM${this.id}|${this.x}|${this.y}|${this.getClientDirection()}|${this.skin}|${this.dir}`);
+    // Broadcast new position — PS (stopped) since player is teleported, not moving
+    broadcast(io, `PS${this.id}|${Math.round(this.x)}|${Math.round(this.y)}|${this.getClientDirection()}|${this.skin}|0`);
   }
 }
 
@@ -394,6 +394,19 @@ class Bomb {
   }
 }
 
+// ─── Game Tick Loop ───────────────────────────────────────────────────────────
+const TICK_MS = 16; // ~60 FPS
+
+function serverTick(io) {
+  for (const [, player] of players) {
+    if (player.onmove) {
+      player.move(io);
+      // Broadcast authoritative position every tick while moving
+      broadcast(io, `PM${player.id}|${Math.round(player.x)}|${Math.round(player.y)}|${player.getClientDirection()}|${player.skin}|${player.dir}`);
+    }
+  }
+}
+
 // ─── Broadcast helpers ───────────────────────────────────────────────────────
 function broadcast(io, message) {
   io.emit('msg', message);
@@ -469,8 +482,9 @@ function handleKeyDown(message, player, socket, io) {
 
   player.setDirection(player.dir + d);
   player.onmove = true;
+  // Movement is driven by the shared serverTick loop; no per-player interval needed
 
-  broadcast(io, `PM${player.id}|${player.x}|${player.y}|${player.getClientDirection()}|${player.skin}|${player.dir}`);
+  broadcast(io, `PM${player.id}|${Math.round(player.x)}|${Math.round(player.y)}|${player.getClientDirection()}|${player.skin}|${player.dir}`);
 }
 
 function handleKeyUp(message, player, io) {
@@ -490,9 +504,10 @@ function handleKeyUp(message, player, io) {
   if (player.dir < 0) player.setDirection(0);
   if (player.dir === 0) {
     player.onmove = false;
+    // Shared tick loop drives movement; no per-player interval to stop
   }
 
-  broadcast(io, `PS${player.id}|${player.x}|${player.y}|${player.getClientDirection()}|${player.skin}|${player.dir}`);
+  broadcast(io, `PS${player.id}|${Math.round(player.x)}|${Math.round(player.y)}|${player.getClientDirection()}|${player.skin}|${player.dir}`);
 }
 
 function handleChat(message, io) {
@@ -549,10 +564,13 @@ function serverTick(io) {
   for (const [, player] of players) {
     if (player.onmove) {
       player.move(io);
+      // Broadcast authoritative position every tick while moving
+      broadcast(io, `PM${player.id}|${Math.round(player.x)}|${Math.round(player.y)}|${player.getClientDirection()}|${player.skin}|${player.dir}`);
     }
   }
 }
 
+// Start the shared game tick loop
 setInterval(() => serverTick(io), TICK_MS);
 
 io.on('connection', (socket) => {
@@ -605,6 +623,7 @@ io.on('connection', (socket) => {
   // Handle disconnect
   socket.on('disconnect', () => {
     console.log(`[-] Client disconnected: ${socket.id}`);
+    player.onmove = false; // stop movement in shared tick loop
     players.delete(socket.id);
 
     // Notify other players
