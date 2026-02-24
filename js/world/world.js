@@ -29,6 +29,23 @@ var World = function(data)
 		}
 	};
 	
+	this.updateDup = function(camX, camY, canvasW, canvasH)
+	{
+		var mapW = this.width * 32;
+		var mapH = this.height * 32;
+		this.dup = [];
+		// Only tile if map is smaller than canvas
+		if (mapW < canvasW || mapH < canvasH) {
+			for (var ox = 0; ox < canvasW + mapW; ox += mapW) {
+				for (var oy = 0; oy < canvasH + mapH; oy += mapH) {
+					if (ox !== 0 || oy !== 0)
+						this.dup.push([ox, oy]);
+				}
+			}
+		}
+		// else: map is bigger than canvas, no duplication needed
+	};
+
 	this.loadWorld = function()
 	{
 		fosfo0.clear();
@@ -37,23 +54,11 @@ var World = function(data)
 		var y = 0;
 		var x = 0;
 
-		var mapW = this.width * 32;
-		var mapH = this.height * 32;
 		var canvasW = layer0.width;
 		var canvasH = layer0.height;
 
-		// Rebuild dup: all tile offsets that cover the canvas, including left of fosfo0.x offset
-		this.dup = [];
-		var offsetX = fosfo0 ? fosfo0.x : 0;
-		var startOx = -Math.ceil(offsetX / mapW) * mapW;
-		for (var ox = startOx; ox < canvasW; ox += mapW)
-		{
-			for (var oy = 0; oy < canvasH; oy += mapH)
-			{
-				if (ox !== 0 || oy !== 0)
-					this.dup.push([ox, oy]);
-			}
-		}
+		// Build initial dup using camera at 0,0
+		this.updateDup(0, 0, canvasW, canvasH);
 
 		while (county < canvasH)
 		{

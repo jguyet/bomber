@@ -64,6 +64,8 @@ var interval = function()
 			world.updateplayers();
 		if (world.updatebombs != null)
 			world.updatebombs();
+		// Recompute dup offsets relative to current camera position each frame
+		world.updateDup(cameraX, cameraY, layer0.width, layer0.height);
 		dup = world.dup;
 		if (world.havechange)
 		{
