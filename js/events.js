@@ -61,10 +61,6 @@ var resize = function(bool){
 	layer1.width = SCREENWIDTH;// - 212;
 	layer0.height = SCREENHEIGHT;
 	layer1.height = SCREENHEIGHT;
-	fosfo0.x = Math.max(0, (window.innerWidth - (40 * 32)) / 2);
-	fosfo0.y = 32;
-	fosfo1.x = Math.max(0, (window.innerWidth - (40 * 32)) / 2);
-	fosfo1.y = 32;
 	if (world != null)
 	{
 		// Recompute dup to cover full canvas including area left of fosfo0.x offset
