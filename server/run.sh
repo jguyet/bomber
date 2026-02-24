@@ -1,1 +1,1 @@
-/usr/java/jre/bin/java -XX:-CITime -XX:+AggressiveOpts -jar server.jar
+java -XX:-CITime -XX:+AggressiveOpts -jar server.jar

@@ -38,8 +38,8 @@ var World = function(data)
 		var x = 0;
 		var first = true;
 		var noput = false;
-		//this.dup.push([-(this.width * 32), 0]);
-		//this.dup.push([0, -(40 * 12)]);
+		// this.dup.push([-(this.width * 32), 0]);
+		// this.dup.push([0, -(40 * 12)]);
 		while (county < (this.height * 32))
 		{
 			countx = 0;
@@ -55,8 +55,8 @@ var World = function(data)
 					tmp.push(fosfo0.drawframe("case" + id, 'assets/maps/1.png', ground, countx, county));
 				if ((y % this.height) == 0 && (x % this.width) == 0)
 				{
-					//if (!first)
-						//this.dup.push([countx, county]);
+					if (!first)
+						this.dup.push([countx, county]);
 					first = false;
 				}
 				countx += 32;
