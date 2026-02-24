@@ -1,0 +1,13 @@
+{
+  "name": "bomber",
+  "version": "1.0.0",
+  "description": "Bomberman multiplayer online game - Node.js server with socket.io",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "http": "node http_server.js"
+  },
+  "dependencies": {
+    "socket.io": "^4.7.5"
+  }
+}
