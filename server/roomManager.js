@@ -58,6 +58,7 @@ class Room {
     // Isolated game state
     this.cells = [];
     this.players = new Map(); // socketId -> player object
+    this.spectators = new Set(); // socketIds of spectator connections
     this.bombs = [];
     this.items = [];
     this.nextPlayerId = 1;
@@ -1057,7 +1058,50 @@ class Room {
     }
   }
 
+  // ─── Spectator Methods ────────────────────────────────────────────────────
+
+  addSpectator(socket) {
+    this.spectators.add(socket.id);
+  }
+
+  removeSpectator(socketId) {
+    this.spectators.delete(socketId);
+  }
+
+  isSpectator(socketId) {
+    return this.spectators.has(socketId);
+  }
+
+  sendSpectatorWorldState(socket) {
+    // Send theme
+    this.sendTo(socket, 'TH' + this.activeTheme);
+    // Send world
+    this.sendTo(socket, 'WL' + MAP_WIDTH + '|' + MAP_HEIGHT + '|' + this.getMapData());
+    // Send all existing players
+    for (const [, p] of this.players) {
+      this.sendTo(socket, 'PA' + p.id + '|' + p.x + '|' + p.y + '|' + this.getClientDirection(p) + '|' + p.skin + '|' + p.speed + '|0|' + p.nickname);
+    }
+    // Send all bombs
+    for (const b of this.bombs) {
+      this.sendTo(socket, 'BA' + b.id + '|' + b.x + '|' + b.y + '|' + b.range);
+    }
+    // Send all items
+    for (const item of this.items) {
+      this.sendTo(socket, 'IA' + item.id + '|' + item.templateId + '|' + item.x + '|' + item.y);
+    }
+    // Send round state and scoreboard
+    const timeRemaining = this.roundState.state === 'active'
+      ? Math.max(0, ROUND_DURATION_MS - (Date.now() - this.roundState.startTime))
+      : 0;
+    this.sendTo(socket, 'RS' + this.roundState.state + '|' + timeRemaining);
+    this.broadcastScoreboard();
+  }
+
+  // ─── Message Processing ─────────────────────────────────────────────────
+
   processMessage(socket, player, message) {
+    // Spectators cannot send game input
+    if (this.isSpectator(socket.id)) return;
     if (!message || message.length < 2) return;
 
     const type = message.charAt(0);
@@ -1177,7 +1221,8 @@ class RoomManager {
       playerCount: r.players.size,
       maxPlayers: r.maxPlayers,
       status: r.state,
-      themeId: r.themeId
+      themeId: r.themeId,
+      spectatorCount: r.spectators.size
     }));
   }
 
