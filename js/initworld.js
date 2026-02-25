@@ -50,8 +50,10 @@ function loadGameAssets(onReady) {
 function preload()
 {
 	// Show loading screen
+	// NOTE: This function is unused in the current lobby → room browser flow.
+	// Kept for backwards compatibility. If re-enabled, the total is:
+	// 5 assets (tileset + bombs + explode + items + skin) + "Server connection" + "World data" = 7
 	LoadingManager.show();
-	// Total assets: map sprite (1) + bomb sprite (1) + explosion sprite (1) + item sprite (1) + character skin (1) + connecting (1) + world init (1) = 7
 	LoadingManager.setTotal(7);
 
 	// Initialize canvas engines
