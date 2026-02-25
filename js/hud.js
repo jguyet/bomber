@@ -136,8 +136,37 @@ var HUD = (function() {
       if (screen) screen.style.display = 'none';
     },
 
+    // Show explosion/death visual feedback: red flash overlay + canvas shake
+    showExplosionFeedback: function() {
+      // Red flash overlay
+      var flash = document.getElementById('explosion-flash');
+      if (flash) {
+        flash.style.display = 'block';
+        flash.classList.remove('flash-active');
+        // Force reflow to restart animation
+        void flash.offsetWidth;
+        flash.classList.add('flash-active');
+        setTimeout(function() {
+          flash.classList.remove('flash-active');
+          flash.style.display = 'none';
+        }, 300);
+      }
+      // Canvas shake
+      var viewport = document.getElementById('viewport');
+      if (viewport) {
+        viewport.classList.remove('shake-active');
+        void viewport.offsetWidth;
+        viewport.classList.add('shake-active');
+        setTimeout(function() {
+          viewport.classList.remove('shake-active');
+        }, 300);
+      }
+    },
+
     // Show death notice for spectating player
     showDeathNotice: function() {
+      // Trigger explosion visual feedback on death
+      this.showExplosionFeedback();
       var stateText = document.getElementById('round-timer-state');
       if (stateText) {
         stateText.textContent = 'YOU DIED \u2014 Spectating';
