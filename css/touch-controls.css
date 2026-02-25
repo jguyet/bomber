@@ -225,6 +225,60 @@
   }
 }
 
+/* ─── Medium phones (< 480px) — slightly reduced layout ─────────────────── */
+@media (max-width: 480px) {
+  .touch-dpad {
+    left: 16px;
+    bottom: calc(16px + env(safe-area-inset-bottom, 0px));
+    width: 138px;
+    height: 138px;
+    grid-template-columns: repeat(3, 46px);
+    grid-template-rows: repeat(3, 46px);
+  }
+
+  .dpad-up,
+  .dpad-down,
+  .dpad-left,
+  .dpad-right {
+    width: 46px;
+    height: 46px;
+    font-size: 18px;
+    border-radius: 7px;
+  }
+
+  .dpad-up::after {
+    border-left-width: 7px;
+    border-right-width: 7px;
+    border-bottom-width: 9px;
+  }
+
+  .dpad-down::after {
+    border-left-width: 7px;
+    border-right-width: 7px;
+    border-top-width: 9px;
+  }
+
+  .dpad-left::after {
+    border-top-width: 7px;
+    border-bottom-width: 7px;
+    border-right-width: 9px;
+  }
+
+  .dpad-right::after {
+    border-top-width: 7px;
+    border-bottom-width: 7px;
+    border-left-width: 9px;
+  }
+
+  .touch-bomb {
+    right: 20px;
+    bottom: calc(30px + env(safe-area-inset-bottom, 0px));
+    width: 64px;
+    height: 64px;
+    font-size: 26px;
+  }
+}
+
 /* ─── Small phones (< 400px) — compact layout ──────────────────────────── */
 @media (max-width: 400px) {
   .touch-dpad {
@@ -292,7 +346,78 @@
   }
 }
 
-/* ─── Landscape orientation on phones — reduce vertical footprint ────────── */
+/* ─── Tiny phones (320px, e.g. iPhone SE 1st gen) — minimal footprint ───── */
+@media (max-width: 320px) {
+  .touch-dpad {
+    left: 6px;
+    bottom: calc(6px + env(safe-area-inset-bottom, 0px));
+    transform: scale(0.65);
+    transform-origin: bottom left;
+  }
+
+  .touch-bomb {
+    right: 8px;
+    bottom: calc(10px + env(safe-area-inset-bottom, 0px));
+    transform: scale(0.65);
+    transform-origin: bottom right;
+  }
+}
+
+/* ─── Landscape orientation — reduce vertical footprint ─────────────────── */
+@media (max-height: 500px) and (orientation: landscape) {
+  .touch-dpad {
+    bottom: calc(10px + env(safe-area-inset-bottom, 0px));
+    left: 14px;
+    width: 132px;
+    height: 132px;
+    grid-template-columns: repeat(3, 44px);
+    grid-template-rows: repeat(3, 44px);
+  }
+
+  .dpad-up,
+  .dpad-down,
+  .dpad-left,
+  .dpad-right {
+    width: 44px;
+    height: 44px;
+    font-size: 16px;
+    border-radius: 6px;
+  }
+
+  .dpad-up::after {
+    border-left-width: 6px;
+    border-right-width: 6px;
+    border-bottom-width: 8px;
+  }
+
+  .dpad-down::after {
+    border-left-width: 6px;
+    border-right-width: 6px;
+    border-top-width: 8px;
+  }
+
+  .dpad-left::after {
+    border-top-width: 6px;
+    border-bottom-width: 6px;
+    border-right-width: 8px;
+  }
+
+  .dpad-right::after {
+    border-top-width: 6px;
+    border-bottom-width: 6px;
+    border-left-width: 8px;
+  }
+
+  .touch-bomb {
+    right: 18px;
+    bottom: calc(16px + env(safe-area-inset-bottom, 0px));
+    width: 60px;
+    height: 60px;
+    font-size: 24px;
+  }
+}
+
+/* ─── Very short landscape (< 400px height) — minimal vertical space ────── */
 @media (max-height: 400px) and (orientation: landscape) {
   .touch-dpad {
     bottom: calc(8px + env(safe-area-inset-bottom, 0px));
@@ -398,5 +523,16 @@
     height: 86px;
     font-size: 34px;
     border-width: 3px;
+  }
+}
+
+/* ─── Portrait tall phones — push controls above chat panel ─────────────── */
+@media (max-width: 480px) and (orientation: portrait) and (min-height: 700px) {
+  .touch-dpad {
+    bottom: calc(20px + env(safe-area-inset-bottom, 0px));
+  }
+
+  .touch-bomb {
+    bottom: calc(34px + env(safe-area-inset-bottom, 0px));
   }
 }
