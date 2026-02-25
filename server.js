@@ -5,6 +5,7 @@
  *
  * Incoming from client:
  *   WL         - Request world data
+ *   NI[nick|skinId] - Set nickname and skin
  *   KD[key]    - Key down (38/87=up, 40/83=down, 37/65=left, 39/68=right, 32=bomb)
  *   KU[key]    - Key up
  *   MN[msg]    - Chat message
@@ -12,10 +13,10 @@
  * Outgoing to client:
  *   WL[w|h|data]              - World data (cells: "id,ground;...")
  *   WC[ground|x|y|walkable]  - Cell updated
- *   PA[id|x|y|dir|skin|bcurrent] - Player added (bcurrent=1 = "this is you")
+ *   PA[id|x|y|dir|skin|bcurrent|nickname] - Player added (bcurrent=1 = "this is you")
  *   PD[id]                   - Player disconnected
- *   PM[id|x|y|dir|skin|bytedir]  - Player moving
- *   PS[id|x|y|dir|skin|bytedir]  - Player stopped
+ *   PM[id|x|y|dir|skin|bytedir|nickname]  - Player moving
+ *   PS[id|x|y|dir|skin|bytedir|nickname]  - Player stopped
  *   BA[id|x|y|range]         - Bomb added
  *   BE[id|sup|down|left|right]   - Bomb exploded
  *   MN[msg]                  - Chat message broadcast
@@ -245,6 +246,7 @@ class Player {
     this.y = y;
     this.skin = skin;
     this.socketId = socketId;
+    this.nickname = 'Player';  // default nickname, overridden by NI message
     this.dir = 0;       // bitmask of active directions
     this.olddir = 1;    // last visual direction (0=up,1=right,2=down,3=left)
     this.onmove = false;
@@ -329,7 +331,7 @@ class Player {
     this.y = spawnCell.y * TILE_SIZE + (TILE_SIZE - PLAYER_H) / 2;
     this.olddir = 0;
     // Broadcast new position — PS (stopped) since player is teleported, not moving
-    broadcast(io, `PS${this.id}|${Math.round(this.x)}|${Math.round(this.y)}|${this.getClientDirection()}|${this.skin}|0`);
+    broadcast(io, `PS${this.id}|${Math.round(this.x)}|${Math.round(this.y)}|${this.getClientDirection()}|${this.skin}|0|${this.nickname}`);
   }
 }
 
@@ -444,12 +446,12 @@ function handleWorldLoad(socket, io) {
   sendTo(socket, `WL${MAP_WIDTH}|${MAP_HEIGHT}|${getMapData()}`);
 
   // Send current player info (bcurrent=1 means "this is you")
-  sendTo(socket, `PA${player.id}|${player.x}|${player.y}|${player.getClientDirection()}|${player.skin}|1`);
+  sendTo(socket, `PA${player.id}|${player.x}|${player.y}|${player.getClientDirection()}|${player.skin}|1|${player.nickname}`);
 
   // Tell new player about all existing players
   for (const [sid, p] of players) {
     if (sid === socket.id) continue;
-    sendTo(socket, `PA${p.id}|${p.x}|${p.y}|${p.getClientDirection()}|${p.skin}|0`);
+    sendTo(socket, `PA${p.id}|${p.x}|${p.y}|${p.getClientDirection()}|${p.skin}|0|${p.nickname}`);
   }
 
   // Tell existing players about new player
@@ -457,7 +459,7 @@ function handleWorldLoad(socket, io) {
     if (sid === socket.id) continue;
     const otherSocket = io.sockets.sockets.get(sid);
     if (otherSocket) {
-      sendTo(otherSocket, `PA${player.id}|${player.x}|${player.y}|${player.getClientDirection()}|${player.skin}|0`);
+      sendTo(otherSocket, `PA${player.id}|${player.x}|${player.y}|${player.getClientDirection()}|${player.skin}|0|${player.nickname}`);
     }
   }
 }
@@ -484,7 +486,7 @@ function handleKeyDown(message, player, socket, io) {
   player.onmove = true;
   // Movement is driven by the shared serverTick loop; no per-player interval needed
 
-  broadcast(io, `PM${player.id}|${Math.round(player.x)}|${Math.round(player.y)}|${player.getClientDirection()}|${player.skin}|${player.dir}`);
+  broadcast(io, `PM${player.id}|${Math.round(player.x)}|${Math.round(player.y)}|${player.getClientDirection()}|${player.skin}|${player.dir}|${player.nickname}`);
 }
 
 function handleKeyUp(message, player, io) {
@@ -506,12 +508,27 @@ function handleKeyUp(message, player, io) {
     // Shared tick loop drives movement; no per-player interval to stop
   }
 
-  broadcast(io, `PS${player.id}|${Math.round(player.x)}|${Math.round(player.y)}|${player.getClientDirection()}|${player.skin}|${player.dir}`);
+  broadcast(io, `PS${player.id}|${Math.round(player.x)}|${Math.round(player.y)}|${player.getClientDirection()}|${player.skin}|${player.dir}|${player.nickname}`);
 }
 
-function handleChat(message, io) {
-  // message = "MN<text>" => broadcast as-is
-  broadcast(io, message);
+function handleChat(message, player, io) {
+  // message = "MN<text>" => broadcast prefixed with sender nickname
+  const text = message.substring(2);
+  broadcast(io, `MN${player.nickname}: ${text}`);
+}
+
+function handleNickname(message, player) {
+  // message = "NI<nickname>|<skinId>"
+  const data = message.substring(2);
+  const sep = data.indexOf('|');
+  if (sep === -1) {
+    player.nickname = data.trim().substring(0, 20) || 'Player';
+    return;
+  }
+  const nick = data.substring(0, sep).trim().substring(0, 20) || 'Player';
+  const skinRaw = parseInt(data.substring(sep + 1), 10);
+  player.nickname = nick;
+  player.skin = (skinRaw >= 0 && skinRaw <= 23) ? skinRaw : 1;
 }
 
 function addBomb(player, io) {
@@ -564,7 +581,7 @@ function serverTick(io) {
     if (player.onmove) {
       player.move(io);
       // Broadcast authoritative position every tick while moving
-      broadcast(io, `PM${player.id}|${Math.round(player.x)}|${Math.round(player.y)}|${player.getClientDirection()}|${player.skin}|${player.dir}`);
+      broadcast(io, `PM${player.id}|${Math.round(player.x)}|${Math.round(player.y)}|${player.getClientDirection()}|${player.skin}|${player.dir}|${player.nickname}`);
     }
   }
 }
@@ -607,9 +624,15 @@ io.on('connection', (socket) => {
         }
         break;
 
+      case 'N':
+        if (action === 'I') {
+          handleNickname(message, player);
+        }
+        break;
+
       case 'M':
         if (action === 'N') {
-          handleChat(message, io);
+          handleChat(message, player, io);
         }
         break;
 
