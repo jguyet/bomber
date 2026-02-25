@@ -2,6 +2,7 @@ var Player = function(id, x, y)
 {
 	this.id = id;
 	this.skin = 1;
+	this.nickname = '';
 	this.x = x;
 	this.y = y;
 	this.anims = [
