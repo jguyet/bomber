@@ -46,6 +46,7 @@
 	<script src="./js/chat.js"></script>
 	<script src="./js/chat-filters.js"></script>
 	<script src="./js/hud.js"></script>
+	<script src="./js/stats-overlay.js"></script>
 	<script src="./js/events.js"></script>
 	<script src="./js/touch-controls.js"></script>
 	<script src="./js/connection-status.js"></script>
@@ -206,6 +207,9 @@
 		</table>
 	</div>
 
+	<!-- Stats Button -->
+	<button id="stats-btn" class="stats-btn" title="Player Stats">&#x1F4CA;</button>
+
 	<!-- Results Screen Overlay -->
 	<div id="results-screen" style="display:none;">
 		<div class="results-container">
@@ -226,6 +230,33 @@
 				</table>
 			</div>
 			<div class="results-countdown" id="results-countdown">Next round in 5s...</div>
+		</div>
+	</div>
+
+	<!-- Stats Overlay -->
+	<div id="stats-overlay" style="display:none;">
+		<div class="stats-overlay-container">
+			<div class="stats-overlay-header">
+				<h2>Player Profile</h2>
+				<button id="stats-overlay-close" class="stats-overlay-close">&times;</button>
+			</div>
+			<div class="stats-player-info">
+				<span class="stats-label">Nickname:</span>
+				<span id="stats-nickname" class="stats-value"></span>
+			</div>
+			<ul class="player-statistics">
+				<li>Games Played <b id="stats-games">0</b></li>
+				<li>Wins <b id="stats-wins">0</b></li>
+				<li>Win Rate <b id="stats-winrate">0%</b></li>
+				<li>Total Kills <b id="stats-kills">0</b></li>
+				<li>Total Deaths <b id="stats-deaths">0</b></li>
+				<li>K/D Ratio <b id="stats-kd">0</b></li>
+			</ul>
+			<h3>Leaderboard</h3>
+			<table class="stats-leaderboard">
+				<thead><tr><th>#</th><th>Player</th><th>Wins</th><th>Kills</th><th>Win%</th></tr></thead>
+				<tbody id="stats-leaderboard-body"></tbody>
+			</table>
 		</div>
 	</div>
 
