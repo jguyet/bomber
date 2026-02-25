@@ -48,7 +48,8 @@ var LoadingManager = {
 
   assetLoaded: function(name) {
     this.loadedAssets++;
-    var pct = Math.round((this.loadedAssets / this.totalAssets) * 100);
+    if (this.totalAssets <= 0) return; // Guard: no loading session active
+    var pct = Math.min(100, Math.round((this.loadedAssets / this.totalAssets) * 100));
     var bar = document.getElementById('loading-bar');
     if (bar) bar.style.width = pct + '%';
     var detail = document.getElementById('loading-detail');

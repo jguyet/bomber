@@ -415,8 +415,10 @@ function InitializeSocket()
 			initCanvas();
 		}
 		// Show loading screen and load assets, then request world data
+		// Total: 5 assets (tileset + bombs + explode + items + skin) + 1 world data = 6
+		// Note: "Server connection" is NOT counted here because socket is already connected
 		LoadingManager.show();
-		LoadingManager.setTotal(7);
+		LoadingManager.setTotal(6);
 		loadGameAssets(function() {
 			LoadingManager.setStatus('Loading world...');
 			sendSocketMessage('WL');
