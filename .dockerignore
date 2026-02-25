@@ -15,3 +15,7 @@ PROJECT.md
 .DS_Store
 .db
 scripts
+server/server.jar
+server/run.sh
+server/server_lib
+server/src

@@ -6,7 +6,7 @@ const { RoomManager, MIN_PLAYERS_TO_START } = require('./server/roomManager');
 const { StatsManager } = require('./server/statsManager');
 
 // ─── Configuration ───────────────────────────────────────────────────────────
-const PORT = 9998;
+const PORT = parseInt(process.env.PORT, 10) || 9998;
 const ROOT = __dirname;
 
 // ─── MIME Types for static file serving ──────────────────────────────────────

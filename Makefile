@@ -1,4 +1,4 @@
-.PHONY: install dev start build docker-build docker-run docker-stop clean help
+.PHONY: install dev start build docker-build docker-run docker-stop docker-logs clean help
 
 APP_NAME    := bomber
 DOCKER_TAG  := $(APP_NAME):latest
@@ -26,7 +26,7 @@ docker-build: ## Build Docker image
 	docker build -t $(DOCKER_TAG) .
 
 docker-run: ## Run Docker container
-	docker run -d --name $(CONTAINER) -p 9998:9998 $(DOCKER_TAG)
+	docker run -d --name $(CONTAINER) -p 9998:9998 -e NODE_ENV=production $(DOCKER_TAG)
 
 docker-stop: ## Stop and remove Docker container
 	docker stop $(CONTAINER) && docker rm $(CONTAINER)
