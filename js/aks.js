@@ -194,6 +194,10 @@ function InitializeSocket()
 							currentTheme = newTheme;
 						}
 						console.log('Theme set to:', currentTheme);
+						// Update HUD theme indicator
+						if (typeof HUD !== 'undefined' && HUD.setRoomInfo) {
+							HUD.setRoomInfo(currentRoomName || '', currentTheme);
+						}
 					break ;
 				}
 			break ;
@@ -328,6 +332,10 @@ function InitializeSocket()
 		// Room creator started the game - transition from waiting room to game
 		if (typeof RoomUI !== 'undefined') RoomUI.hideWaitingRoom();
 		document.getElementById('chat').style.display = '';
+		// Show room & theme HUD
+		if (typeof HUD !== 'undefined' && HUD.setRoomInfo) {
+			HUD.setRoomInfo(currentRoomName || '', currentTheme || 'default');
+		}
 		// Request world load
 		sendSocketMessage('WL');
 		initWorld();

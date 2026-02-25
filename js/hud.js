@@ -150,6 +150,24 @@ var HUD = (function() {
       }, 2000);
     },
 
+    // Set room name and theme in HUD (top-left during gameplay)
+    setRoomInfo: function(roomName, themeId) {
+      var container = document.getElementById('hud-room-info');
+      var nameEl = document.getElementById('hud-room-name');
+      var themeEl = document.getElementById('hud-theme-badge');
+      if (!container) return;
+      container.style.display = 'flex';
+      if (nameEl) nameEl.textContent = roomName;
+      var themeLabels = { 'default': '\uD83C\uDF3F Default', 'winter': '\u2744\uFE0F Winter', 'moon': '\uD83C\uDF19 Moon' };
+      if (themeEl) themeEl.textContent = themeLabels[themeId] || themeId;
+    },
+
+    // Hide room info HUD
+    hideRoomInfo: function() {
+      var container = document.getElementById('hud-room-info');
+      if (container) container.style.display = 'none';
+    },
+
     // Reset everything for new round
     reset: function() {
       this.hideResults();

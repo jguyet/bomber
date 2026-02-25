@@ -327,6 +327,10 @@ var RoomUI = (function() {
     currentRoomName = '';
     isRoomCreator = false;
     roomPlayerList = [];
+    // Hide room info HUD
+    if (typeof HUD !== 'undefined' && HUD.hideRoomInfo) {
+      HUD.hideRoomInfo();
+    }
     hideWaitingRoom();
     showBrowser();
   }
