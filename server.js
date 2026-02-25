@@ -574,7 +574,7 @@ function handleKeyUp(player, message) {
 function handleChatMessage(player, message) {
   const msg = message.substring(2);
   if (!msg || msg.length === 0) return;
-  broadcastAll('MN' + msg);
+  broadcastAll('MN' + player.nickname + '|' + msg);
 }
 
 function handleWorldLoad(player, ws) {
