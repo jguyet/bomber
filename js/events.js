@@ -46,7 +46,7 @@ function onMouseOut()
 }
 function onKeyDown( event )
 {
-	if (isSpectating) return;
+	if (isSpectating || isFullSpectator) return;
 	if (keyState[event.keyCode || event.which] == true)
 		return ;
 	keyState[event.keyCode || event.which] = true;
@@ -55,7 +55,7 @@ function onKeyDown( event )
 
 function onKeyUp( event )
 {
-	if (isSpectating) return;
+	if (isSpectating || isFullSpectator) return;
 	keyState[event.keyCode || event.which] = false;
 	sendSocketMessage("KU" + (event.keyCode || event.which));
 }

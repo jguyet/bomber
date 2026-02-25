@@ -123,14 +123,18 @@ var RoomUI = (function() {
           '<span class="room-card-players">' + playerCount + '/' + maxPlayers + ' players</span>' +
           '<span class="room-card-status ' + statusClass + '">' + statusLabel + '</span>' +
         '</div>' +
-        '<button class="room-card-join">JOIN</button>';
+        '<button class="room-card-join">JOIN</button>' +
+        '<button class="room-card-watch">WATCH</button>';
 
       list.appendChild(card);
 
-      // Bind join handler
+      // Bind join and watch handlers
       (function(roomId) {
         card.querySelector('.room-card-join').addEventListener('click', function() {
           joinRoom(roomId);
+        });
+        card.querySelector('.room-card-watch').addEventListener('click', function() {
+          joinRoomAsSpectator(roomId);
         });
       })(room.id);
     }
@@ -326,6 +330,50 @@ var RoomUI = (function() {
     if (title) title.textContent = roomName;
   }
 
+  function joinRoomAsSpectator(roomId) {
+    currentRoomId = roomId;
+    isFullSpectator = true;
+    isSpectating = true;
+    stopAutoRefresh();
+
+    var onRoomJoined = function(data) {
+      hideBrowser();
+      // Skip waiting room — go straight to game if room is playing
+      if (data.spectator) {
+        document.getElementById('chat').style.display = '';
+        if (typeof initChatScroll === 'function') initChatScroll();
+        if (typeof HUD !== 'undefined' && HUD.setRoomInfo) {
+          HUD.setRoomInfo(data.roomName || '', data.themeId || 'default');
+        }
+        if (typeof fosfo0 === 'undefined' || !fosfo0) initCanvas();
+        LoadingManager.show();
+        LoadingManager.setTotal(6);
+        loadGameAssets(function() {
+          LoadingManager.setStatus('Loading world...');
+          sendSocketMessage('WL');
+          initWorld();
+          // Show spectator badge after world loads
+          if (typeof HUD !== 'undefined' && HUD.showSpectatorBadge) {
+            HUD.showSpectatorBadge();
+          }
+        });
+      } else {
+        // Room is in waiting state — show waiting room like normal join
+        showWaitingRoom(data.roomName, data.themeId || currentTheme);
+        updateChatRoomLabel(data.roomName || 'Room');
+      }
+      socket.off('roomJoined', onRoomJoined);
+    };
+
+    if (!socket || !socket.connected) {
+      InitializeSocket();
+      socket.on('roomJoined', onRoomJoined);
+    } else {
+      socket.on('roomJoined', onRoomJoined);
+      socket.emit('joinRoom', { roomId: roomId, spectator: true });
+    }
+  }
+
   function leaveRoom() {
     if (socket && socket.connected) {
       socket.emit('leaveRoom');
@@ -333,6 +381,8 @@ var RoomUI = (function() {
     currentRoomId = null;
     currentRoomName = '';
     isRoomCreator = false;
+    isFullSpectator = false;
+    isSpectating = false;
     roomPlayerList = [];
     updateChatRoomLabel('---');
     // Hide room info HUD
@@ -378,6 +428,7 @@ var RoomUI = (function() {
     showWaitingRoom: showWaitingRoom,
     hideWaitingRoom: hideWaitingRoom,
     updateWaitingRoom: updateWaitingRoom,
-    updateChatRoomLabel: updateChatRoomLabel
+    updateChatRoomLabel: updateChatRoomLabel,
+    joinRoomAsSpectator: joinRoomAsSpectator
   };
 })();

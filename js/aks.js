@@ -23,7 +23,11 @@ function InitializeSocket()
 
 		// Join room (currentRoomId must be set before calling InitializeSocket)
 		if (currentRoomId) {
-			socket.emit('joinRoom', currentRoomId);
+			if (isFullSpectator) {
+				socket.emit('joinRoom', { roomId: currentRoomId, spectator: true });
+			} else {
+				socket.emit('joinRoom', currentRoomId);
+			}
 		}
 
 		console.log("Socket.io connected");
@@ -298,8 +302,10 @@ function InitializeSocket()
 							world.players = [];
 						}
 
-						// Reset spectating
-						isSpectating = false;
+						// Reset spectating (but keep isFullSpectator for lobby spectators)
+						if (!isFullSpectator) {
+							isSpectating = false;
+						}
 
 						// Reset HUD and round globals
 						if (typeof HUD !== 'undefined') HUD.hideResults();

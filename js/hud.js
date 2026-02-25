@@ -197,6 +197,12 @@ var HUD = (function() {
       if (container) container.style.display = 'none';
     },
 
+    // Show spectator badge for lobby spectators
+    showSpectatorBadge: function() {
+      var stateText = document.getElementById('round-timer-state');
+      if (stateText) stateText.textContent = '\uD83D\uDC41 SPECTATING';
+    },
+
     // Reset everything for new round
     reset: function() {
       this.hideResults();
