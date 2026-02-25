@@ -80,6 +80,8 @@ function initWorld()
 	fosfo1.setFramesToImg('assets/items/1.png', 3, 9);
 	setInterval(interval, 1000 / 60);
 	resize(false);
+	// Initialize touch controls for mobile devices
+	if (typeof TouchControls !== 'undefined') TouchControls.init();
 }
 
 var lastCalledTime;
