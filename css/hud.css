@@ -1,0 +1,514 @@
+/* ─── HUD Styles — Round Timer, Scoreboard, Results Screen ────────────────── */
+/* Design tokens: #252525 (dark bg), #3d3d3d (card bg), #ffd21f (gold accent),
+   #363636 (alt row), Open Sans font stack. Matches existing styles.css patterns. */
+
+/* ═══════════════════════════════════════════════════════════════════════════ */
+/*  ROUND TIMER                                                               */
+/* ═══════════════════════════════════════════════════════════════════════════ */
+
+#round-timer {
+  position: fixed;
+  top: 16px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 100;
+  background: rgba(0, 0, 0, 0.6);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+  border: 1px solid rgba(255, 210, 31, 0.3);
+  border-radius: 12px;
+  padding: 8px 24px;
+  text-align: center;
+  min-width: 120px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.4);
+  animation: hudFadeIn 0.3s ease-out;
+}
+
+.round-timer-text {
+  font-family: 'Courier New', 'Consolas', monospace;
+  font-size: 28px;
+  font-weight: 700;
+  color: #fff;
+  line-height: 1.2;
+  letter-spacing: 2px;
+}
+
+.round-timer-state {
+  font-family: 'Open Sans', Arial, sans-serif;
+  font-size: 14px;
+  color: #ffd21f;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  margin-top: 2px;
+}
+
+/* ─── Timer urgency states ───────────────────────────────────────────────── */
+
+/* Under 30 seconds — red text */
+#round-timer.urgent .round-timer-text {
+  color: #f44336;
+}
+
+#round-timer.urgent {
+  border-color: rgba(244, 67, 54, 0.4);
+}
+
+/* Under 10 seconds — red + pulse animation */
+#round-timer.critical .round-timer-text {
+  color: #f44336;
+  animation: timerPulse 0.6s ease-in-out infinite;
+}
+
+#round-timer.critical {
+  border-color: rgba(244, 67, 54, 0.6);
+  animation: timerBorderPulse 0.6s ease-in-out infinite;
+}
+
+@keyframes timerPulse {
+  0%   { opacity: 1; transform: scale(1); }
+  50%  { opacity: 0.6; transform: scale(1.08); }
+  100% { opacity: 1; transform: scale(1); }
+}
+
+@keyframes timerBorderPulse {
+  0%   { box-shadow: 0 4px 16px rgba(0, 0, 0, 0.4); }
+  50%  { box-shadow: 0 4px 16px rgba(0, 0, 0, 0.4), 0 0 12px rgba(244, 67, 54, 0.3); }
+  100% { box-shadow: 0 4px 16px rgba(0, 0, 0, 0.4); }
+}
+
+/* ─── Waiting state ──────────────────────────────────────────────────────── */
+#round-timer.waiting .round-timer-text {
+  font-size: 16px;
+  font-family: 'Open Sans', Arial, sans-serif;
+  letter-spacing: 0;
+  color: #aaa;
+}
+
+#round-timer.waiting .round-timer-state {
+  color: #ffd21f;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════ */
+/*  HUD SCOREBOARD                                                            */
+/* ═══════════════════════════════════════════════════════════════════════════ */
+
+#hud-scoreboard {
+  position: fixed;
+  top: 16px;
+  right: 16px;
+  z-index: 100;
+  background: rgba(37, 37, 37, 0.85);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+  border: 1px solid #ffd21f;
+  border-radius: 8px;
+  max-width: 200px;
+  min-width: 160px;
+  padding: 8px 0;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.4);
+  animation: hudSlideIn 0.3s ease-out;
+}
+
+.hud-scoreboard-title {
+  font-family: 'Open Sans', Arial, sans-serif;
+  font-size: 11px;
+  font-weight: 600;
+  color: #ffd21f;
+  text-transform: uppercase;
+  letter-spacing: 1.5px;
+  text-align: center;
+  padding: 2px 10px 6px;
+}
+
+/* ─── Scoreboard table ───────────────────────────────────────────────────── */
+
+.hud-scoreboard-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-family: 'Open Sans', Arial, sans-serif;
+  font-size: 11px;
+}
+
+.hud-scoreboard-table thead th {
+  color: #ffd21f;
+  font-weight: 600;
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  padding: 4px 8px;
+  border-bottom: 1px solid #ffd21f;
+  text-align: left;
+}
+
+.hud-scoreboard-table thead th:nth-child(2),
+.hud-scoreboard-table thead th:nth-child(3) {
+  text-align: center;
+  width: 24px;
+}
+
+.hud-scoreboard-table tbody td {
+  color: #fff;
+  font-size: 11px;
+  padding: 3px 8px;
+  line-height: 20px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.hud-scoreboard-table tbody td:nth-child(2),
+.hud-scoreboard-table tbody td:nth-child(3) {
+  text-align: center;
+  font-weight: 600;
+}
+
+/* Kills column — green */
+.hud-scoreboard-table tbody td:nth-child(2) {
+  color: #2c8127;
+}
+
+/* Deaths column — red */
+.hud-scoreboard-table tbody td:nth-child(3) {
+  color: #df6767;
+}
+
+/* Alternating row backgrounds — matches .player-statistics li:nth-child(odd) */
+.hud-scoreboard-table tbody tr:nth-child(odd) {
+  background-color: #363636;
+}
+
+.hud-scoreboard-table tbody tr:nth-child(even) {
+  background-color: transparent;
+}
+
+/* Current player highlight — gold left border */
+.hud-scoreboard-table tbody tr.current-player {
+  border-left: 3px solid #ffd21f;
+}
+
+.hud-scoreboard-table tbody tr.current-player td:first-child {
+  padding-left: 5px;
+  color: #ffd21f;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════ */
+/*  RESULTS SCREEN OVERLAY                                                    */
+/* ═══════════════════════════════════════════════════════════════════════════ */
+
+#results-screen {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: rgba(0, 0, 0, 0.8);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  z-index: 1002;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  animation: hudFadeIn 0.4s ease-out;
+}
+
+.results-container {
+  background: #3d3d3d;
+  border: 2px solid #ffd21f;
+  border-radius: 16px;
+  padding: 30px;
+  max-width: 500px;
+  width: 90%;
+  box-shadow: 0 8px 40px rgba(0, 0, 0, 0.6), 0 0 30px rgba(255, 210, 31, 0.1);
+  animation: resultsSlideUp 0.4s ease-out;
+}
+
+.results-title {
+  font-family: 'Open Sans', Arial, sans-serif;
+  font-size: 32px;
+  font-weight: 700;
+  color: #ffd21f;
+  text-align: center;
+  margin: 0 0 8px;
+  text-shadow: 0 2px 8px rgba(255, 210, 31, 0.3);
+}
+
+.results-winner {
+  font-family: 'Open Sans', Arial, sans-serif;
+  font-size: 20px;
+  font-weight: 600;
+  color: #fff;
+  text-align: center;
+  margin-bottom: 20px;
+  padding-bottom: 16px;
+  border-bottom: 1px solid rgba(255, 210, 31, 0.3);
+}
+
+/* ─── Results table ──────────────────────────────────────────────────────── */
+
+.results-summary {
+  margin-bottom: 16px;
+}
+
+.results-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-family: 'Open Sans', Arial, sans-serif;
+}
+
+.results-table thead th {
+  color: #ffd21f;
+  font-size: 12px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  padding: 8px 10px;
+  border-bottom: 1px solid #ffd21f;
+  text-align: left;
+}
+
+.results-table thead th:first-child {
+  width: 28px;
+  text-align: center;
+}
+
+.results-table thead th:nth-child(3),
+.results-table thead th:nth-child(4) {
+  text-align: center;
+  width: 60px;
+}
+
+.results-table tbody td {
+  color: #fff;
+  font-size: 14px;
+  padding: 8px 10px;
+  line-height: 24px;
+}
+
+.results-table tbody td:first-child {
+  text-align: center;
+  color: #aaa;
+  font-size: 12px;
+}
+
+.results-table tbody td:nth-child(3),
+.results-table tbody td:nth-child(4) {
+  text-align: center;
+  font-weight: 600;
+}
+
+/* Kills — green */
+.results-table tbody td:nth-child(3) {
+  color: #2c8127;
+}
+
+/* Deaths — red */
+.results-table tbody td:nth-child(4) {
+  color: #df6767;
+}
+
+/* Alternating rows — matches existing pattern */
+.results-table tbody tr:nth-child(odd) {
+  background-color: #363636;
+}
+
+.results-table tbody tr:nth-child(even) {
+  background-color: transparent;
+}
+
+/* Winner row highlight */
+.results-table tbody tr.winner-row {
+  background: rgba(255, 210, 31, 0.15) !important;
+}
+
+.results-table tbody tr.winner-row td {
+  color: #ffd21f;
+}
+
+.results-table tbody tr.winner-row td:nth-child(3) {
+  color: #4CAF50;
+}
+
+.results-table tbody tr.winner-row td:nth-child(4) {
+  color: #df6767;
+}
+
+/* ─── Countdown text ─────────────────────────────────────────────────────── */
+
+.results-countdown {
+  font-family: 'Open Sans', Arial, sans-serif;
+  font-size: 14px;
+  color: #888;
+  font-style: italic;
+  text-align: center;
+  margin-top: 4px;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════ */
+/*  KILL FEED ENTRIES (in chat panel)                                         */
+/* ═══════════════════════════════════════════════════════════════════════════ */
+
+.kill-feed-entry {
+  font-family: 'Open Sans', Arial, sans-serif;
+  font-size: 12px;
+  color: #ccc;
+  padding: 2px 8px;
+  border-left: 3px solid #f44336;
+  margin: 2px 0;
+  background: rgba(244, 67, 54, 0.08);
+}
+
+.kill-feed-entry .killer-name {
+  color: #ffd21f;
+  font-weight: 600;
+}
+
+.kill-feed-entry .victim-name {
+  color: #df6767;
+  font-weight: 600;
+}
+
+.kill-feed-entry.self-kill {
+  border-left-color: #ff9800;
+  background: rgba(255, 152, 0, 0.08);
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════ */
+/*  SHARED ANIMATIONS                                                         */
+/* ═══════════════════════════════════════════════════════════════════════════ */
+
+@keyframes hudFadeIn {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+@keyframes hudSlideIn {
+  from {
+    opacity: 0;
+    transform: translateX(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes resultsSlideUp {
+  from {
+    opacity: 0;
+    transform: translateY(30px) scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════ */
+/*  RESPONSIVE                                                                */
+/* ═══════════════════════════════════════════════════════════════════════════ */
+
+@media (max-width: 768px) {
+  #round-timer {
+    top: 8px;
+    padding: 6px 16px;
+    border-radius: 8px;
+  }
+
+  .round-timer-text {
+    font-size: 22px;
+  }
+
+  .round-timer-state {
+    font-size: 12px;
+  }
+
+  #hud-scoreboard {
+    top: 8px;
+    right: 8px;
+    max-width: 160px;
+    min-width: 130px;
+  }
+
+  .hud-scoreboard-title {
+    font-size: 10px;
+  }
+
+  .hud-scoreboard-table {
+    font-size: 10px;
+  }
+
+  .hud-scoreboard-table tbody td {
+    font-size: 10px;
+    padding: 2px 6px;
+    line-height: 18px;
+  }
+
+  .results-container {
+    padding: 20px;
+    border-radius: 12px;
+  }
+
+  .results-title {
+    font-size: 24px;
+  }
+
+  .results-winner {
+    font-size: 16px;
+  }
+
+  .results-table tbody td {
+    font-size: 12px;
+    padding: 6px 8px;
+  }
+}
+
+@media (max-width: 480px) {
+  #round-timer {
+    top: 4px;
+    padding: 4px 12px;
+    min-width: 90px;
+  }
+
+  .round-timer-text {
+    font-size: 18px;
+  }
+
+  #hud-scoreboard {
+    top: auto;
+    bottom: 60px;
+    right: 4px;
+    max-width: 140px;
+    min-width: 110px;
+    font-size: 9px;
+  }
+
+  .results-container {
+    padding: 16px;
+    max-width: 95%;
+  }
+
+  .results-title {
+    font-size: 20px;
+  }
+
+  .results-winner {
+    font-size: 14px;
+    margin-bottom: 12px;
+    padding-bottom: 10px;
+  }
+
+  .results-table thead th {
+    font-size: 10px;
+    padding: 6px;
+  }
+
+  .results-table tbody td {
+    font-size: 11px;
+    padding: 5px 6px;
+    line-height: 20px;
+  }
+
+  .results-countdown {
+    font-size: 12px;
+  }
+}
