@@ -5,6 +5,7 @@ var World = function(data)
 	this.data = [];
 	this.dataimg = [];
 	this.bombs = [];
+	this.items = [];
 	this.players = [];
 	this.dup = [];
 	this.havechange = false;
@@ -233,6 +234,28 @@ var World = function(data)
 			if (value != null)
 				value.update();
 		});
+	};
+
+	this.addItem = function(id, type, cellX, cellY)
+	{
+		// Frame indices from 5x4 items spritesheet (assets/items/1.png)
+		var frameMap = { 'fire': 0, 'bomb': 1, 'boots': 10 };
+		var frameIndex = frameMap[type] !== undefined ? frameMap[type] : 0;
+		fosfo1.drawframe('item' + id, 'assets/items/1.png', frameIndex, cellX * 32, cellY * 32);
+		this.items.push({ id: id, type: type, cellX: cellX, cellY: cellY });
+	};
+
+	this.removeItem = function(id)
+	{
+		for (var i = 0; i < this.items.length; i++)
+		{
+			if (this.items[i].id === id)
+			{
+				fosfo1.undraw('item' + id);
+				this.items.splice(i, 1);
+				return;
+			}
+		}
 	};
 
 	this.createWorld = function(data)

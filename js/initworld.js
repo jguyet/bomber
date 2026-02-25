@@ -61,8 +61,8 @@ function preload()
 
 	fosfo0.loadimage(['assets/maps/1.png']).done(function() {
 		setLoadingProgress('Loading map…', 33);
-		fosfo1.loadimage(['assets/bombs/1.png', 'assets/bombs/explode/1.png']).done(function() {
-			setLoadingProgress('Loading bombs…', 66);
+		fosfo1.loadimage(['assets/bombs/1.png', 'assets/bombs/explode/1.png', 'assets/items/1.png']).done(function() {
+			setLoadingProgress('Loading assets…', 66);
 			// Assets loaded — show lobby instead of connecting immediately
 			showLobby();
 		});
@@ -84,6 +84,7 @@ function initWorld()
 	fosfo0.setFramesToImg('assets/maps/1.png', 8, 24);
 	fosfo1.setFramesToImg('assets/bombs/1.png', 1, 9);
 	fosfo1.setFramesToImg('assets/bombs/explode/1.png', 4, 2);
+	fosfo1.setFramesToImg('assets/items/1.png', 5, 4);
 	function loop() {
 		interval();
 		requestAnimationFrame(loop);
