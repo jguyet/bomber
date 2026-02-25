@@ -36,6 +36,10 @@ const PLAYER_SPEED = 1.5;
 const BOMB_RANGE = 4;
 const BOMB_TIMER_MS = 3000;
 const CHAIN_EXPLOSION_DELAY_MS = 350; // delay between chained bomb explosions (ms)
+// Player hitbox: (x, y) is the top-left corner of the hitbox.
+// The hitbox must be smaller than TILE_SIZE to fit through 1-tile corridors.
+const PLAYER_W = 28;  // hitbox width  (centered in 32px tile → 2px padding each side)
+const PLAYER_H = 28;  // hitbox height
 // Direction bitmasks (same as Java BinaryDirection enum)
 const DIR = {
   up:    4,
@@ -256,15 +260,16 @@ class Player {
   }
 
   getCurCell() {
-    const { wx, wy } = wrapCoord(this.x + 10, this.y + 10);
-    return getCellPos(wx, wy);
+    return getCellPos(this.x + PLAYER_W / 2, this.y + PLAYER_H / 2);
   }
 
-  getPossibleCell(dx, dy) {
-    const nx = this.x + 10 + dx;
-    const ny = this.y + 10 + dy;
-    // No hard boundary check — getCellPos wraps internally to support dup navigation
-    return getCellPos(nx, ny);
+  // Check if both corner points of a hitbox edge are in walkable cells
+  _canMove(x1, y1, x2, y2) {
+    const c1 = getCellPos(x1, y1);
+    const c2 = getCellPos(x2, y2);
+    if (!c1 || !c1.isWalkableCheckBomb(this)) return false;
+    if (!c2 || !c2.isWalkableCheckBomb(this)) return false;
+    return true;
   }
 
   move(io) {
@@ -272,8 +277,8 @@ class Player {
     const speed = PLAYER_SPEED;
 
     if ((this.dir & DIR.up) !== 0) {
-      const c = this.getPossibleCell(0, -speed);
-      if (c === null || !c.isWalkableCheckBomb(this)) {
+      const edgeY = this.y - speed;
+      if (!this._canMove(this.x + 1, edgeY, this.x + PLAYER_W - 1, edgeY)) {
         this._forceKeyUp('KU38', io);
         this._forceKeyUp('KU87', io);
       } else {
@@ -281,8 +286,8 @@ class Player {
       }
     }
     if ((this.dir & DIR.down) !== 0) {
-      const c = this.getPossibleCell(0, speed + 2);
-      if (c === null || !c.isWalkableCheckBomb(this)) {
+      const edgeY = this.y + PLAYER_H + speed;
+      if (!this._canMove(this.x + 1, edgeY, this.x + PLAYER_W - 1, edgeY)) {
         this._forceKeyUp('KU40', io);
         this._forceKeyUp('KU83', io);
       } else {
@@ -290,8 +295,8 @@ class Player {
       }
     }
     if ((this.dir & DIR.left) !== 0) {
-      const c = this.getPossibleCell(-speed, 0);
-      if (c === null || !c.isWalkableCheckBomb(this)) {
+      const edgeX = this.x - speed;
+      if (!this._canMove(edgeX, this.y + 1, edgeX, this.y + PLAYER_H - 1)) {
         this._forceKeyUp('KU37', io);
         this._forceKeyUp('KU65', io);
       } else {
@@ -299,8 +304,8 @@ class Player {
       }
     }
     if ((this.dir & DIR.right) !== 0) {
-      const c = this.getPossibleCell(speed + 12, 0);
-      if (c === null || !c.isWalkableCheckBomb(this)) {
+      const edgeX = this.x + PLAYER_W + speed;
+      if (!this._canMove(edgeX, this.y + 1, edgeX, this.y + PLAYER_H - 1)) {
         this._forceKeyUp('KU39', io);
         this._forceKeyUp('KU68', io);
       } else {
@@ -315,8 +320,8 @@ class Player {
 
   die(io) {
     const spawnCell = getRandomWalkableCellStart();
-    this.x = (spawnCell.x * TILE_SIZE) - 5;
-    this.y = (spawnCell.y * TILE_SIZE) + 10;
+    this.x = spawnCell.x * TILE_SIZE + (TILE_SIZE - PLAYER_W) / 2;
+    this.y = spawnCell.y * TILE_SIZE + (TILE_SIZE - PLAYER_H) / 2;
     this.olddir = 0;
     // Broadcast new position — PS (stopped) since player is teleported, not moving
     broadcast(io, `PS${this.id}|${Math.round(this.x)}|${Math.round(this.y)}|${this.getClientDirection()}|${this.skin}|0`);
@@ -567,8 +572,8 @@ io.on('connection', (socket) => {
 
   // Spawn player at a valid start cell
   const spawnCell = getRandomWalkableCellStart();
-  const px = (spawnCell.x * TILE_SIZE) - 5;
-  const py = (spawnCell.y * TILE_SIZE) + 10;
+  const px = spawnCell.x * TILE_SIZE + (TILE_SIZE - PLAYER_W) / 2;
+  const py = spawnCell.y * TILE_SIZE + (TILE_SIZE - PLAYER_H) / 2;
 
   const playerId = nextPlayerId++;
   const player = new Player(playerId, px, py, 1, socket.id);

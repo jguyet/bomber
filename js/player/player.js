@@ -41,7 +41,13 @@ var Player = function(id, x, y)
 	this.print = function()
 	{
 		fosfo1.undraw('player' + this.id);
-		fosfo1.drawframe("player" + this.id, 'assets/characters/' + this.skin + '.png', this.currentanim.frames[this.currentanimid], this.x, this.y - (this.img.height - 20));
+		// Sprite (42x42) centered on hitbox (28x28): offset = (28-42)/2 = -7
+		// Vertically: align sprite bottom with hitbox bottom: offset = 28-42 = -14
+		var frameW = this.img.image.width / this.img.fw;
+		var frameH = this.img.image.height / this.img.fh;
+		var offsetX = (28 - frameW) / 2;   // -7 for 42px sprite
+		var offsetY = 28 - frameH;         // -14 for 42px sprite (feet at hitbox bottom)
+		fosfo1.drawframe("player" + this.id, 'assets/characters/' + this.skin + '.png', this.currentanim.frames[this.currentanimid], this.x + offsetX, this.y + offsetY);
 	}
 	
 	this.move = function()

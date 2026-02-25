@@ -49,34 +49,26 @@ var World = function(data)
 	this.loadWorld = function()
 	{
 		fosfo0.clear();
-		var county = 0;
-		var countx = 0;
-		var y = 0;
-		var x = 0;
-
-		var canvasW = layer0.width;
-		var canvasH = layer0.height;
+		var mapW = parseInt(this.width);
+		var mapH = parseInt(this.height);
 
 		// Build initial dup using camera at 0,0
-		this.updateDup(0, 0, canvasW, canvasH);
+		this.updateDup(0, 0, layer0.width, layer0.height);
 
-		while (county < canvasH)
+		// Create tiles for the ENTIRE map, not just the canvas viewport.
+		// Tile positions are in world coordinates; fosfo0.x/y (camera offset)
+		// handles scrolling them into view.
+		for (var y = 0; y < mapH; y++)
 		{
-			countx = 0;
-			x = 0;
 			var tmp = [];
-			while (countx < canvasW)
+			for (var x = 0; x < mapW; x++)
 			{
-				var c = this.data[y % this.height][x % this.width];
+				var c = this.data[y][x];
 				var id = c.split(",")[0];
 				var ground = c.split(",")[1];
-				tmp.push(fosfo0.drawframe("case" + id, 'assets/maps/1.png', ground, countx, county));
-				countx += 32;
-				x++;
+				tmp.push(fosfo0.drawframe("case" + id, 'assets/maps/1.png', ground, x * 32, y * 32));
 			}
 			this.dataimg[y] = tmp;
-			y++;
-			county += 32;
 		}
 		fosfo0.update(this.dup);
 	};
@@ -84,26 +76,18 @@ var World = function(data)
 	this.printWorld = function()
 	{
 		fosfo0.clear();
-		var county = 0;
-		var countx = 0;
-		var y = 0;
-		var x = 0;
-		while (county < layer0.height)
+		var mapW = parseInt(this.width);
+		var mapH = parseInt(this.height);
+		for (var y = 0; y < mapH; y++)
 		{
-			countx = 0;
-			x = 0;
-			while (countx < layer0.width)
+			for (var x = 0; x < mapW; x++)
 			{
 				if (this.dataimg[y] != null && this.dataimg[y][x] != null)
 				{
 					var img = this.dataimg[y][x];
-					this.dataimg[y][x] = fosfo0.drawframe(img.name, 'assets/maps/1.png', img.id, countx, county);
+					this.dataimg[y][x] = fosfo0.drawframe(img.name, 'assets/maps/1.png', img.id, x * 32, y * 32);
 				}
-				countx += 32;
-				x++;
 			}
-			y++;
-			county += 32;
 		}
 		fosfo0.update(this.dup);
 	};

@@ -67,11 +67,9 @@ var interval = function()
 		// Recompute dup offsets relative to current camera position each frame
 		world.updateDup(cameraX, cameraY, layer0.width, layer0.height);
 		dup = world.dup;
-		if (world.havechange)
-		{
-			fosfo0.update(dup);
-			world.havechange = false;
-		}
+		// Always redraw layer0: camera offset changes every frame
+		fosfo0.update(dup);
+		world.havechange = false;
 	}
 	updatelayer1();
 	fosfo1.update(dup);

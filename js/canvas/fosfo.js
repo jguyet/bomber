@@ -145,7 +145,8 @@ var fosfo = function(canvas)
 					_.forEach([[0, 0]].concat(dup), function(duplicat) {
 						var dx = duplicat[0] + tmp.x + value.x;
 						var dy = duplicat[1] + tmp.y + value.y;
-						if (dx < -32 || dy < -32)
+						if (dx < -value.width || dy < -value.height
+							|| dx > tmp.canvas.width || dy > tmp.canvas.height)
 							return ;
 						tmp.ctx.drawImage(value.image, value.sx, value.sy, value.sLargeur,
 							value.sHauteur, dx, dy, value.width, value.height);
