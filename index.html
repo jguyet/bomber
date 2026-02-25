@@ -26,6 +26,7 @@
     <link rel="stylesheet" href="./css/normalize-2.1.0.css">
     <link rel="stylesheet" href="./css/styles.css">
     <link rel="stylesheet" href="./css/lobby.css">
+    <link rel="stylesheet" href="./css/loading.css">
 
 	<!--JS---------------------------------->
 	<script src="//ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
@@ -39,6 +40,7 @@
 	<script src="./js/aks.js"></script>
 	<script src="./js/chat.js"></script>
 	<script src="./js/events.js"></script>
+	<script src="./js/loading.js"></script>
 	<script src="./js/initworld.js"></script>
 	<script src="./js/lobby.js"></script>
 	<!-------------------------------------->
@@ -61,6 +63,18 @@
 				</div>
 			</div>
 			<button id="play-btn" class="play-btn" disabled>PLAY</button>
+		</div>
+	</div>
+
+	<!-- Loading Screen -->
+	<div id="loading-screen" style="display:none;">
+		<div class="loading-container">
+			<h2 class="loading-title">Loading Game...</h2>
+			<div class="loading-bar-outer">
+				<div class="loading-bar-inner" id="loading-bar"></div>
+			</div>
+			<div class="loading-status" id="loading-status">Preparing...</div>
+			<div class="loading-detail" id="loading-detail"></div>
 		</div>
 	</div>
 
