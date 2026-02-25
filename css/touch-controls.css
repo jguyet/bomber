@@ -15,6 +15,9 @@
   height: 100%;
   z-index: 1000;
   pointer-events: none;
+  touch-action: manipulation;
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+  box-sizing: border-box;
 }
 
 /* ═══════════════════════════════════════════════════════════════════════════ */
@@ -24,7 +27,7 @@
 .touch-dpad {
   position: fixed;
   left: 20px;
-  bottom: 20px;
+  bottom: calc(20px + env(safe-area-inset-bottom, 0px));
   width: 150px;
   height: 150px;
   display: grid;
@@ -152,7 +155,7 @@
 .touch-bomb {
   position: fixed;
   right: 30px;
-  bottom: 40px;
+  bottom: calc(40px + env(safe-area-inset-bottom, 0px));
   width: 70px;
   height: 70px;
   border-radius: 50%;
@@ -226,7 +229,7 @@
 @media (max-width: 400px) {
   .touch-dpad {
     left: 12px;
-    bottom: 12px;
+    bottom: calc(12px + env(safe-area-inset-bottom, 0px));
     width: 126px;
     height: 126px;
     grid-template-columns: repeat(3, 42px);
@@ -269,9 +272,131 @@
 
   .touch-bomb {
     right: 16px;
-    bottom: 24px;
+    bottom: calc(24px + env(safe-area-inset-bottom, 0px));
     width: 58px;
     height: 58px;
     font-size: 24px;
+  }
+}
+
+/* ─── Very small phones (< 375px) — scaled down to avoid overlap ────────── */
+@media (max-width: 375px) {
+  .touch-dpad {
+    transform: scale(0.75);
+    transform-origin: bottom left;
+  }
+
+  .touch-bomb {
+    transform: scale(0.75);
+    transform-origin: bottom right;
+  }
+}
+
+/* ─── Landscape orientation on phones — reduce vertical footprint ────────── */
+@media (max-height: 400px) and (orientation: landscape) {
+  .touch-dpad {
+    bottom: calc(8px + env(safe-area-inset-bottom, 0px));
+    left: 12px;
+    width: 120px;
+    height: 120px;
+    grid-template-columns: repeat(3, 40px);
+    grid-template-rows: repeat(3, 40px);
+  }
+
+  .dpad-up,
+  .dpad-down,
+  .dpad-left,
+  .dpad-right {
+    width: 40px;
+    height: 40px;
+    font-size: 14px;
+    border-radius: 6px;
+  }
+
+  .dpad-up::after {
+    border-left-width: 5px;
+    border-right-width: 5px;
+    border-bottom-width: 7px;
+  }
+
+  .dpad-down::after {
+    border-left-width: 5px;
+    border-right-width: 5px;
+    border-top-width: 7px;
+  }
+
+  .dpad-left::after {
+    border-top-width: 5px;
+    border-bottom-width: 5px;
+    border-right-width: 7px;
+  }
+
+  .dpad-right::after {
+    border-top-width: 5px;
+    border-bottom-width: 5px;
+    border-left-width: 7px;
+  }
+
+  .touch-bomb {
+    right: 16px;
+    bottom: calc(12px + env(safe-area-inset-bottom, 0px));
+    width: 56px;
+    height: 56px;
+    font-size: 22px;
+  }
+}
+
+/* ─── Tablets (touch + large screen) — larger controls for bigger display ── */
+@media (min-width: 768px) and (max-width: 1023px) and (pointer: coarse) {
+  .touch-dpad {
+    left: 28px;
+    bottom: calc(28px + env(safe-area-inset-bottom, 0px));
+    width: 186px;
+    height: 186px;
+    grid-template-columns: repeat(3, 62px);
+    grid-template-rows: repeat(3, 62px);
+  }
+
+  .dpad-up,
+  .dpad-down,
+  .dpad-left,
+  .dpad-right {
+    width: 62px;
+    height: 62px;
+    font-size: 24px;
+    border-radius: 10px;
+  }
+
+  .dpad-up::after {
+    border-left-width: 10px;
+    border-right-width: 10px;
+    border-bottom-width: 12px;
+  }
+
+  .dpad-down::after {
+    border-left-width: 10px;
+    border-right-width: 10px;
+    border-top-width: 12px;
+  }
+
+  .dpad-left::after {
+    border-top-width: 10px;
+    border-bottom-width: 10px;
+    border-right-width: 12px;
+  }
+
+  .dpad-right::after {
+    border-top-width: 10px;
+    border-bottom-width: 10px;
+    border-left-width: 12px;
+  }
+
+  .touch-bomb {
+    right: 36px;
+    bottom: calc(48px + env(safe-area-inset-bottom, 0px));
+    width: 86px;
+    height: 86px;
+    font-size: 34px;
+    border-width: 3px;
   }
 }
