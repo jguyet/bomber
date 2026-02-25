@@ -9795,3 +9795,201 @@ body {
   z-index: 1000;
   color: #fff;
 }
+
+/* ============================================================
+   Sprint 6 — Lobby, Skin Picker, Loading & Disconnect Overlays
+   ============================================================ */
+
+/* --- Lobby Screen --- */
+#lobby-screen {
+  position: fixed;
+  inset: 0;
+  z-index: 9000;
+  background: rgba(0, 0, 0, 0.92);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: 'Open Sans', Arial, sans-serif;
+}
+
+#lobby-box {
+  background: #111;
+  border: 1px solid #333;
+  border-radius: 8px;
+  padding: 32px;
+  min-width: 360px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+#lobby-box h1 {
+  font-family: 'Courier New', 'Courier', monospace;
+  font-size: 2.4rem;
+  font-weight: bold;
+  color: #FFD700;
+  text-align: center;
+  margin: 0 0 8px 0;
+  letter-spacing: 4px;
+}
+
+#nickname-input {
+  width: 100%;
+  background: #1a1a1a;
+  border: 1px solid #444;
+  color: #eee;
+  padding: 10px;
+  border-radius: 4px;
+  font-size: 1rem;
+  font-family: 'Open Sans', Arial, sans-serif;
+  box-sizing: border-box;
+  outline: none;
+  transition: border-color 0.2s;
+}
+
+#nickname-input:focus {
+  border-color: #FFD700;
+}
+
+#nickname-input::placeholder {
+  color: #555;
+}
+
+#play-btn {
+  width: 100%;
+  background: #FFD700;
+  color: #111;
+  font-weight: bold;
+  font-size: 1.1rem;
+  padding: 12px;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-family: 'Open Sans', Arial, sans-serif;
+  letter-spacing: 1px;
+  transition: background 0.15s;
+}
+
+#play-btn:hover {
+  background: #e6c200;
+}
+
+/* --- Skin Grid --- */
+#skin-grid {
+  display: grid;
+  grid-template-columns: repeat(6, 42px);
+  gap: 6px;
+  margin: 16px 0;
+  justify-content: center;
+}
+
+.skin-thumb {
+  width: 42px;
+  height: 42px;
+  cursor: pointer;
+  border: 2px solid transparent;
+  border-radius: 4px;
+  image-rendering: pixelated;
+  transition: border-color 0.15s;
+  box-sizing: border-box;
+}
+
+.skin-thumb.selected {
+  border-color: #FFD700;
+}
+
+.skin-thumb:hover {
+  border-color: #888;
+}
+
+/* --- Loading Overlay --- */
+#loading-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 8000;
+  background: #000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  font-family: 'Open Sans', Arial, sans-serif;
+}
+
+#loading-box {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+}
+
+#loading-label {
+  color: #eee;
+  margin-bottom: 12px;
+  font-size: 1rem;
+}
+
+#loading-bar-track {
+  width: 300px;
+  height: 10px;
+  background: #222;
+  border-radius: 5px;
+  overflow: hidden;
+}
+
+#loading-bar-fill {
+  height: 100%;
+  background: #FFD700;
+  width: 0%;
+  transition: width 0.3s ease;
+  border-radius: 5px;
+}
+
+/* --- Disconnect Overlay --- */
+#disconnect-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 7000;
+  background: rgba(0, 0, 0, 0.8);
+  display: none;
+  align-items: center;
+  justify-content: center;
+  font-family: 'Open Sans', Arial, sans-serif;
+}
+
+#disconnect-overlay.visible {
+  display: flex;
+}
+
+#disconnect-box {
+  background: #1a1a1a;
+  border: 1px solid #c0392b;
+  border-radius: 8px;
+  padding: 24px 32px;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+}
+
+#disconnect-msg {
+  color: #e74c3c;
+  font-size: 1rem;
+  margin-bottom: 12px;
+}
+
+#refresh-btn {
+  background: #c0392b;
+  color: #fff;
+  border: none;
+  padding: 8px 20px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-family: 'Open Sans', Arial, sans-serif;
+  font-size: 0.95rem;
+  transition: background 0.15s;
+}
+
+#refresh-btn:hover {
+  background: #a93226;
+}
