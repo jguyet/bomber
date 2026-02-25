@@ -34,6 +34,7 @@ const roundState = {
   startTime: 0,
   roundNumber: 0,
   timeInterval: null, // interval for broadcasting time remaining
+  lastResults: null,  // cached RE message for late joiners
 };
 
 // ─── World State ─────────────────────────────────────────────────────────────
@@ -566,6 +567,7 @@ function endRound(winnerId, winnerNickname) {
     playerResults.push(p.id + '|' + p.nickname + '|' + (p.kills || 0) + '|' + (p.deaths || 0));
   }
   const resultsStr = 'RE' + (winnerId || '') + '|' + (winnerNickname || '') + '|' + playerResults.join(';');
+  roundState.lastResults = resultsStr; // cache for late joiners
   broadcastAll(resultsStr);
 
   // Broadcast ended state
@@ -898,9 +900,21 @@ function handleWorldEntities(player, ws) {
     : 0;
   sendTo(ws, 'RS' + roundState.state + '|' + timeRemaining);
 
-  // Auto-start round if enough players and currently waiting
+  // Send current scoreboard
+  broadcastScoreboard();
+
+  // If round is ended, send cached results screen data
+  if (roundState.state === 'ended' && roundState.lastResults) {
+    sendTo(ws, roundState.lastResults);
+  }
+
+  // Auto-start round if enough players and currently waiting (3s delay for client to load)
   if (roundState.state === 'waiting' && players.size >= MIN_PLAYERS_TO_START) {
-    startRound();
+    setTimeout(() => {
+      if (roundState.state === 'waiting' && players.size >= MIN_PLAYERS_TO_START) {
+        startRound();
+      }
+    }, 3000);
   }
 }
 
