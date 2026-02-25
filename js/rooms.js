@@ -140,12 +140,6 @@ var RoomUI = (function() {
     }
   }
 
-  function escapeHtml(text) {
-    var div = document.createElement('div');
-    div.appendChild(document.createTextNode(text));
-    return div.innerHTML;
-  }
-
   function joinRoom(roomId) {
     currentRoomId = roomId;
     stopAutoRefresh();

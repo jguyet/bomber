@@ -2,12 +2,6 @@
 var CHAT_MAX_MESSAGES = 100;
 var chatAutoScroll = true;
 
-function escapeHtml(str) {
-	var div = document.createElement('div');
-	div.textContent = str;
-	return div.innerHTML;
-}
-
 var current_line = "";
 
 var onchatpress = function(event)

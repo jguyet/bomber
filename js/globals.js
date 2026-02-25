@@ -56,3 +56,10 @@ var THEME_TILESETS = {
   'winter': 'assets/maps/1-winter.png',
   'moon': 'assets/maps/tileset-moon.png'
 };
+
+// ─── Global Utilities ───────────────────────────────────────────────────────
+function escapeHtml(str) {
+  var div = document.createElement('div');
+  div.textContent = str;
+  return div.innerHTML;
+}
