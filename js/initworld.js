@@ -1,11 +1,5 @@
-function preload()
-{
-	// Show loading screen
-	LoadingManager.show();
-	// Total assets: map sprite (1) + bomb sprite (1) + explosion sprite (1) + item sprite (1) + connecting (1) + world init (1) = 6
-	LoadingManager.setTotal(6);
-
-	//Canvas------------------------------------------//
+// Initialize canvas engines (fosfo0/fosfo1) without loading images or connecting
+function initCanvas() {
 	layer0 = document.getElementById("layer0");
 	layer1 = document.getElementById("layer1");
 	ctx0 = layer0.getContext("2d");
@@ -16,7 +10,10 @@ function preload()
 	fosfo0.y = 32;
 	fosfo1.x = (window.innerWidth - (40 * 32)) / 2;
 	fosfo1.y = 32;
-	// Use theme-aware tileset path
+}
+
+// Load tileset and entity images, then call onReady callback
+function loadGameAssets(onReady) {
 	var tilesetPath = THEME_TILESETS[currentTheme] || THEME_TILESETS['default'];
 	fosfo0.loadimage([tilesetPath]).done(function() {
 		LoadingManager.assetLoaded(tilesetPath);
@@ -24,9 +21,25 @@ function preload()
 			LoadingManager.assetLoaded('assets/bombs/1.png');
 			LoadingManager.assetLoaded('assets/bombs/explode/1.png');
 			LoadingManager.assetLoaded('assets/items/1.png');
-			LoadingManager.setStatus('Connecting to server...');
-			InitializeSocket();
+			if (onReady) onReady();
 		});
+	});
+}
+
+function preload()
+{
+	// Show loading screen
+	LoadingManager.show();
+	// Total assets: map sprite (1) + bomb sprite (1) + explosion sprite (1) + item sprite (1) + connecting (1) + world init (1) = 6
+	LoadingManager.setTotal(6);
+
+	// Initialize canvas engines
+	initCanvas();
+
+	// Load game assets then connect
+	loadGameAssets(function() {
+		LoadingManager.setStatus('Connecting to server...');
+		InitializeSocket();
 	});
 }
 function initWorld()

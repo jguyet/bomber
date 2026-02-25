@@ -360,9 +360,18 @@ function InitializeSocket()
 		if (typeof HUD !== 'undefined' && HUD.setRoomInfo) {
 			HUD.setRoomInfo(currentRoomName || '', currentTheme || 'default');
 		}
-		// Request world load
-		sendSocketMessage('WL');
-		initWorld();
+		// Initialize canvas engines if not already done
+		if (typeof fosfo0 === 'undefined' || !fosfo0) {
+			initCanvas();
+		}
+		// Show loading screen and load assets, then request world data
+		LoadingManager.show();
+		LoadingManager.setTotal(6);
+		loadGameAssets(function() {
+			LoadingManager.setStatus('Loading world...');
+			sendSocketMessage('WL');
+			initWorld();
+		});
 	});
 
 	socket.on('error', function(msg) {
