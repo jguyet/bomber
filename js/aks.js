@@ -394,7 +394,7 @@ function InitializeSocket()
 		}
 		// Show loading screen and load assets, then request world data
 		LoadingManager.show();
-		LoadingManager.setTotal(6);
+		LoadingManager.setTotal(7);
 		loadGameAssets(function() {
 			LoadingManager.setStatus('Loading world...');
 			sendSocketMessage('WL');

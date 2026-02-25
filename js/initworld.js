@@ -37,7 +37,12 @@ function loadGameAssets(onReady) {
 			LoadingManager.assetLoaded('assets/bombs/1.png');
 			LoadingManager.assetLoaded('assets/bombs/explode/1.png');
 			LoadingManager.assetLoaded('assets/items/1.png');
-			if (onReady) onReady();
+			// Pre-load current player's character skin sprite
+			var skinPath = 'assets/characters/' + (playerSkinId || 0) + '.png';
+			fosfo1.loadimage([skinPath]).done(function() {
+				LoadingManager.assetLoaded(skinPath);
+				if (onReady) onReady();
+			});
 		});
 	});
 }
@@ -46,8 +51,8 @@ function preload()
 {
 	// Show loading screen
 	LoadingManager.show();
-	// Total assets: map sprite (1) + bomb sprite (1) + explosion sprite (1) + item sprite (1) + connecting (1) + world init (1) = 6
-	LoadingManager.setTotal(6);
+	// Total assets: map sprite (1) + bomb sprite (1) + explosion sprite (1) + item sprite (1) + character skin (1) + connecting (1) + world init (1) = 7
+	LoadingManager.setTotal(7);
 
 	// Initialize canvas engines
 	initCanvas();
