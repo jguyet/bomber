@@ -24,6 +24,10 @@ npm-debug.log*
 # Database (runtime data)
 .db/
 
+# Worktrees & Taskforce
+.worktrees/
+.taskforce/
+
 # Docker
 docker-compose.override.yml
 
