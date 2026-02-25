@@ -16,8 +16,10 @@ function preload()
 	fosfo0.y = 32;
 	fosfo1.x = (window.innerWidth - (40 * 32)) / 2;
 	fosfo1.y = 32;
-	fosfo0.loadimage(['assets/maps/1.png']).done(function() {
-		LoadingManager.assetLoaded('assets/maps/1.png');
+	// Use theme-aware tileset path
+	var tilesetPath = THEME_TILESETS[currentTheme] || THEME_TILESETS['default'];
+	fosfo0.loadimage([tilesetPath]).done(function() {
+		LoadingManager.assetLoaded(tilesetPath);
 		fosfo1.loadimage(['assets/bombs/1.png', 'assets/bombs/explode/1.png', 'assets/items/1.png']).done(function() {
 			LoadingManager.assetLoaded('assets/bombs/1.png');
 			LoadingManager.assetLoaded('assets/bombs/explode/1.png');
@@ -40,7 +42,8 @@ function initWorld()
 	document.addEventListener('mousewheel', onrool, false);
 	window.addEventListener( 'resize', onWindowResize, false );
 	console.log("START");
-	fosfo0.setFramesToImg('assets/maps/1.png', 8, 24);
+	var tilesetPath = THEME_TILESETS[currentTheme] || THEME_TILESETS['default'];
+	fosfo0.setFramesToImg(tilesetPath, 8, 24);
 	fosfo1.setFramesToImg('assets/bombs/1.png', 1, 9);
 	fosfo1.setFramesToImg('assets/bombs/explode/1.png', 4, 2);
 	fosfo1.setFramesToImg('assets/items/1.png', 3, 9);
