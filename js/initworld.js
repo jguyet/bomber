@@ -40,19 +40,13 @@ function initWorld()
 
 var interval = function()
 {
-	// Camera: follow currentPlayer, clamp to map bounds
+	// Camera: follow currentPlayer, no clamping (map wraps via dup)
 	if (currentPlayer != null) {
-		var targetCamX = currentPlayer.x - (layer0.width / 2);
-		var targetCamY = currentPlayer.y - (layer0.height / 2);
-		// Clamp so camera doesn't scroll past map edges
-		cameraX = Math.max(0, Math.min(MAP_WIDTH_PX - layer0.width, targetCamX));
-		cameraY = Math.max(0, Math.min(MAP_HEIGHT_PX - layer0.height, targetCamY));
-		// When map is smaller than canvas, center it instead of clamping
-		if (MAP_WIDTH_PX <= layer0.width)  cameraX = -(layer0.width - MAP_WIDTH_PX) / 2;
-		if (MAP_HEIGHT_PX <= layer0.height) cameraY = -(layer0.height - MAP_HEIGHT_PX) / 2;
+		cameraX = currentPlayer.x - (layer0.width / 2);
+		cameraY = currentPlayer.y - (layer0.height / 2);
 		// Apply camera to both layers (fosfo uses .x/.y as draw offset)
 		fosfo0.x = -cameraX;
-		fosfo0.y = -cameraY + 32; // keep the +32 y offset from original preload
+		fosfo0.y = -cameraY + 32;
 		fosfo1.x = -cameraX;
 		fosfo1.y = -cameraY + 32;
 	}

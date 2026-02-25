@@ -34,16 +34,19 @@ var World = function(data)
 		var mapW = this.width * 32;
 		var mapH = this.height * 32;
 		this.dup = [];
-		// Only tile if map is smaller than canvas
-		if (mapW < canvasW || mapH < canvasH) {
-			for (var ox = 0; ox < canvasW + mapW; ox += mapW) {
-				for (var oy = 0; oy < canvasH + mapH; oy += mapH) {
-					if (ox !== 0 || oy !== 0)
-						this.dup.push([ox, oy]);
-				}
+		// Compute which map copies are needed to fill the entire screen.
+		// Screen position = -camX + tileX + n*mapW (fosfo0.x = -camX).
+		// We need n such that at least one tile in the copy is visible.
+		var nXmin = Math.floor(camX / mapW);
+		var nXmax = Math.floor((camX + canvasW) / mapW);
+		var nYmin = Math.floor((camY - 32) / mapH);
+		var nYmax = Math.floor((camY - 32 + canvasH) / mapH);
+		for (var nx = nXmin; nx <= nXmax; nx++) {
+			for (var ny = nYmin; ny <= nYmax; ny++) {
+				if (nx === 0 && ny === 0) continue;
+				this.dup.push([nx * mapW, ny * mapH]);
 			}
 		}
-		// else: map is bigger than canvas, no duplication needed
 	};
 
 	this.loadWorld = function()
