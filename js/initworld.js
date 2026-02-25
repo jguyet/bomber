@@ -1,3 +1,19 @@
+// Rounded rectangle helper with fallback for older browsers
+function drawRoundRect(ctx, x, y, w, h, r) {
+	if (ctx.roundRect) { ctx.beginPath(); ctx.roundRect(x, y, w, h, r); ctx.fill(); return; }
+	ctx.beginPath();
+	ctx.moveTo(x + r, y);
+	ctx.lineTo(x + w - r, y);
+	ctx.arcTo(x + w, y, x + w, y + r, r);
+	ctx.lineTo(x + w, y + h - r);
+	ctx.arcTo(x + w, y + h, x + w - r, y + h, r);
+	ctx.lineTo(x + r, y + h);
+	ctx.arcTo(x, y + h, x, y + h - r, r);
+	ctx.lineTo(x, y + r);
+	ctx.arcTo(x, y, x + r, y, r);
+	ctx.fill();
+}
+
 // Initialize canvas engines (fosfo0/fosfo1) without loading images or connecting
 function initCanvas() {
 	layer0 = document.getElementById("layer0");
@@ -110,14 +126,23 @@ var interval = function()
 		ctx.save();
 		ctx.font = "bold 11px Arial";
 		ctx.textAlign = "center";
+		var badgePadding = 3;
+		var badgeHeight = 14;
 		for (var i = 0; i < world.players.length; i++) {
 			var p = world.players[i];
 			if (p == null || p.img == null) continue;
 			var px = (p.x % (world.width * 32)) + fosfo1.x + 16;
 			var py = (p.y % (world.height * 32)) - (p.img.height - 20) + fosfo1.y - 4;
-			// Draw text shadow
-			ctx.fillStyle = "rgba(0,0,0,0.7)";
-			ctx.fillText(p.nickname, px + 1, py + 1);
+			var textWidth = ctx.measureText(p.nickname).width;
+			var isCurrentPlayer = (typeof currentPlayer !== 'undefined' && currentPlayer && p.id === currentPlayer.id);
+			var badgeBg = isCurrentPlayer ? "rgba(0, 100, 200, 0.6)" : "rgba(0, 0, 0, 0.55)";
+			// Draw badge background
+			var bx = px - textWidth / 2 - badgePadding;
+			var by = py - badgeHeight + 2;
+			var bw = textWidth + badgePadding * 2;
+			var bh = badgeHeight;
+			ctx.fillStyle = badgeBg;
+			drawRoundRect(ctx, bx, by, bw, bh, 3);
 			// Draw text
 			ctx.fillStyle = "#ffffff";
 			ctx.fillText(p.nickname, px, py);
@@ -125,8 +150,10 @@ var interval = function()
 			for (var d = 0; d < dup.length; d++) {
 				var dpx = px + dup[d][0];
 				var dpy = py + dup[d][1];
-				ctx.fillStyle = "rgba(0,0,0,0.7)";
-				ctx.fillText(p.nickname, dpx + 1, dpy + 1);
+				// Badge for duplicate
+				ctx.fillStyle = badgeBg;
+				drawRoundRect(ctx, dpx - textWidth / 2 - badgePadding, dpy - badgeHeight + 2, bw, bh, 3);
+				// Text for duplicate
 				ctx.fillStyle = "#ffffff";
 				ctx.fillText(p.nickname, dpx, dpy);
 			}
