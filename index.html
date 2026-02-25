@@ -1,0 +1,125 @@
+<!doctype html>
+<html class=""><head>
+    <title>Bomber — Multiplayer Bomberman</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Bomber — a free multiplayer Bomberman game. Play online in your browser with friends.">
+    <meta property="og:title" content="Bomber — Multiplayer Bomberman">
+    <meta property="og:description" content="Play free multiplayer Bomberman in your browser. No download needed.">
+    <meta property="og:image" content="/assets/og-preview.svg">
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://bomber.game">
+    <link rel="icon" type="image/svg+xml" href="/assets/favicon.svg">
+    <link href="https://fonts.googleapis.com/css?family=Open+Sans:400,600&amp;subset=latin,cyrillic" rel="stylesheet">
+    <link rel="stylesheet" href="/css/normalize-2.1.0.css">
+    <link rel="stylesheet" href="/css/styles.css">
+
+	<!--JS---------------------------------->
+	<script src="//ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
+	<script src="./js/libs/lodash.min.js"></script>
+	<script src="/ws/socket.io.js"></script>
+	<script src="./js/canvas/fosfo.js"></script>
+	<script src="./js/globals.js"></script>
+	<script src="./js/world/world.js"></script>
+	<script src="./js/player/player.js"></script>
+	<script src="./js/bomb/bomb.js"></script>
+	<script src="./js/aks.js"></script>
+	<script src="./js/chat.js"></script>
+	<script src="./js/events.js"></script>
+	<script src="./js/initworld.js"></script>
+	<!-------------------------------------->
+</head>
+<body class="ng-scope">
+
+	<!-- Lobby overlay -->
+	<div id="lobby-screen">
+	  <div id="lobby-box">
+	    <h1>BOMBER</h1>
+	    <input type="text" id="nickname-input" placeholder="Enter your nickname" maxlength="20" autocomplete="off">
+	    <div id="skin-grid"><!-- 24 skin preview images, populated by JS --></div>
+	    <button id="play-btn">PLAY</button>
+	  </div>
+	</div>
+
+	<!-- Loading overlay -->
+	<div id="loading-overlay" style="display:none;">
+	  <div id="loading-box">
+	    <div id="loading-label">Loading assets…</div>
+	    <div id="loading-bar-track"><div id="loading-bar-fill"></div></div>
+	  </div>
+	</div>
+
+	<!-- Disconnect overlay -->
+	<div id="disconnect-overlay" style="display:none;">
+	  <div id="disconnect-box">
+	    <div id="disconnect-msg">Connection lost. Reconnecting…</div>
+	    <button id="refresh-btn" style="display:none;" onclick="location.reload()">Refresh</button>
+	  </div>
+	</div>
+
+	<div id="viewport" ng-controller="KeyboardCtrl" class="ng-scope">
+	<div style="position: absolute; left: 0px; top: 0px;">
+		<canvas id="layer0" style="position: absolute; left: 0px; top: 0px; background-color: black;"></canvas>
+		<canvas id="layer1" style="position: absolute; left: 0px; top: 0px;"></canvas>
+	</div>
+	</div>
+
+	<div id="chat" ng-controller="ChatCtrl" class="ng-scope">
+		<div id="dropDownChat" dropdown-on-event="nicknamePopup">
+			<ul>
+            <li class="nicknameChat ng-binding" ng-click="chatClickHandler()">@ </li>
+            <!--<li ng-click="postToCommunity('showProfile')">Show profile</li>-->
+            <li ng-click="postToCommunity('createChat')">Send message</li>
+            <li ng-click="postToCommunity('addFriend')">Add friend</li>
+            <li ng-show="canShowWhoIs()" ng-click="showWhoIs()" class="ng-hide">Who is it?</li>
+			<span ng-show="canIgnore()" class="colorRed ng-hide">
+				<li ng-click="ignore(1)" style="float: left;" class="ng-binding">Ignore for 1 hour</li>
+				<li ng-click="ignore(24)" style="float: left;" class="ng-binding">/day</li>
+				<li ng-click="ignore(24*30)" class="ng-binding">/mon.</li>
+			</span>
+			<li ng-show="canStopIgnoring()" ng-click="ignore(0)" class="ng-binding ng-hide">Stop ignoring</li>
+            </ul>
+		</div>
+		<div class="misc-top ng-scope" ng-controller="GameServersCtrl">
+			<h1 class="ng-binding">hardcore</h1>
+			<div class="out_butt">
+			<div class="room">
+				<div class="butt_left_menu ng-binding" style="text-transform:none;" ng-click="showRooms()">Room:
+					<span class="colorFoxy ng-binding">EU1</span>
+				</div>
+			</div>
+			</div>
+		</div>
+
+		<ul class="chat-list" id="listChat">
+			<li id="endchat"></li>
+		</ul>
+
+		<!--<div id="chatmsg" class="chatmsg" ng-controller="ChatInputCtrl"></div>-->
+		<div class="chatmsg ng-scope" area-bottom="104" ng-controller="ChatInputCtrl">
+			<textarea area-auto="" maxlength="140" onkeypress="onchatpress(event)" onkeydown="onchatdelete(event)" rows="1" id="msgText" style="height: 28px;" placeholder="Message" data-mentions-input="true"></textarea>
+			<div class="helperHeight" area-helper=""></div>
+			<div class="mentions-input-box"><div class="mentions"><div></div></div><div class="mentions-autocomplete-list"></div></div>
+		</div>
+		<ul class="chat-filters">
+			<li>
+				<button class="text" >&nbsp;</button>
+			</li><li>
+				<button class="text" >&nbsp;</button>
+			</li><li>
+				<button class="kill" >&nbsp;</button>
+			</li><li>
+				<button class="mod" >&nbsp;</button>
+			</li><li>
+				<button class="common" >&nbsp;</button>
+			</li><li>
+				<button class="filter-all" >CHAT</button>
+			</li><li>
+				&nbsp;&nbsp;<a href="https://www.facebook.com/" target="_blank"><button class="fb">fb</button></a>
+			</li>
+		</ul>
+		<div class="misc-bottom">
+		</div>
+	</div>
+</body>
+</html>

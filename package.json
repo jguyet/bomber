@@ -1,0 +1,19 @@
+{
+  "name": "bomber",
+  "version": "1.0.0",
+  "description": "Bomberman multiplayer online game - Node.js server with socket.io",
+  "main": "server.js",
+  "scripts": {
+    "dev": "node server.js",
+    "start": "node server.js",
+    "build": "echo 'No build step required (static client)'",
+    "lint": "node --check server.js"
+  },
+  "dependencies": {
+    "express": "^4.18.2",
+    "socket.io": "^4.7.5"
+  },
+  "devDependencies": {
+    "puppeteer": "^24.37.5"
+  }
+}
