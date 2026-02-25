@@ -148,6 +148,23 @@ function InitializeSocket(nickname, skinId)
 					break;
 				}
 			break;
+			case "I":
+				switch (action)
+				{
+					case "A": // Item Added
+						var itemId = Number(fields[0]);
+						var itemType = fields[1]; // 'fire', 'bomb', or 'boots'
+						var cellX = Number(fields[2]);
+						var cellY = Number(fields[3]);
+						if (world) world.addItem(itemId, itemType, cellX, cellY);
+					break;
+					case "P": // Item Picked up
+						var itemId = Number(fields[0]);
+						var playerId = Number(fields[1]);
+						if (world) world.removeItem(itemId);
+					break;
+				}
+			break;
 			case "W":
 				switch (action)
 				{
