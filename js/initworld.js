@@ -1,3 +1,78 @@
+var selectedSkinId = 0;
+
+// Loading progress helpers
+function setLoadingProgress(label, pct) {
+	var fill = document.getElementById('loading-bar-fill');
+	var lbl = document.getElementById('loading-label');
+	if (fill) fill.style.width = pct + '%';
+	if (lbl) lbl.textContent = label;
+}
+
+function dismissLoadingOverlay() {
+	var el = document.getElementById('loading-overlay');
+	if (el) el.style.display = 'none';
+}
+
+function showLobby() {
+	var lobbyScreen = document.getElementById('lobby-screen');
+	if (lobbyScreen) lobbyScreen.style.display = 'flex';
+
+	// Populate skin grid with 24 thumbnails
+	var grid = document.getElementById('skin-grid');
+	if (grid) {
+		grid.innerHTML = '';
+		for (var n = 0; n < 24; n++) {
+			(function(skinId) {
+				var img = document.createElement('img');
+				img.src = 'assets/characters/' + skinId + '.png';
+				img.width = 42;
+				img.height = 42;
+				img.className = 'skin-thumb' + (skinId === 0 ? ' selected' : '');
+				img.setAttribute('data-skin', skinId);
+				img.addEventListener('click', function() {
+					var all = grid.querySelectorAll('.skin-thumb');
+					for (var i = 0; i < all.length; i++) all[i].classList.remove('selected');
+					img.classList.add('selected');
+					selectedSkinId = skinId;
+				});
+				grid.appendChild(img);
+			})(n);
+		}
+	}
+
+	// Wire play button
+	var playBtn = document.getElementById('play-btn');
+	if (playBtn) {
+		playBtn.onclick = function() {
+			var nicknameInput = document.getElementById('nickname-input');
+			var nickname = nicknameInput ? nicknameInput.value.trim() : '';
+			if (!nickname) nickname = 'Player';
+			startGame(nickname, selectedSkinId);
+		};
+	}
+}
+
+function startGame(nickname, skinId) {
+	// Store for reconnect
+	window._lastNickname = nickname;
+	window._lastSkinId = skinId;
+
+	// Hide lobby, show loading
+	var lobbyScreen = document.getElementById('lobby-screen');
+	if (lobbyScreen) lobbyScreen.style.display = 'none';
+	var loadingOverlay = document.getElementById('loading-overlay');
+	if (loadingOverlay) loadingOverlay.style.display = 'flex';
+
+	setLoadingProgress('Connecting…', 10);
+	InitializeSocket(nickname, skinId);
+}
+
+// Called by aks.js when WL world data is received and world is ready
+window.onWorldReady = function() {
+	setLoadingProgress('Ready!', 100);
+	setTimeout(dismissLoadingOverlay, 400);
+};
+
 function preload()
 {
 	//Canvas------------------------------------------//
@@ -9,11 +84,15 @@ function preload()
 	fosfo1 = new fosfo(layer1);
 	resize(false);
 	fosfo0.loadimage(['assets/maps/1.png']).done(function() {
+		setLoadingProgress('Loading map…', 33);
 		fosfo1.loadimage(['assets/bombs/1.png', 'assets/bombs/explode/1.png']).done(function() {
-			InitializeSocket();
+			setLoadingProgress('Loading bombs…', 66);
+			// Show lobby — socket init deferred until PLAY clicked
+			showLobby();
 		});
 	});
 }
+
 function initWorld()
 {
 	//Events------------------------------------------//
@@ -26,7 +105,6 @@ function initWorld()
 	document.addEventListener('keyup', onKeyUp, false );
 	document.addEventListener('mousewheel', onrool, false);
 	window.addEventListener( 'resize', onWindowResize, false );
-	console.log("START");
 	fosfo0.setFramesToImg('assets/maps/1.png', 8, 24);
 	fosfo1.setFramesToImg('assets/bombs/1.png', 1, 9);
 	fosfo1.setFramesToImg('assets/bombs/explode/1.png', 4, 2);

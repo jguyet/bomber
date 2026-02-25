@@ -16,14 +16,28 @@ var onchatdelete = function(event)
 
 var addmessagetochat = function(data)
 {
-	var elem = document.createElement("li");
-	elem.setAttribute("class", "ng-scope");
-	elem.innerHTML = "<span ng-show=\"!msg.killinfo\"><b class=\"nickname ng-binding\" ng-class=\"{'my-msg': msg.my}\">unknow</b>"
-						+ ":</span><span class=\"text\" ng-switch=\"msg.special\">"
-						+ "<span class=\"time colorFFF ng-binding ng-hide\" ng-show=\"msg.showTime\">23:18</span>"
-						+ "<span ng-switch-default=\"\" ng-bind-html=\"getText(msg)\" class=\"ng-binding ng-scope\">" + data + "</span>"
-						+ "</span>";
+	// Parse "nickname: text" format broadcast by server
+	var colonIdx = data.indexOf(': ');
+	var sender = colonIdx > 0 ? data.substring(0, colonIdx) : 'Player';
+	var text = colonIdx > 0 ? data.substring(colonIdx + 2) : data;
+
+	// Build DOM safely (no innerHTML with user data — XSS-safe)
+	var li = document.createElement('li');
+	li.setAttribute('class', 'ng-scope');
+
+	var b = document.createElement('b');
+	b.className = 'nickname ng-binding';
+	b.textContent = sender;
+
+	var span = document.createElement('span');
+	span.className = 'text';
+	span.textContent = text;
+
+	li.appendChild(b);
+	li.appendChild(document.createTextNode(': '));
+	li.appendChild(span);
+
 	var chat = document.getElementById("endchat");
 	var parentdiv = chat.parentNode;
-	parentdiv.insertBefore(elem, chat);
+	parentdiv.insertBefore(li, chat);
 };

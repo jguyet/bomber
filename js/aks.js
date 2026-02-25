@@ -8,12 +8,13 @@
 // Per-player move buffer: stores latest PM data per player ID.
 // Flushed once per rAF frame by flushPendingMoves() called from interval().
 var pendingMoves = {};
+var reconnectAttempts = 0;
 
 function flushPendingMoves() {
 	if (world == null) return;
 	for (var id in pendingMoves) {
 		var m = pendingMoves[id];
-		world.moveplayer(Number(id), m.x, m.y, m.dir, m.skin, false, m.bytedir);
+		world.moveplayer(Number(id), m.x, m.y, m.dir, m.skin, false, m.bytedir, m.nickname);
 	}
 	pendingMoves = {};
 }
@@ -23,7 +24,22 @@ function sendSocketMessage(message)
 	socket.emit('msg', message);
 }
 
-function InitializeSocket()
+// Disconnect overlay helpers
+function showDisconnectOverlay(msg, showRefresh) {
+	var el = document.getElementById('disconnect-overlay');
+	var msgEl = document.getElementById('disconnect-msg');
+	var btn = document.getElementById('refresh-btn');
+	if (el) el.style.display = 'flex';
+	if (msgEl) msgEl.textContent = msg;
+	if (btn) btn.style.display = showRefresh ? 'block' : 'none';
+}
+
+function hideDisconnectOverlay() {
+	var el = document.getElementById('disconnect-overlay');
+	if (el) el.style.display = 'none';
+}
+
+function InitializeSocket(nickname, skinId)
 {
 	// Connect to the game server via socket.io (same origin, /ws path)
 	socket = io({
@@ -33,8 +49,17 @@ function InitializeSocket()
 
 	socket.on('connect', function()
 	{
-		sendSocketMessage("WL");
-		console.log("Connection OK");
+		// Hide disconnect overlay and reset counter on successful connect
+		hideDisconnectOverlay();
+		reconnectAttempts = 0;
+
+		// If reconnecting after a drop (world already loaded), re-send NI + WL to resync
+		var nick = window._lastNickname || nickname || 'Player';
+		var skin = (window._lastSkinId !== undefined) ? window._lastSkinId : (skinId || 0);
+
+		// Send NI before WL so server knows nickname+skin before broadcasting PA
+		sendSocketMessage('NI' + nick + '|' + skin);
+		sendSocketMessage('WL');
 		initWorld();
 	});
 
@@ -48,76 +73,84 @@ function InitializeSocket()
 				switch (action)
 				{
 					case "A":
-						var id = Number(received_msg.substring(2).split("|")[0]);
-						var x = Number(received_msg.substring(2).split("|")[1]);
-						var y = Number(received_msg.substring(2).split("|")[2]);
-						var range = Number(received_msg.substring(2).split("|")[3]);
+						var parts = received_msg.substring(2).split("|");
+						var id = Number(parts[0]);
+						var x = Number(parts[1]);
+						var y = Number(parts[2]);
+						var range = Number(parts[3]);
 						var bomb = new Bomb(id, x, y, range);
 						bomb.start();
 						world.addbomb(bomb);
-					break ;
+					break;
 					case "E":
-						var id = Number(received_msg.substring(2).split("|")[0]);
-						var sup = Number(received_msg.substring(2).split("|")[1]);
-						var down = Number(received_msg.substring(2).split("|")[2]);
-						var left = Number(received_msg.substring(2).split("|")[3]);
-						var right = Number(received_msg.substring(2).split("|")[4]);
+						var parts = received_msg.substring(2).split("|");
+						var id = Number(parts[0]);
+						var sup = Number(parts[1]);
+						var down = Number(parts[2]);
+						var left = Number(parts[3]);
+						var right = Number(parts[4]);
 						var bomb = world.getBomb(id);
 						bomb.exsup = sup;
 						bomb.exleft = left;
 						bomb.exdown = down;
 						bomb.exright = right;
 						bomb.explode();
-					break ;
+					break;
 				}
-			break ;
+			break;
 			case "M":
 				switch (action)
 				{
 					case "N":
 						addmessagetochat(received_msg.substring(2));
-					break ;
+					break;
 				}
-			break ;
+			break;
 			case "P":
 				switch (action)
 				{
 					case "A":
-						var id = Number(received_msg.substring(2).split("|")[0]);
-						var x = Number(received_msg.substring(2).split("|")[1]);
-						var y = Number(received_msg.substring(2).split("|")[2]);
-						var dir = Number(received_msg.substring(2).split("|")[3]);
-						var skin = Number(received_msg.substring(2).split("|")[4]);
-						var bcurrent = Number(received_msg.substring(2).split("|")[5]);
-						world.addplayer(id, x, y, dir, skin, bcurrent);
-					break ;
+						var parts = received_msg.substring(2).split("|");
+						var id = Number(parts[0]);
+						var x = Number(parts[1]);
+						var y = Number(parts[2]);
+						var dir = Number(parts[3]);
+						var skin = Number(parts[4]);
+						var bcurrent = Number(parts[5]);
+						var nickname = parts[6] || 'Player';
+						world.addplayer(id, x, y, dir, skin, bcurrent, nickname);
+					break;
 					case "D":
 						var id = Number(received_msg.substring(2).split("|")[0]);
 						world.removeplayer(id);
-					break ;
+					break;
 					case "M":
-						var id = Number(received_msg.substring(2).split("|")[0]);
-						var x = Number(received_msg.substring(2).split("|")[1]);
-						var y = Number(received_msg.substring(2).split("|")[2]);
-						var dir = Number(received_msg.substring(2).split("|")[3]);
-						var skin = Number(received_msg.substring(2).split("|")[4]);
-						var bytedir = Number(received_msg.substring(2).split("|")[5]);
+						var parts = received_msg.substring(2).split("|");
+						var id = Number(parts[0]);
+						var x = Number(parts[1]);
+						var y = Number(parts[2]);
+						var dir = Number(parts[3]);
+						var skin = Number(parts[4]);
+						var bytedir = Number(parts[5]);
+						var nickname = parts[6] || 'Player';
 						// Buffer latest position — overwrite any previous unprocessed update for this player
-						pendingMoves[id] = { x: x, y: y, dir: dir, skin: skin, bytedir: bytedir };
-					break ;
+						pendingMoves[id] = { x: x, y: y, dir: dir, skin: skin, bytedir: bytedir, nickname: nickname };
+					break;
 					case "S":
-						var id = Number(received_msg.substring(2).split("|")[0]);
-						var x = Number(received_msg.substring(2).split("|")[1]);
-						var y = Number(received_msg.substring(2).split("|")[2]);
-						var dir = Number(received_msg.substring(2).split("|")[3]);
-						var skin = Number(received_msg.substring(2).split("|")[4]);
-						var bytedir = Number(received_msg.substring(2).split("|")[5]);
+						var parts = received_msg.substring(2).split("|");
+						var id = Number(parts[0]);
+						var x = Number(parts[1]);
+						var y = Number(parts[2]);
+						var dir = Number(parts[3]);
+						var skin = Number(parts[4]);
+						var bytedir = Number(parts[5]);
+						var nickname = parts[6] || 'Player';
 						// PS (stop) is always applied immediately — authoritative position snap
-						world.moveplayer(id, x, y, dir, skin, true, bytedir);
+						world.moveplayer(id, x, y, dir, skin, true, bytedir, nickname);
 						delete pendingMoves[id];
-					break ;
+					break;
 				}
-			break ;
+			break;
 			case "W":
 				switch (action)
 				{
@@ -125,31 +158,40 @@ function InitializeSocket()
 						fosfo0.clear();
 						world = new World(received_msg.substring(2));
 						world.loadWorld();
-					break ;
+						// Notify initworld that world is ready (dismisses loading overlay)
+						if (typeof window.onWorldReady === 'function') window.onWorldReady();
+					break;
 					case "C":
-						var ground = Number(received_msg.substring(2).split("|")[0]);
-						var x = Number(received_msg.substring(2).split("|")[1]);
-						var y = Number(received_msg.substring(2).split("|")[2]);
+						var parts = received_msg.substring(2).split("|");
+						var ground = Number(parts[0]);
+						var x = Number(parts[1]);
+						var y = Number(parts[2]);
 						// x, y are TILE coordinates (grid), not pixel — no camera adjustment needed
 						if (world.dataimg[y] && world.dataimg[y][x]) {
 							var img = world.dataimg[y][x];
 							world.dataimg[y][x] = fosfo0.drawframe(img.name, 'assets/maps/1.png', ground, img.x, img.y);
 							world.havechange = true;
 						}
-					break ;
+					break;
 				}
-			break ;
+			break;
 		}
 	});
 
-	socket.on('disconnect', function()
+	socket.on('disconnect', function(reason)
 	{
-		console.log("Socket disconnected, reconnecting in 1s...");
-		setTimeout(InitializeSocket, 1000);
+		showDisconnectOverlay('Connection lost. Reconnecting…', false);
+		reconnectAttempts = 0;
+		// Socket.io auto-reconnects by default — no manual setTimeout needed
 	});
 
 	socket.on('connect_error', function()
 	{
-		console.log("Socket connection error, retrying...");
+		reconnectAttempts++;
+		if (reconnectAttempts < 5) {
+			showDisconnectOverlay('Connection failed. Retrying (' + reconnectAttempts + '/5)…', false);
+		} else {
+			showDisconnectOverlay('Unable to connect. Please refresh.', true);
+		}
 	});
 }
