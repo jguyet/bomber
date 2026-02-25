@@ -11,6 +11,10 @@ FROM node:20-alpine AS production
 
 WORKDIR /app
 
+# Environment defaults
+ENV NODE_ENV=production
+ENV PORT=9998
+
 # Create non-root user
 RUN addgroup -S bomber && adduser -S bomber -G bomber
 
@@ -28,18 +32,21 @@ COPY assets/ ./assets/
 COPY background/ ./background/
 COPY i/ ./i/
 COPY util/ ./util/
-COPY server/ ./server/
+
+# Copy only Node.js server modules (skip legacy Java artifacts)
+COPY server/roomManager.js ./server/
+COPY server/statsManager.js ./server/
 
 # Create .db directory for runtime data
 RUN mkdir -p /app/.db && chown -R bomber:bomber /app
 
 USER bomber
 
-# Unified server: HTTP + Socket.io + API on port 9998
+# Unified server: HTTP + Socket.io + API
 EXPOSE 9998
 
 # Health check against the unified server
 HEALTHCHECK --interval=30s --timeout=5s --start-period=10s --retries=3 \
-  CMD wget --no-verbose --tries=1 --spider http://localhost:9998/ || exit 1
+  CMD wget --no-verbose --tries=1 --spider http://localhost:${PORT}/ || exit 1
 
 CMD ["node", "server.js"]
