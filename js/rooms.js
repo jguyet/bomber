@@ -378,6 +378,42 @@ var RoomUI = (function() {
     if (socket && socket.connected) {
       socket.emit('leaveRoom');
     }
+
+    // Clear client-side game state to prevent stale data leaking into next room
+    if (typeof world !== 'undefined' && world) {
+      // Remove all player sprites
+      if (world.players && typeof fosfo1 !== 'undefined' && fosfo1) {
+        for (var i = 0; i < world.players.length; i++) {
+          if (world.players[i]) fosfo1.undraw('player' + world.players[i].id);
+        }
+      }
+      // Remove all bomb sprites
+      if (world.bombs && typeof fosfo1 !== 'undefined' && fosfo1) {
+        for (var i = 0; i < world.bombs.length; i++) {
+          if (world.bombs[i]) fosfo1.undraw('bomb' + world.bombs[i].id);
+        }
+      }
+      // Remove all item sprites
+      if (world.items && typeof fosfo1 !== 'undefined' && fosfo1) {
+        for (var i = 0; i < world.items.length; i++) {
+          if (world.items[i]) fosfo1.undraw('item' + world.items[i].id);
+        }
+      }
+      world.players = [];
+      world.bombs = [];
+      world.items = [];
+    }
+    currentPlayer = null;
+
+    // Reset round/scoreboard/kill state
+    roundState = 'waiting';
+    roundTimeRemaining = 0;
+    roundWinner = null;
+    roundResults = [];
+    scoreboardData = [];
+    killFeed = [];
+
+    // Reset room globals
     currentRoomId = null;
     currentRoomName = '';
     isRoomCreator = false;
@@ -385,10 +421,14 @@ var RoomUI = (function() {
     isSpectating = false;
     roomPlayerList = [];
     updateChatRoomLabel('---');
-    // Hide room info HUD
-    if (typeof HUD !== 'undefined' && HUD.hideRoomInfo) {
-      HUD.hideRoomInfo();
+
+    // Hide HUD elements
+    if (typeof HUD !== 'undefined') {
+      if (HUD.hideRoomInfo) HUD.hideRoomInfo();
+      if (HUD.hideResults) HUD.hideResults();
+      if (HUD.hideDeathNotice) HUD.hideDeathNotice();
     }
+
     hideWaitingRoom();
     showBrowser();
   }
