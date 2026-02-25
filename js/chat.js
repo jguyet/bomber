@@ -1,4 +1,10 @@
 
+function escapeHtml(str) {
+	var div = document.createElement('div');
+	div.textContent = str;
+	return div.innerHTML;
+}
+
 var current_line = "";
 
 var onchatpress = function(event)
@@ -23,21 +29,27 @@ var onchatpress = function(event)
 var onchatdelete = function(event)
 {
 	var key = event.keyCode;
-	
+
 	if (key == 8 && current_line != "")
 		current_line = current_line.substr(0, current_line.length - 1);
 };
 
-var addmessagetochat = function(data)
+var addmessagetochat = function(nickname, data)
 {
+	var isMyMsg = (nickname === playerNickname);
+	var myMsgClass = isMyMsg ? ' my-msg' : '';
 	var elem = document.createElement("li");
 	elem.setAttribute("class", "ng-scope");
-	elem.innerHTML = "<span ng-show=\"!msg.killinfo\"><b class=\"nickname ng-binding\" ng-class=\"{'my-msg': msg.my}\">unknow</b>"
-						+ ":</span><span class=\"text\" ng-switch=\"msg.special\">"
-						+ "<span class=\"time colorFFF ng-binding ng-hide\" ng-show=\"msg.showTime\">23:18</span>"
-						+ "<span ng-switch-default=\"\" ng-bind-html=\"getText(msg)\" class=\"ng-binding ng-scope\">" + data + "</span>"
-						+ "</span>";
+	elem.innerHTML = '<span><b class="nickname ng-binding' + myMsgClass + '">' + escapeHtml(nickname) + '</b>'
+		+ ':</span><span class="text">'
+		+ '<span class="ng-binding ng-scope">' + escapeHtml(data) + '</span>'
+		+ '</span>';
 	var chat = document.getElementById("endchat");
 	var parentdiv = chat.parentNode;
 	parentdiv.insertBefore(elem, chat);
+	// Auto-scroll to bottom
+	var chatList = document.getElementById("listChat");
+	if (chatList) {
+		chatList.scrollTop = chatList.scrollHeight;
+	}
 };

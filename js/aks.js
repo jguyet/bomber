@@ -94,7 +94,15 @@ function InitializeSocket()
 					switch (action)
 					{
 						case "N":
-							addmessagetochat(received_msg.substring(2));
+							var chatData = received_msg.substring(2);
+							var separatorIdx = chatData.indexOf('|');
+							if (separatorIdx !== -1) {
+								var senderNick = chatData.substring(0, separatorIdx);
+								var chatText = chatData.substring(separatorIdx + 1);
+								addmessagetochat(senderNick, chatText);
+							} else {
+								addmessagetochat("Unknown", chatData);
+							}
 						break ;
 					}
 				break ;
