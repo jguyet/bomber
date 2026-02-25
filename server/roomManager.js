@@ -1,6 +1,9 @@
 const fs = require('fs');
 const path = require('path');
 
+// Room Isolation: All game state (cells, players, bombs, items, roundState) is scoped
+// per-Room instance. Broadcasts use Socket.io rooms (io.to('room:' + id)) for isolation.
+
 // ─── Configuration ───────────────────────────────────────────────────────────
 const MAP_WIDTH = 80;
 const MAP_HEIGHT = 42;
