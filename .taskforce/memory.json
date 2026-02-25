@@ -4863,9 +4863,60 @@
       "agentName": "Clara",
       "sprintNumber": 5,
       "timestamp": 1772031542932
+    },
+    {
+      "id": "mem-289",
+      "title": "Repeated command pattern: rm *",
+      "text": "This command pattern was executed 3+ times during task work.\n\nExamples:\n  $ rm smoke-load.png\n  $ rm player1-game.png\n  $ rm spectator-view.png\n\nConsider creating a script, alias, or combining these into a single operation to avoid redundancy.",
+      "tags": [
+        "auto-detected",
+        "redundancy",
+        "optimization",
+        "rm"
+      ],
+      "type": "pattern",
+      "agentId": "final-tester",
+      "agentRole": "bug_tester",
+      "agentName": "Sara",
+      "sprintNumber": 5,
+      "timestamp": 1772032202739
+    },
+    {
+      "id": "mem-290",
+      "title": "Repeated command pattern: ls -la *",
+      "text": "This command pattern was executed 3+ times during task work.\n\nExamples:\n  $ ls -la /Users/jeremyguyet/bomber/js/*.js /Users/jeremyguyet/bomber/js/*/*.js 2>&1 | grep -v \"No such file\"\n  $ ls -la /Users/jeremyguyet/bomber/server/*.js 2>/dev/null | head -20\n  $ ls -la /Users/jeremyguyet/bomber/*.js\n\nConsider creating a script, alias, or combining these into a single operation to avoid redundancy.",
+      "tags": [
+        "auto-detected",
+        "redundancy",
+        "optimization",
+        "ls"
+      ],
+      "type": "pattern",
+      "agentId": "final-tester",
+      "agentRole": "bug_tester",
+      "agentName": "Sara",
+      "sprintNumber": 5,
+      "timestamp": 1772032333994
+    },
+    {
+      "id": "mem-291",
+      "title": "Repeated command pattern: grep -n *",
+      "text": "This command pattern was executed 3+ times during task work.\n\nExamples:\n  $ grep -n \"src=\" /Users/jeremyguyet/bomber/index.html | head -30\n  $ grep -n \"socket\\.emit\\|io\\.emit\" server.js | head -30\n  $ grep -n \"socket\\.emit\\|io\\.emit\" server.js | tail -20\n\nConsider creating a script, alias, or combining these into a single operation to avoid redundancy.",
+      "tags": [
+        "auto-detected",
+        "redundancy",
+        "optimization",
+        "grep"
+      ],
+      "type": "pattern",
+      "agentId": "final-tester",
+      "agentRole": "bug_tester",
+      "agentName": "Sara",
+      "sprintNumber": 5,
+      "timestamp": 1772032357078
     }
   ],
-  "counter": 288,
+  "counter": 291,
   "qvalues": {
     "mem-1": {
       "utility": 0.575,
@@ -7458,6 +7509,33 @@
       "lastUpdated": 1772031542932,
       "generalizable": false,
       "promotedToGlobal": false
+    },
+    "mem-289": {
+      "utility": 0.5,
+      "consultCount": 0,
+      "positiveSignals": 0,
+      "negativeSignals": 0,
+      "lastUpdated": 1772032202739,
+      "generalizable": true,
+      "promotedToGlobal": false
+    },
+    "mem-290": {
+      "utility": 0.5,
+      "consultCount": 0,
+      "positiveSignals": 0,
+      "negativeSignals": 0,
+      "lastUpdated": 1772032333994,
+      "generalizable": true,
+      "promotedToGlobal": false
+    },
+    "mem-291": {
+      "utility": 0.5,
+      "consultCount": 0,
+      "positiveSignals": 0,
+      "negativeSignals": 0,
+      "lastUpdated": 1772032357078,
+      "generalizable": true,
+      "promotedToGlobal": false
     }
   },
   "triples": {
@@ -8152,6 +8230,18 @@
     "mem-278": {
       "intent": "Auto-detected redundant command pattern that could be optimized",
       "experience": "Command \"rm *\" was repeated 3+ times — suggests a batch operation or script would be more efficient"
+    },
+    "mem-289": {
+      "intent": "Auto-detected redundant command pattern that could be optimized",
+      "experience": "Command \"rm *\" was repeated 3+ times — suggests a batch operation or script would be more efficient"
+    },
+    "mem-290": {
+      "intent": "Auto-detected redundant command pattern that could be optimized",
+      "experience": "Command \"ls -la *\" was repeated 3+ times — suggests a batch operation or script would be more efficient"
+    },
+    "mem-291": {
+      "intent": "Auto-detected redundant command pattern that could be optimized",
+      "experience": "Command \"grep -n *\" was repeated 3+ times — suggests a batch operation or script would be more efficient"
     }
   }
 }

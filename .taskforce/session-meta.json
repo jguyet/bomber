@@ -4091,12 +4091,12 @@
     },
     {
       "id": "task2-nickname",
-      "category": "Bug Fix",
-      "title": "Task-2: Nickname persistence across reconnects",
+      "category": "Auth",
+      "title": "Nickname persistence across reconnects",
       "status": "passed",
       "error": null,
       "fix": null,
-      "timestamp": 1772031062269,
+      "timestamp": 1772032304405,
       "sprintNumber": 5
     },
     {
@@ -4111,22 +4111,22 @@
     },
     {
       "id": "task3-powerups",
-      "category": "Bug Fix",
-      "title": "Task-3: Power-up edge case hardening",
+      "category": "Gameplay",
+      "title": "Power-up edge cases (code review)",
       "status": "passed",
       "error": null,
       "fix": null,
-      "timestamp": 1772031274360,
+      "timestamp": 1772032305589,
       "sprintNumber": 5
     },
     {
       "id": "task4-isolation",
-      "category": "Bug Fix",
-      "title": "Task-4: Room isolation and state cleanup",
+      "category": "Architecture",
+      "title": "Room isolation (code review)",
       "status": "passed",
       "error": null,
       "fix": null,
-      "timestamp": 1772031275252,
+      "timestamp": 1772032396477,
       "sprintNumber": 5
     },
     {
@@ -4151,12 +4151,12 @@
     },
     {
       "id": "task7-hud",
-      "category": "UI/Visual",
-      "title": "Task-7: HUD visual fixes and spectator indicator",
-      "status": "passed",
+      "category": "Layout",
+      "title": "HUD elements no overlap",
+      "status": "running",
       "error": null,
       "fix": null,
-      "timestamp": 1772031343560,
+      "timestamp": 1772032434652,
       "sprintNumber": 5
     },
     {
@@ -4172,11 +4172,11 @@
     {
       "id": "task10-escapehtml",
       "category": "Code Quality",
-      "title": "Task-10: Consolidate escapeHtml utility",
+      "title": "escapeHtml consolidated to globals.js",
       "status": "passed",
       "error": null,
       "fix": null,
-      "timestamp": 1772031345837,
+      "timestamp": 1772032307515,
       "sprintNumber": 5
     },
     {
@@ -4233,20 +4233,80 @@
       "id": "task1-spectator-join",
       "category": "Spectator",
       "title": "Spectator can join room without crashes",
-      "status": "running",
+      "status": "passed",
       "error": null,
       "fix": null,
-      "timestamp": 1772031834644,
+      "timestamp": 1772032217801,
       "sprintNumber": 5
     },
     {
       "id": "task8-spectator-loading",
       "category": "Loading",
       "title": "Spectator loading screen completes",
-      "status": "failed",
-      "error": "Loading screen stuck for spectators - shows 'Loading is taking longer than expected...' and never dismisses",
+      "status": "fixed",
+      "error": null,
+      "fix": "Fixed spectator loading stuck by adding room status to join data and sending world state to spectators on game start",
+      "timestamp": 1772032220704,
+      "sprintNumber": 5
+    },
+    {
+      "id": "task1-spectator-render",
+      "category": "Spectator",
+      "title": "Other players render for spectators",
+      "status": "passed",
+      "error": null,
       "fix": null,
-      "timestamp": 1772031902411,
+      "timestamp": 1772032218803,
+      "sprintNumber": 5
+    },
+    {
+      "id": "task9-deadcode",
+      "category": "Code Quality",
+      "title": "Dead UI and unused code cleanup",
+      "status": "passed",
+      "error": null,
+      "fix": null,
+      "timestamp": 1772032306550,
+      "sprintNumber": 5
+    },
+    {
+      "id": "task5-rounds",
+      "category": "Gameplay",
+      "title": "Round transitions edge cases (code review)",
+      "status": "passed",
+      "error": null,
+      "fix": null,
+      "timestamp": 1772032397223,
+      "sprintNumber": 5
+    },
+    {
+      "id": "task11-spectcam",
+      "category": "Spectator",
+      "title": "Spectator camera positioning (code review)",
+      "status": "passed",
+      "error": null,
+      "fix": null,
+      "timestamp": 1772032398501,
+      "sprintNumber": 5
+    },
+    {
+      "id": "task6-touch-css",
+      "category": "Layout",
+      "title": "Touch controls CSS responsive breakpoints",
+      "status": "passed",
+      "error": null,
+      "fix": null,
+      "timestamp": 1772032427368,
+      "sprintNumber": 5
+    },
+    {
+      "id": "task12-stats-overlay",
+      "category": "UI",
+      "title": "Stats overlay opens/closes correctly",
+      "status": "running",
+      "error": null,
+      "fix": null,
+      "timestamp": 1772032433884,
       "sprintNumber": 5
     }
   ],
@@ -4298,6 +4358,22 @@
       "agentId": "final-tester",
       "sprintNumber": 5,
       "timestamp": 1772031668254
+    },
+    {
+      "id": "screenshot-1772032173622-g7ta3h",
+      "filename": "player1-game.png",
+      "description": "Player1 game view with winter theme, timer 2:55, scoreboard showing Player1 and Player2",
+      "agentId": "final-tester",
+      "sprintNumber": 5,
+      "timestamp": 1772032173622
+    },
+    {
+      "id": "screenshot-1772032197762-0o23fm",
+      "filename": "spectator-view.png",
+      "description": "Spectator view - game world visible, Player1 nickname shown, timer 2:34, scoreboard present, no crashes",
+      "agentId": "final-tester",
+      "sprintNumber": 5,
+      "timestamp": 1772032197762
     }
   ],
   "assets": [],

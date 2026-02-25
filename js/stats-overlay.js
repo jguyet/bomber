@@ -106,7 +106,7 @@ var StatsOverlay = (function() {
 
   function showButton() {
     var btn = document.getElementById('stats-btn');
-    if (btn) btn.style.display = '';
+    if (btn) btn.style.display = 'block';
   }
 
   function hideButton() {

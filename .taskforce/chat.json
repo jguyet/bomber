@@ -611,6 +611,18 @@
       "mentions": [],
       "replyTo": null,
       "timestamp": 1772031631205
+    },
+    {
+      "id": "msg-52",
+      "from": "final-tester",
+      "fromName": "Sara",
+      "fromRole": "bug_tester",
+      "to": null,
+      "toRole": null,
+      "content": "Fixed: spectator loading screen was stuck when joining a waiting room — now spectators see waiting room and transition properly when game starts.",
+      "mentions": [],
+      "replyTo": null,
+      "timestamp": 1772032225549
     }
   ],
   "agents": [
@@ -686,5 +698,5 @@
       "model": "claude-opus-4-6"
     }
   ],
-  "counter": 51
+  "counter": 52
 }
