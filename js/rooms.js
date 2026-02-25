@@ -350,6 +350,8 @@ var RoomUI = (function() {
           if (typeof HUD !== 'undefined' && HUD.showSpectatorBadge) {
             HUD.showSpectatorBadge();
           }
+          // Show stats button during gameplay
+          if (typeof StatsOverlay !== 'undefined' && StatsOverlay.showButton) StatsOverlay.showButton();
         });
       } else {
         // Room is in waiting state — show waiting room like normal join
@@ -422,6 +424,8 @@ var RoomUI = (function() {
       if (HUD.hideResults) HUD.hideResults();
       if (HUD.hideDeathNotice) HUD.hideDeathNotice();
     }
+    // Hide stats button when leaving gameplay
+    if (typeof StatsOverlay !== 'undefined' && StatsOverlay.hideButton) StatsOverlay.hideButton();
 
     hideWaitingRoom();
     showBrowser();
