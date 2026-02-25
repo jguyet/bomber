@@ -1,4 +1,6 @@
-/* ─── Room Browser Screen ────────────────────────────────────────────────────── */
+/* ─── Room Browser Screen ────────────────────────────────────────────────── */
+/* Full-screen overlay matching lobby gradient + yellow accent design system */
+
 #room-browser {
   position: fixed;
   top: 0;
@@ -9,10 +11,11 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  z-index: 10000;
+  z-index: 9999;
   overflow-y: auto;
 }
 
+/* Subtle radial glow overlay — matches lobby */
 #room-browser::before {
   content: '';
   position: absolute;
@@ -24,45 +27,79 @@
   pointer-events: none;
 }
 
+/* ─── Container ──────────────────────────────────────────────────────────── */
 .room-browser-container {
   position: relative;
   text-align: center;
-  max-width: 700px;
+  max-width: 800px;
   width: 90%;
   padding: 40px 32px;
-  animation: lobbyFadeIn 0.5s ease-out both;
+  animation: roomFadeIn 0.5s ease-out both;
 }
 
-/* ─── Title ──────────────────────────────────────────────────────────────────── */
+/* ─── Fade-in animation ──────────────────────────────────────────────────── */
+@keyframes roomFadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* ─── Room card stagger animation ────────────────────────────────────────── */
+@keyframes roomCardAppear {
+  from {
+    opacity: 0;
+    transform: scale(0.9);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+/* ─── Pulse animation for waiting text ───────────────────────────────────── */
+@keyframes pulse {
+  0%   { opacity: 1; }
+  50%  { opacity: 0.5; }
+  100% { opacity: 1; }
+}
+
+/* ─── Title ──────────────────────────────────────────────────────────────── */
 .room-browser-title {
   font-family: 'pix', 'Open Sans', Tahoma, Arial, sans-serif;
-  font-size: 32px;
+  font-size: 36px;
   font-weight: 700;
   color: #fff;
   margin: 0 0 8px 0;
   text-shadow: 0 0 20px rgba(255, 165, 0, 0.5), 0 0 40px rgba(255, 165, 0, 0.15);
   letter-spacing: 2px;
+  line-height: 1.2;
 }
 
 .room-browser-subtitle {
   font-family: 'Open Sans', sans-serif;
-  font-size: 14px;
+  font-size: 15px;
   color: #6b7fa3;
-  margin: 0 0 24px 0;
+  margin: 0 0 30px 0;
   letter-spacing: 1px;
 }
 
-/* ─── Action Buttons ─────────────────────────────────────────────────────────── */
+/* ─── Action Buttons Row ─────────────────────────────────────────────────── */
 .room-browser-actions {
   display: flex;
   justify-content: center;
   gap: 12px;
-  margin-bottom: 24px;
+  margin-bottom: 20px;
 }
 
 .create-room-btn {
   display: inline-block;
-  padding: 12px 24px;
+  height: 44px;
+  padding: 0 24px;
   font-family: 'Open Sans', sans-serif;
   font-size: 15px;
   font-weight: 700;
@@ -72,42 +109,57 @@
   border-radius: 8px;
   cursor: pointer;
   text-transform: uppercase;
-  letter-spacing: 1px;
+  letter-spacing: 1.5px;
   transition: all 0.2s ease;
-  box-shadow: 0 4px 12px rgba(76, 175, 80, 0.3);
+  box-shadow: 0 4px 16px rgba(76, 175, 80, 0.3);
 }
 
 .create-room-btn:hover {
   filter: brightness(1.1);
   transform: scale(1.02);
-  box-shadow: 0 6px 16px rgba(76, 175, 80, 0.4);
+  box-shadow: 0 6px 20px rgba(76, 175, 80, 0.4);
+}
+
+.create-room-btn:active {
+  transform: scale(0.98);
+  box-shadow: 0 2px 8px rgba(76, 175, 80, 0.3);
 }
 
 .refresh-rooms-btn {
   display: inline-block;
-  padding: 12px 20px;
+  height: 44px;
+  padding: 0 20px;
   font-family: 'Open Sans', sans-serif;
   font-size: 15px;
   font-weight: 600;
-  color: #ccc;
-  background: #2a2a3e;
+  color: #aaa;
+  background: transparent;
   border: 2px solid #444;
   border-radius: 8px;
   cursor: pointer;
+  text-transform: uppercase;
+  letter-spacing: 1px;
   transition: all 0.2s ease;
 }
 
 .refresh-rooms-btn:hover {
   border-color: #ffcc00;
-  color: #fff;
-  background: #333348;
+  color: #ffcc00;
+  box-shadow: 0 0 8px rgba(255, 204, 0, 0.15);
 }
 
-/* ─── Room List ──────────────────────────────────────────────────────────────── */
+.refresh-rooms-btn:active {
+  transform: scale(0.98);
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════ */
+/*  ROOM LIST GRID                                                           */
+/* ═══════════════════════════════════════════════════════════════════════════ */
+
 .room-list {
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+  gap: 16px;
   max-height: 400px;
   overflow-y: auto;
   padding: 4px;
@@ -115,6 +167,7 @@
   scrollbar-color: #444 #1a1a2e;
 }
 
+/* Webkit custom scrollbar — matches skin-grid */
 .room-list::-webkit-scrollbar {
   width: 6px;
 }
@@ -129,108 +182,154 @@
   border-radius: 3px;
 }
 
-.room-list-empty {
-  font-family: 'Open Sans', sans-serif;
-  font-size: 15px;
-  color: #6b7fa3;
-  padding: 40px 16px;
-  text-align: center;
+.room-list::-webkit-scrollbar-thumb:hover {
+  background: #555;
 }
 
-/* ─── Room Card ──────────────────────────────────────────────────────────────── */
-.room-card {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  background: #222;
-  border: 2px solid #444;
-  border-radius: 10px;
-  padding: 14px 18px;
-  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+/* Empty state */
+.room-list-empty {
+  grid-column: 1 / -1;
+  text-align: center;
+  color: #666;
+  font-family: 'Open Sans', sans-serif;
+  font-size: 15px;
+  padding: 40px 20px;
 }
+
+/* ═══════════════════════════════════════════════════════════════════════════ */
+/*  ROOM CARD                                                                */
+/* ═══════════════════════════════════════════════════════════════════════════ */
+
+.room-card {
+  background: #222;
+  border: 2px solid #333;
+  border-radius: 8px;
+  padding: 16px;
+  cursor: default;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease, transform 0.2s ease;
+  animation: roomCardAppear 0.3s ease-out both;
+}
+
+/* Stagger animation for room cards */
+.room-card:nth-child(1)  { animation-delay: 0.05s; }
+.room-card:nth-child(2)  { animation-delay: 0.10s; }
+.room-card:nth-child(3)  { animation-delay: 0.15s; }
+.room-card:nth-child(4)  { animation-delay: 0.20s; }
+.room-card:nth-child(5)  { animation-delay: 0.25s; }
+.room-card:nth-child(6)  { animation-delay: 0.30s; }
+.room-card:nth-child(7)  { animation-delay: 0.35s; }
+.room-card:nth-child(8)  { animation-delay: 0.40s; }
 
 .room-card:hover {
   border-color: #ffcc00;
-  box-shadow: 0 0 10px rgba(255, 204, 0, 0.15);
+  box-shadow: 0 0 12px rgba(255, 204, 0, 0.25);
+  transform: translateY(-2px);
 }
 
 .room-card-header {
   display: flex;
+  justify-content: space-between;
   align-items: center;
-  gap: 8px;
-  min-width: 0;
+  margin-bottom: 8px;
 }
 
 .room-card-name {
   font-family: 'Open Sans', sans-serif;
-  font-size: 16px;
   font-weight: 600;
   color: #fff;
-  white-space: nowrap;
+  font-size: 16px;
   overflow: hidden;
   text-overflow: ellipsis;
-  max-width: 180px;
+  white-space: nowrap;
 }
 
 .room-card-theme {
-  font-size: 18px;
+  font-size: 20px;
+  flex-shrink: 0;
+  margin-left: 8px;
 }
 
 .room-card-info {
   display: flex;
+  justify-content: space-between;
   align-items: center;
-  gap: 12px;
-  flex-shrink: 0;
+  margin-bottom: 12px;
 }
 
 .room-card-players {
   font-family: 'Open Sans', sans-serif;
-  font-size: 13px;
   color: #aaa;
+  font-size: 14px;
 }
 
 .room-card-status {
   font-family: 'Open Sans', sans-serif;
   font-size: 12px;
+  padding: 2px 8px;
+  border-radius: 4px;
   font-weight: 600;
-  padding: 3px 10px;
-  border-radius: 12px;
   text-transform: uppercase;
   letter-spacing: 0.5px;
 }
 
-.room-card-status.status-waiting {
-  background: rgba(76, 175, 80, 0.15);
+.status-waiting {
+  background: rgba(255, 204, 0, 0.2);
+  color: #ffcc00;
+}
+
+.status-playing {
+  background: rgba(76, 175, 80, 0.2);
   color: #4CAF50;
 }
 
-.room-card-status.status-playing {
-  background: rgba(255, 152, 0, 0.15);
-  color: #ff9800;
+.status-full {
+  background: rgba(244, 67, 54, 0.2);
+  color: #f44336;
 }
 
+/* JOIN button */
 .room-card-join {
-  padding: 8px 20px;
+  width: 100%;
+  height: 36px;
   font-family: 'Open Sans', sans-serif;
-  font-size: 13px;
-  font-weight: 700;
+  font-size: 14px;
+  font-weight: 600;
   color: #fff;
-  background: linear-gradient(135deg, #4CAF50, #45a049);
+  background: #4CAF50;
   border: none;
   border-radius: 6px;
   cursor: pointer;
   text-transform: uppercase;
   letter-spacing: 1px;
   transition: all 0.2s ease;
-  flex-shrink: 0;
 }
 
 .room-card-join:hover {
-  filter: brightness(1.15);
-  transform: scale(1.05);
+  filter: brightness(1.1);
+  box-shadow: 0 2px 8px rgba(76, 175, 80, 0.3);
 }
 
-/* ─── Create Room Modal ──────────────────────────────────────────────────────── */
+.room-card-join:active {
+  transform: scale(0.98);
+}
+
+.room-card-join:disabled {
+  background: #555;
+  color: #888;
+  cursor: not-allowed;
+  filter: none;
+  box-shadow: none;
+}
+
+.room-card-join:disabled:hover {
+  filter: none;
+  box-shadow: none;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════ */
+/*  CREATE ROOM MODAL                                                        */
+/* ═══════════════════════════════════════════════════════════════════════════ */
+
 .create-room-modal {
   position: fixed;
   top: 0;
@@ -238,52 +337,74 @@
   width: 100vw;
   height: 100vh;
   background: rgba(0, 0, 0, 0.7);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+  z-index: 10001;
   display: flex;
   align-items: center;
   justify-content: center;
-  z-index: 10001;
+  animation: modalFadeIn 0.25s ease-out;
+}
+
+@keyframes modalFadeIn {
+  from { opacity: 0; }
+  to   { opacity: 1; }
 }
 
 .create-room-form {
-  background: #1e1e2e;
-  border: 2px solid #444;
-  border-radius: 14px;
+  background: #1a1a2e;
+  border: 2px solid #333;
+  border-radius: 12px;
   padding: 32px;
-  max-width: 420px;
+  max-width: 450px;
   width: 90%;
-  text-align: left;
-  animation: lobbyFadeIn 0.3s ease-out both;
+  animation: modalSlideUp 0.3s ease-out;
+  box-shadow: 0 8px 40px rgba(0, 0, 0, 0.5);
+}
+
+@keyframes modalSlideUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px) scale(0.97);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
 }
 
 .create-room-form h2 {
-  font-family: 'pix', 'Open Sans', Tahoma, Arial, sans-serif;
+  font-family: 'Open Sans', sans-serif;
   font-size: 22px;
+  font-weight: 700;
   color: #fff;
   margin: 0 0 24px 0;
   text-align: center;
-  text-shadow: 0 0 12px rgba(255, 165, 0, 0.3);
 }
 
+/* ─── Form groups ────────────────────────────────────────────────────────── */
 .form-group {
   margin-bottom: 20px;
+  text-align: left;
 }
 
 .form-group label {
   display: block;
   font-family: 'Open Sans', sans-serif;
-  font-size: 13px;
-  color: #aaa;
+  font-size: 14px;
+  color: #fff;
   margin-bottom: 8px;
   text-transform: uppercase;
   letter-spacing: 1px;
   font-weight: 600;
 }
 
+/* Text input — matches lobby nickname input */
 .form-group input[type="text"] {
   width: 100%;
-  height: 44px;
-  padding: 0 14px;
-  font-size: 16px;
+  height: 48px;
+  padding: 0 16px;
+  font-size: 18px;
   font-family: 'Open Sans', sans-serif;
   background: #1a1a2e;
   border: 2px solid #333;
@@ -303,11 +424,11 @@
   color: #666;
 }
 
-/* ─── Slider ─────────────────────────────────────────────────────────────────── */
+/* ─── Slider group ───────────────────────────────────────────────────────── */
 .slider-group {
   display: flex;
   align-items: center;
-  gap: 14px;
+  gap: 12px;
 }
 
 .slider-group input[type="range"] {
@@ -318,6 +439,7 @@
   background: #333;
   border-radius: 3px;
   outline: none;
+  cursor: pointer;
 }
 
 .slider-group input[type="range"]::-webkit-slider-thumb {
@@ -329,7 +451,12 @@
   background: #ffcc00;
   cursor: pointer;
   border: 2px solid #1a1a2e;
-  box-shadow: 0 0 6px rgba(255, 204, 0, 0.4);
+  box-shadow: 0 2px 6px rgba(255, 204, 0, 0.3);
+  transition: transform 0.15s ease;
+}
+
+.slider-group input[type="range"]::-webkit-slider-thumb:hover {
+  transform: scale(1.15);
 }
 
 .slider-group input[type="range"]::-moz-range-thumb {
@@ -339,23 +466,23 @@
   background: #ffcc00;
   cursor: pointer;
   border: 2px solid #1a1a2e;
-  box-shadow: 0 0 6px rgba(255, 204, 0, 0.4);
+  box-shadow: 0 2px 6px rgba(255, 204, 0, 0.3);
 }
 
-.slider-group span {
+#room-max-players-label {
   font-family: 'Open Sans', sans-serif;
+  color: #ffcc00;
   font-size: 20px;
   font-weight: 700;
-  color: #ffcc00;
   min-width: 24px;
   text-align: center;
 }
 
-/* ─── Theme Selector ─────────────────────────────────────────────────────────── */
+/* ─── Theme Selector ─────────────────────────────────────────────────────── */
 .theme-selector {
-  display: flex;
-  gap: 10px;
-  flex-wrap: wrap;
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 8px;
 }
 
 .theme-option {
@@ -363,41 +490,35 @@
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  width: 80px;
-  height: 70px;
+  padding: 12px 4px;
   background: #222;
   border: 2px solid #444;
   border-radius: 8px;
   cursor: pointer;
-  transition: border-color 0.2s ease, box-shadow 0.2s ease, background 0.2s ease;
+  transition: border-color 0.2s ease, background 0.2s ease, box-shadow 0.2s ease;
+  font-family: 'Open Sans', sans-serif;
+  font-size: 12px;
+  color: #aaa;
 }
 
 .theme-option:hover {
   border-color: #ffcc00;
+  color: #ddd;
 }
 
 .theme-option.selected {
   border-color: #ffcc00;
   background: #2a2a1e;
-  box-shadow: 0 0 10px rgba(255, 204, 0, 0.3);
+  color: #ffcc00;
+  box-shadow: 0 0 8px rgba(255, 204, 0, 0.2);
 }
 
 .theme-icon {
-  font-size: 22px;
+  font-size: 24px;
   margin-bottom: 4px;
 }
 
-.theme-option span:last-child {
-  font-family: 'Open Sans', sans-serif;
-  font-size: 11px;
-  color: #aaa;
-}
-
-.theme-option.selected span:last-child {
-  color: #ffcc00;
-}
-
-/* ─── Form Actions ───────────────────────────────────────────────────────────── */
+/* ─── Form Actions ───────────────────────────────────────────────────────── */
 .form-actions {
   display: flex;
   gap: 12px;
@@ -406,9 +527,9 @@
 
 .create-room-confirm {
   flex: 1;
-  padding: 12px;
+  height: 48px;
   font-family: 'Open Sans', sans-serif;
-  font-size: 15px;
+  font-size: 16px;
   font-weight: 700;
   color: #fff;
   background: linear-gradient(135deg, #4CAF50, #45a049);
@@ -416,25 +537,30 @@
   border-radius: 8px;
   cursor: pointer;
   text-transform: uppercase;
-  letter-spacing: 1px;
+  letter-spacing: 1.5px;
   transition: all 0.2s ease;
-  box-shadow: 0 4px 12px rgba(76, 175, 80, 0.3);
+  box-shadow: 0 4px 16px rgba(76, 175, 80, 0.3);
 }
 
 .create-room-confirm:hover {
   filter: brightness(1.1);
   transform: scale(1.02);
+  box-shadow: 0 6px 20px rgba(76, 175, 80, 0.4);
+}
+
+.create-room-confirm:active {
+  transform: scale(0.98);
 }
 
 .create-room-cancel {
   flex: 1;
-  padding: 12px;
+  height: 48px;
   font-family: 'Open Sans', sans-serif;
-  font-size: 15px;
+  font-size: 16px;
   font-weight: 600;
-  color: #ccc;
-  background: #2a2a3e;
-  border: 2px solid #444;
+  color: #aaa;
+  background: transparent;
+  border: 2px solid #555;
   border-radius: 8px;
   cursor: pointer;
   text-transform: uppercase;
@@ -443,11 +569,18 @@
 }
 
 .create-room-cancel:hover {
-  border-color: #666;
-  color: #fff;
+  border-color: #888;
+  color: #ddd;
 }
 
-/* ─── Waiting Room Screen ────────────────────────────────────────────────────── */
+.create-room-cancel:active {
+  transform: scale(0.98);
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════ */
+/*  WAITING ROOM                                                             */
+/* ═══════════════════════════════════════════════════════════════════════════ */
+
 #waiting-room {
   position: fixed;
   top: 0;
@@ -458,7 +591,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  z-index: 10000;
+  z-index: 9999;
   overflow-y: auto;
 }
 
@@ -476,123 +609,149 @@
 .waiting-room-container {
   position: relative;
   text-align: center;
-  max-width: 500px;
+  max-width: 600px;
   width: 90%;
   padding: 40px 32px;
-  animation: lobbyFadeIn 0.5s ease-out both;
+  animation: roomFadeIn 0.5s ease-out both;
 }
 
 .waiting-room-title {
   font-family: 'pix', 'Open Sans', Tahoma, Arial, sans-serif;
-  font-size: 28px;
+  font-size: 32px;
   font-weight: 700;
   color: #fff;
   margin: 0 0 8px 0;
-  text-shadow: 0 0 20px rgba(255, 165, 0, 0.5);
+  text-shadow: 0 0 20px rgba(255, 165, 0, 0.5), 0 0 40px rgba(255, 165, 0, 0.15);
   letter-spacing: 2px;
+  line-height: 1.2;
 }
 
 .waiting-room-theme {
   font-family: 'Open Sans', sans-serif;
-  font-size: 14px;
   color: #6b7fa3;
-  margin-bottom: 28px;
-  text-transform: capitalize;
+  font-size: 14px;
+  margin-bottom: 20px;
+  letter-spacing: 0.5px;
 }
 
-/* ─── Player Cards in Waiting Room ───────────────────────────────────────────── */
+/* ─── Player Grid ────────────────────────────────────────────────────────── */
 .waiting-room-players {
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: center;
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
   gap: 16px;
   margin-bottom: 24px;
-  min-height: 80px;
 }
 
 .waiting-player-card {
   display: flex;
   flex-direction: column;
   align-items: center;
-  justify-content: center;
-  width: 80px;
+  padding: 16px;
   background: #222;
-  border: 2px solid #444;
-  border-radius: 10px;
-  padding: 12px 8px;
-  transition: border-color 0.2s ease;
+  border: 2px solid #333;
+  border-radius: 8px;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+  animation: roomCardAppear 0.3s ease-out both;
 }
 
-.waiting-player-card:first-child {
+.waiting-player-card:nth-child(1) { animation-delay: 0.05s; }
+.waiting-player-card:nth-child(2) { animation-delay: 0.10s; }
+.waiting-player-card:nth-child(3) { animation-delay: 0.15s; }
+.waiting-player-card:nth-child(4) { animation-delay: 0.20s; }
+.waiting-player-card:nth-child(5) { animation-delay: 0.25s; }
+.waiting-player-card:nth-child(6) { animation-delay: 0.30s; }
+.waiting-player-card:nth-child(7) { animation-delay: 0.35s; }
+.waiting-player-card:nth-child(8) { animation-delay: 0.40s; }
+
+.waiting-player-card:hover {
   border-color: #ffcc00;
+  box-shadow: 0 0 8px rgba(255, 204, 0, 0.2);
 }
 
 .waiting-player-skin {
   image-rendering: pixelated;
   image-rendering: -moz-crisp-edges;
-  width: 40px;
-  height: 40px;
-  margin-bottom: 6px;
+  width: 48px;
+  height: 48px;
+  margin-bottom: 8px;
 }
 
 .waiting-player-name {
   font-family: 'Open Sans', sans-serif;
-  font-size: 11px;
-  color: #ccc;
-  white-space: nowrap;
+  color: #fff;
+  font-size: 14px;
+  font-weight: 600;
   overflow: hidden;
   text-overflow: ellipsis;
-  max-width: 70px;
-  text-align: center;
+  white-space: nowrap;
+  max-width: 100%;
 }
 
+/* ─── Waiting Status ─────────────────────────────────────────────────────── */
 .waiting-room-status {
   font-family: 'Open Sans', sans-serif;
-  font-size: 14px;
-  color: #6b7fa3;
+  color: #ffcc00;
+  font-size: 16px;
   margin-bottom: 20px;
+  letter-spacing: 0.5px;
+  animation: pulse 2s ease-in-out infinite;
 }
 
-/* ─── Waiting Room Buttons ───────────────────────────────────────────────────── */
+/* ─── Start Game Button (room creator only) ──────────────────────────────── */
 .start-game-btn {
   display: inline-block;
-  max-width: 260px;
+  max-width: 300px;
   width: 100%;
-  height: 50px;
+  height: 52px;
   margin-bottom: 12px;
   padding: 0 32px;
   font-family: 'Open Sans', sans-serif;
-  font-size: 17px;
+  font-size: 18px;
   font-weight: 700;
   color: #fff;
-  background: linear-gradient(135deg, #4CAF50, #45a049);
+  background: linear-gradient(135deg, #ff9800, #f57c00);
   border: none;
   border-radius: 8px;
   cursor: pointer;
   text-transform: uppercase;
   letter-spacing: 2px;
   transition: all 0.2s ease;
-  box-shadow: 0 4px 16px rgba(76, 175, 80, 0.3);
+  box-shadow: 0 4px 16px rgba(255, 152, 0, 0.3);
 }
 
 .start-game-btn:hover {
   filter: brightness(1.1);
   transform: scale(1.02);
-  box-shadow: 0 6px 20px rgba(76, 175, 80, 0.4);
+  box-shadow: 0 6px 20px rgba(255, 152, 0, 0.4);
 }
 
+.start-game-btn:active {
+  transform: scale(0.98);
+  box-shadow: 0 2px 8px rgba(255, 152, 0, 0.3);
+}
+
+.start-game-btn:disabled {
+  background: #555;
+  color: #888;
+  cursor: not-allowed;
+  box-shadow: none;
+  filter: none;
+  transform: none;
+}
+
+/* ─── Leave Room Button ──────────────────────────────────────────────────── */
 .leave-room-btn {
   display: inline-block;
-  max-width: 260px;
+  max-width: 300px;
   width: 100%;
   height: 44px;
   padding: 0 24px;
   font-family: 'Open Sans', sans-serif;
-  font-size: 14px;
+  font-size: 15px;
   font-weight: 600;
-  color: #ccc;
+  color: #f44336;
   background: transparent;
-  border: 2px solid #444;
+  border: 2px solid #f44336;
   border-radius: 8px;
   cursor: pointer;
   text-transform: uppercase;
@@ -601,87 +760,126 @@
 }
 
 .leave-room-btn:hover {
-  border-color: #e74c3c;
-  color: #e74c3c;
+  background: rgba(244, 67, 54, 0.1);
+  box-shadow: 0 0 12px rgba(244, 67, 54, 0.2);
 }
 
-/* ─── Responsive: Tablet (< 768px) ──────────────────────────────────────────── */
+.leave-room-btn:active {
+  transform: scale(0.98);
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════ */
+/*  RESPONSIVE — Tablet (max-width: 768px)                                   */
+/* ═══════════════════════════════════════════════════════════════════════════ */
+
 @media (max-width: 768px) {
+  /* Room browser */
   .room-browser-container {
     padding: 32px 20px;
   }
 
   .room-browser-title {
-    font-size: 26px;
+    font-size: 30px;
   }
 
-  .room-card {
-    flex-wrap: wrap;
-    gap: 8px;
-    padding: 12px 14px;
+  .room-browser-subtitle {
+    font-size: 14px;
+    margin-bottom: 24px;
   }
 
-  .room-card-name {
-    max-width: 140px;
+  .room-list {
+    grid-template-columns: 1fr;
+    max-height: 350px;
   }
 
-  .theme-option {
-    width: 68px;
-    height: 60px;
+  /* Create modal */
+  .theme-selector {
+    grid-template-columns: repeat(2, 1fr);
   }
 
   .create-room-form {
     padding: 24px;
   }
+
+  /* Waiting room */
+  .waiting-room-container {
+    padding: 32px 20px;
+  }
+
+  .waiting-room-title {
+    font-size: 26px;
+  }
+
+  .waiting-room-players {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 12px;
+  }
 }
 
-/* ─── Responsive: Mobile (< 480px) ──────────────────────────────────────────── */
+/* ═══════════════════════════════════════════════════════════════════════════ */
+/*  RESPONSIVE — Mobile (max-width: 480px)                                   */
+/* ═══════════════════════════════════════════════════════════════════════════ */
+
 @media (max-width: 480px) {
+  /* Room browser */
   .room-browser-container {
     padding: 24px 16px;
   }
 
   .room-browser-title {
-    font-size: 22px;
+    font-size: 24px;
+  }
+
+  .room-browser-subtitle {
+    font-size: 13px;
+    margin-bottom: 20px;
   }
 
   .room-browser-actions {
     flex-direction: column;
-    gap: 8px;
-  }
-
-  .room-card {
-    flex-direction: column;
     align-items: stretch;
-    text-align: left;
   }
 
-  .room-card-header {
-    margin-bottom: 4px;
-  }
-
-  .room-card-name {
-    max-width: 100%;
-  }
-
-  .room-card-info {
-    margin-bottom: 8px;
-  }
-
-  .room-card-join {
+  .create-room-btn,
+  .refresh-rooms-btn {
     width: 100%;
-    text-align: center;
+  }
+
+  .room-list {
+    grid-template-columns: 1fr;
+    max-height: 300px;
+  }
+
+  /* Create modal */
+  .create-room-form {
+    padding: 20px 16px;
+    border-radius: 8px;
+  }
+
+  .create-room-form h2 {
+    font-size: 18px;
+    margin-bottom: 20px;
   }
 
   .theme-selector {
-    justify-content: center;
+    grid-template-columns: repeat(2, 1fr);
   }
 
-  .theme-option {
-    width: 64px;
-    height: 56px;
+  .form-group input[type="text"] {
+    height: 44px;
+    font-size: 16px;
   }
 
+  .form-actions {
+    flex-direction: column;
+  }
+
+  .create-room-confirm,
+  .create-room-cancel {
+    height: 44px;
+  }
+
+  /* Waiting room */
   .waiting-room-container {
     padding: 24px 16px;
   }
@@ -690,8 +888,29 @@
     font-size: 22px;
   }
 
+  .waiting-room-players {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 10px;
+  }
+
   .waiting-player-card {
-    width: 68px;
-    padding: 10px 6px;
+    padding: 12px;
+  }
+
+  .waiting-player-skin {
+    width: 40px;
+    height: 40px;
+  }
+
+  .start-game-btn {
+    height: 48px;
+    font-size: 16px;
+    max-width: 100%;
+  }
+
+  .leave-room-btn {
+    height: 40px;
+    font-size: 14px;
+    max-width: 100%;
   }
 }
