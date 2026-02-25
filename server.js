@@ -14,6 +14,11 @@ const DEFAULT_SPEED = 1.5;
 const DEFAULT_RANGE = 2;
 const DEFAULT_MAX_BOMBS = 1;
 
+// ─── Round Configuration ────────────────────────────────────────────────────
+const ROUND_DURATION_MS = 180000; // 3 minutes
+const ROUND_END_DISPLAY_MS = 5000; // 5 seconds results screen
+const MIN_PLAYERS_TO_START = 2;
+
 // ─── Binary Directions (bitmask) ─────────────────────────────────────────────
 const DIR = { UP: 4, RIGHT: 8, DOWN: 16, LEFT: 32 };
 
@@ -21,6 +26,15 @@ const DIR = { UP: 4, RIGHT: 8, DOWN: 16, LEFT: 32 };
 let nextPlayerId = 1;
 let nextBombId = 1;
 let nextItemId = 1;
+
+// ─── Round State ────────────────────────────────────────────────────────────
+const roundState = {
+  state: 'waiting', // 'waiting' | 'active' | 'ended'
+  timer: null,
+  startTime: 0,
+  roundNumber: 0,
+  timeInterval: null, // interval for broadcasting time remaining
+};
 
 // ─── World State ─────────────────────────────────────────────────────────────
 const cells = [];       // flat array of cell objects
@@ -176,6 +190,8 @@ function createPlayer(ws) {
     nickname: 'Player' + id,
     skinId: 0,
     alive: true,
+    kills: 0,
+    deaths: 0,
     ws,
   };
   return p;
@@ -423,6 +439,170 @@ function pickupItem(player, item) {
   broadcastAll('ID' + item.id + '|' + item.templateId + '|' + item.x + '|' + item.y);
 }
 
+// ─── Round State Machine ────────────────────────────────────────────────────
+function startRound() {
+  roundState.state = 'active';
+  roundState.startTime = Date.now();
+  roundState.roundNumber++;
+
+  // Reset all player stats and respawn
+  for (const [, p] of players) {
+    p.kills = 0;
+    p.deaths = 0;
+    p.alive = true;
+    p.speed = DEFAULT_SPEED;
+    p.range = DEFAULT_RANGE;
+    p.maxBombs = DEFAULT_MAX_BOMBS;
+    p.bombCounter = 0;
+
+    // Respawn player to a new position
+    const spawnCell = getRandomWalkableCellStart();
+    if (spawnCell) {
+      p.x = (spawnCell.x * TILE_SIZE) - 5;
+      p.y = (spawnCell.y * TILE_SIZE) + 10;
+      p.dir = 0;
+      p.olddir = 2;
+      p.onmove = false;
+    }
+
+    // Broadcast updated position
+    broadcastAll('PM' + p.id
+      + '|' + p.x
+      + '|' + p.y
+      + '|' + getClientDirection(p)
+      + '|' + p.skin
+      + '|' + p.dir
+      + '|' + p.onmove
+      + '|' + p.nickname);
+  }
+
+  // Broadcast round state
+  broadcastAll('RS' + 'active' + '|' + ROUND_DURATION_MS);
+
+  // Start countdown timer — end round when time runs out
+  if (roundState.timer) clearTimeout(roundState.timer);
+  roundState.timer = setTimeout(() => {
+    if (roundState.state === 'active') {
+      // Time ran out — find player with most kills as winner
+      let winner = null;
+      let bestKills = -1;
+      for (const [, p] of players) {
+        if (p.alive && (p.kills > bestKills || (p.kills === bestKills && winner === null))) {
+          bestKills = p.kills;
+          winner = p;
+        }
+      }
+      endRound(winner ? winner.id : null, winner ? winner.nickname : null);
+    }
+  }, ROUND_DURATION_MS);
+
+  // Start broadcasting time remaining every second
+  if (roundState.timeInterval) clearInterval(roundState.timeInterval);
+  roundState.timeInterval = setInterval(() => {
+    if (roundState.state === 'active') {
+      broadcastRoundState();
+    } else {
+      clearInterval(roundState.timeInterval);
+      roundState.timeInterval = null;
+    }
+  }, 1000);
+}
+
+function endRound(winnerId, winnerNickname) {
+  roundState.state = 'ended';
+
+  // Clear round timer
+  if (roundState.timer) {
+    clearTimeout(roundState.timer);
+    roundState.timer = null;
+  }
+
+  // Clear time broadcast interval
+  if (roundState.timeInterval) {
+    clearInterval(roundState.timeInterval);
+    roundState.timeInterval = null;
+  }
+
+  // Broadcast winner
+  broadcastAll('RW' + (winnerId || '') + '|' + (winnerNickname || ''));
+
+  // Build and broadcast full results
+  // Format: RE{winnerId}|{winnerNick}|{p1Id}|{p1Nick}|{p1Kills}|{p1Deaths};{p2Id}|...
+  const playerResults = [];
+  for (const [, p] of players) {
+    playerResults.push(p.id + '|' + p.nickname + '|' + (p.kills || 0) + '|' + (p.deaths || 0));
+  }
+  const resultsStr = 'RE' + (winnerId || '') + '|' + (winnerNickname || '') + '|' + playerResults.join(';');
+  broadcastAll(resultsStr);
+
+  // Broadcast ended state
+  broadcastAll('RS' + 'ended' + '|0');
+
+  // After display time, reset the round
+  setTimeout(() => {
+    resetRound();
+  }, ROUND_END_DISPLAY_MS);
+}
+
+function resetRound() {
+  // Clear all bombs and their timers
+  for (const b of bombs) {
+    if (b.timer) clearTimeout(b.timer);
+    if (b.cell) b.cell.bomb = null;
+  }
+  bombs.length = 0;
+
+  // Clear all items and their timers
+  for (const item of items) {
+    if (item.timer) clearTimeout(item.timer);
+    if (item.cell) item.cell.item = null;
+  }
+  items.length = 0;
+
+  // Regenerate map
+  cells.length = 0;
+  initializeMap();
+
+  // Broadcast round reset then new map data
+  broadcastAll('RR');
+  broadcastAll('WL' + MAP_WIDTH + '|' + MAP_HEIGHT + '|' + getMapData());
+
+  // Set state to waiting
+  roundState.state = 'waiting';
+
+  // Check if enough players to auto-start
+  if (players.size >= MIN_PLAYERS_TO_START) {
+    startRound();
+  }
+}
+
+function checkRoundEnd() {
+  if (roundState.state !== 'active') return;
+
+  let aliveCount = 0;
+  let lastAlive = null;
+  for (const [, p] of players) {
+    if (p.alive) {
+      aliveCount++;
+      lastAlive = p;
+    }
+  }
+
+  if (aliveCount <= 1) {
+    endRound(
+      lastAlive ? lastAlive.id : null,
+      lastAlive ? lastAlive.nickname : null
+    );
+  }
+}
+
+function broadcastRoundState() {
+  const timeRemaining = roundState.state === 'active'
+    ? Math.max(0, ROUND_DURATION_MS - (Date.now() - roundState.startTime))
+    : 0;
+  broadcastAll('RS' + roundState.state + '|' + timeRemaining);
+}
+
 // ─── Movement ────────────────────────────────────────────────────────────────
 function movePlayer(player) {
   if (!player.onmove) return;
@@ -626,6 +806,17 @@ function handleWorldEntities(player, ws) {
       + '|0'
       + '|' + player.nickname);
   }
+
+  // Send current round state to newly connected player
+  const timeRemaining = roundState.state === 'active'
+    ? Math.max(0, ROUND_DURATION_MS - (Date.now() - roundState.startTime))
+    : 0;
+  sendTo(ws, 'RS' + roundState.state + '|' + timeRemaining);
+
+  // Auto-start round if enough players and currently waiting
+  if (roundState.state === 'waiting' && players.size >= MIN_PLAYERS_TO_START) {
+    startRound();
+  }
 }
 
 function handleNicknameInit(player, message) {
@@ -715,6 +906,11 @@ wss.on('connection', (ws) => {
     // Broadcast disconnect
     broadcast('PD' + player.id);
     players.delete(ws);
+
+    // If round is active, check if round should end
+    if (roundState.state === 'active') {
+      checkRoundEnd();
+    }
   });
 
   ws.on('error', (err) => {
@@ -734,6 +930,9 @@ server.listen(PORT, () => {
 process.on('SIGINT', () => {
   console.log('\nShutting down...');
   clearInterval(tickInterval);
+  // Clear round timers
+  if (roundState.timer) clearTimeout(roundState.timer);
+  if (roundState.timeInterval) clearInterval(roundState.timeInterval);
   // Clear all bomb/item timers
   for (const b of bombs) {
     if (b.timer) clearTimeout(b.timer);
