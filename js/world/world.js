@@ -101,12 +101,13 @@ var World = function(data)
 		var y = player.y - (player.img.height - 20);
 	}
 	
-	this.addplayer = function(id, x, y, dir, skin, bcurrent)
+	this.addplayer = function(id, x, y, dir, skin, bcurrent, nickname)
 	{
 		var p = new Player(id, x, y);
 		p.currentanim = p.anims[dir];
 		p.currentanimid = 0;
 		p.skin = skin;
+		p.nickname = nickname || 'Player';
 		p.targetX = x;
 		p.targetY = y;
 		p.load();
@@ -115,13 +116,13 @@ var World = function(data)
 		this.players.push(p);
 	};
 	
-	this.moveplayer = function(id, x, y, dir, skin, bstop, bytedir)
+	this.moveplayer = function(id, x, y, dir, skin, bstop, bytedir, nickname)
 	{
 		var player = this.getPlayer(id);
 
 		if (player == null)
 		{
-			this.addplayer(id, x, y, dir, skin, 0);
+			this.addplayer(id, x, y, dir, skin, 0, nickname);
 			return ;
 		}
 		// Update animation direction
@@ -131,6 +132,7 @@ var World = function(data)
 			player.currentanimid = 0;
 		}
 		player.skin = skin;
+		if (nickname) player.nickname = nickname;
 
 		var isLocal = (currentPlayer != null && player.id == currentPlayer.id);
 

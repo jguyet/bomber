@@ -1,10 +1,19 @@
 <!doctype html>
 <html class=""><head>
-    <title ng-bind="'title' | i18n" class="ng-binding">Game of Bombs</title>
+    <title>Bomber — Multiplayer Bomberman</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Bomber — a free multiplayer Bomberman game. Play online in your browser with friends.">
+    <meta property="og:title" content="Bomber — Multiplayer Bomberman">
+    <meta property="og:description" content="Play free multiplayer Bomberman in your browser. No download needed.">
+    <meta property="og:image" content="/assets/og-preview.png">
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://bomber.game">
+    <link rel="icon" type="image/svg+xml" href="/assets/favicon.svg">
     <link href="https://fonts.googleapis.com/css?family=Open+Sans:400,600&amp;subset=latin,cyrillic" rel="stylesheet">
     <link rel="stylesheet" href="/css/normalize-2.1.0.css">
     <link rel="stylesheet" href="/css/styles.css">
-	
+
 	<!--JS---------------------------------->
 	<script src="//ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
 	<script src="./js/libs/lodash.min.js"></script>
@@ -21,7 +30,33 @@
 	<!-------------------------------------->
 </head>
 <body class="ng-scope">
-	
+
+	<!-- Lobby overlay -->
+	<div id="lobby-screen">
+	  <div id="lobby-box">
+	    <h1>BOMBER</h1>
+	    <input type="text" id="nickname-input" placeholder="Enter your nickname" maxlength="20" autocomplete="off">
+	    <div id="skin-grid"><!-- 24 skin preview images, populated by JS --></div>
+	    <button id="play-btn">PLAY</button>
+	  </div>
+	</div>
+
+	<!-- Loading overlay -->
+	<div id="loading-overlay" style="display:none;">
+	  <div id="loading-box">
+	    <div id="loading-label">Loading assets…</div>
+	    <div id="loading-bar-track"><div id="loading-bar-fill"></div></div>
+	  </div>
+	</div>
+
+	<!-- Disconnect overlay -->
+	<div id="disconnect-overlay" style="display:none;">
+	  <div id="disconnect-box">
+	    <div id="disconnect-msg">Connection lost. Reconnecting…</div>
+	    <button id="refresh-btn" style="display:none;" onclick="location.reload()">Refresh</button>
+	  </div>
+	</div>
+
 	<div id="viewport" ng-controller="KeyboardCtrl" class="ng-scope">
 	<div style="position: absolute; left: 0px; top: 0px;">
 		<canvas id="layer0" style="position: absolute; left: 0px; top: 0px; background-color: black;"></canvas>
@@ -42,14 +77,14 @@
 				<li ng-click="ignore(24)" style="float: left;" class="ng-binding">/day</li>
 				<li ng-click="ignore(24*30)" class="ng-binding">/mon.</li>
 			</span>
-			<li ng-show="canStopIgnoring()" ng-click="ignore(0)" class="ng-binding ng-hide">Stop ignoring</li>			
+			<li ng-show="canStopIgnoring()" ng-click="ignore(0)" class="ng-binding ng-hide">Stop ignoring</li>
             </ul>
 		</div>
 		<div class="misc-top ng-scope" ng-controller="GameServersCtrl">
 			<h1 class="ng-binding">hardcore</h1>
 			<div class="out_butt">
 			<div class="room">
-				<div class="butt_left_menu ng-binding" style="text-transform:none;" ng-click="showRooms()">Room: 
+				<div class="butt_left_menu ng-binding" style="text-transform:none;" ng-click="showRooms()">Room:
 					<span class="colorFoxy ng-binding">EU1</span>
 				</div>
 			</div>
@@ -59,7 +94,7 @@
 		<ul class="chat-list" id="listChat">
 			<li id="endchat"></li>
 		</ul>
-  
+
 		<!--<div id="chatmsg" class="chatmsg" ng-controller="ChatInputCtrl"></div>-->
 		<div class="chatmsg ng-scope" area-bottom="104" ng-controller="ChatInputCtrl">
 			<textarea area-auto="" maxlength="140" onkeypress="onchatpress(event)" onkeydown="onchatdelete(event)" rows="1" id="msgText" style="height: 28px;" placeholder="Message" data-mentions-input="true"></textarea>
