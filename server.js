@@ -249,6 +249,11 @@ function explodeLine(cellList) {
     }
     if (playerDied) break;
 
+    // Destroy items on explosion-affected cells
+    if (cell.item) {
+      despawnItem(cell.item);
+    }
+
     if (cell.bomb) {
       chainBombs.push(cell.bomb);
       break;
@@ -303,6 +308,11 @@ function explodeBomb(bomb) {
     if (pCell && pCell.id === cell.id) {
       respawnPlayer(p);
     }
+  }
+
+  // Destroy item on center cell
+  if (cell.item) {
+    despawnItem(cell.item);
   }
 
   broadcastAll('BE' + bomb.id + '|' + sup.count + '|' + down.count + '|' + left.count + '|' + right.count);
@@ -388,8 +398,8 @@ function trySpawnItem(cell) {
 
   broadcastAll('IA' + item.id + '|' + item.templateId + '|' + item.x + '|' + item.y);
 
-  // auto-despawn after timeout
-  item.timer = setTimeout(() => despawnItem(item), ITEM_DESPAWN_MS);
+  // Items persist until collected or destroyed by explosion (no auto-despawn)
+  item.timer = null;
 }
 
 function despawnItem(item) {
