@@ -21,5 +21,8 @@ npm-debug.log*
 *.swo
 *~
 
+# Database
+.db/
+
 # Docker
 docker-compose.override.yml
