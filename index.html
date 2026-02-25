@@ -27,6 +27,7 @@
     <link rel="stylesheet" href="./css/styles.css">
     <link rel="stylesheet" href="./css/lobby.css">
     <link rel="stylesheet" href="./css/loading.css">
+    <link rel="stylesheet" href="./css/connection-status.css">
 
 	<!--JS---------------------------------->
 	<script src="//ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
@@ -40,6 +41,7 @@
 	<script src="./js/aks.js"></script>
 	<script src="./js/chat.js"></script>
 	<script src="./js/events.js"></script>
+	<script src="./js/connection-status.js"></script>
 	<script src="./js/loading.js"></script>
 	<script src="./js/initworld.js"></script>
 	<script src="./js/lobby.js"></script>
@@ -75,6 +77,15 @@
 			</div>
 			<div class="loading-status" id="loading-status">Preparing...</div>
 			<div class="loading-detail" id="loading-detail"></div>
+		</div>
+	</div>
+
+	<!-- Connection Status Overlay -->
+	<div id="connection-overlay" style="display:none;">
+		<div class="connection-toast">
+			<div class="connection-icon" id="connection-icon">&#x26A0;</div>
+			<div class="connection-text" id="connection-text">Connection lost</div>
+			<div class="connection-detail" id="connection-detail">Reconnecting...</div>
 		</div>
 	</div>
 

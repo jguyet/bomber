@@ -4,6 +4,8 @@ function sendSocketMessage(message)
 	socket.send(message);
 }
 
+var reconnectAttempt = 0;
+
 function InitializeSocket()
 {
 	if ("WebSocket" in window)
@@ -13,6 +15,8 @@ function InitializeSocket()
 
 		socket.onopen = function()
 		{
+			reconnectAttempt = 0;
+			ConnectionStatus.onConnected();
 			LoadingManager.assetLoaded('Server connection');
 			LoadingManager.setStatus('Loading world...');
 			sendSocketMessage("WL");
@@ -157,17 +161,31 @@ function InitializeSocket()
 
 		socket.onclose = function()
 		{
-			console.log("Socket connexion echouer waiting 1000s...");
-			setTimeout(InitializeSocket, 1000);
+			console.log("Socket connection closed.");
+			if (reconnectAttempt < ConnectionStatus.maxRetries) {
+				ConnectionStatus.onDisconnected();
+				ConnectionStatus.onRetrying(reconnectAttempt);
+				reconnectAttempt++;
+				setTimeout(InitializeSocket, 2000);
+			} else {
+				ConnectionStatus.onPermanentFailure();
+			}
 		};
 	}
 	else
 	{
-		
+
 	}
 	if (socket == null)
 	{
-		console.log("Socket connexion echouer waiting 1000s...");
-		setTimeout(InitializeSocket, 1000);
+		console.log("Socket connection failed.");
+		if (reconnectAttempt < ConnectionStatus.maxRetries) {
+			ConnectionStatus.onDisconnected();
+			ConnectionStatus.onRetrying(reconnectAttempt);
+			reconnectAttempt++;
+			setTimeout(InitializeSocket, 2000);
+		} else {
+			ConnectionStatus.onPermanentFailure();
+		}
 	}
 }

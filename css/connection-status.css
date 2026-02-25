@@ -1,0 +1,56 @@
+/* ─── Connection Status Overlay ───────────────────────────────────────────── */
+#connection-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: rgba(0, 0, 0, 0.6);
+  z-index: 9999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  animation: connFadeIn 0.3s ease-in;
+}
+
+@keyframes connFadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+.connection-toast {
+  background: #333;
+  padding: 24px 32px;
+  border-radius: 12px;
+  text-align: center;
+  min-width: 320px;
+}
+
+.connection-icon {
+  font-size: 48px;
+  color: #ff9800;
+  margin-bottom: 12px;
+}
+
+#connection-overlay.success .connection-icon {
+  color: #4CAF50;
+}
+
+#connection-overlay.failed .connection-icon {
+  color: #f44336;
+}
+
+.connection-text {
+  color: #fff;
+  font-size: 18px;
+  font-weight: 600;
+  font-family: 'Open Sans', Arial, sans-serif;
+  margin-bottom: 4px;
+}
+
+.connection-detail {
+  color: #aaa;
+  font-size: 14px;
+  font-family: 'Open Sans', Arial, sans-serif;
+  margin-top: 8px;
+}
