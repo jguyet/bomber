@@ -179,10 +179,22 @@ function broadcastRoomPlayerList(room) {
 io.on('connection', (socket) => {
   console.log('Client connected:', socket.id);
 
-  // Handle nickname init
+  // Handle nickname init — validate and persist on socket for room joins/reconnects
   socket.on('nicknameInit', (data) => {
-    socket.nickname = data.nickname;
-    socket.skinId = data.skinId;
+    if (data && typeof data.nickname === 'string' && data.nickname.trim().length > 0) {
+      socket.nickname = data.nickname.trim().substring(0, 16);
+    } else if (!socket.nickname) {
+      socket.nickname = 'Player';
+    }
+    if (data && data.skinId !== undefined && data.skinId !== null) {
+      const skinId = parseInt(data.skinId, 10);
+      if (!isNaN(skinId) && skinId >= 0 && skinId <= 23) {
+        socket.skinId = skinId;
+      }
+    }
+    if (socket.skinId === undefined || socket.skinId === null) {
+      socket.skinId = 0;
+    }
   });
 
   // Handle room join (supports both string roomId and { roomId, spectator } object)
