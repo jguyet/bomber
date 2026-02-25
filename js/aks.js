@@ -13,6 +13,8 @@ function InitializeSocket()
 
 		socket.onopen = function()
 		{
+			LoadingManager.assetLoaded('Server connection');
+			LoadingManager.setStatus('Loading world...');
 			sendSocketMessage("WL");
 			initWorld();
 			console.log("Connection OK");
@@ -135,6 +137,8 @@ function InitializeSocket()
 							fosfo0.clear();
 							world = new World(received_msg.substring(2));
 							world.loadWorld();
+							LoadingManager.assetLoaded('World data');
+							LoadingManager.worldReady();
 							sendSocketMessage("WE"); // load entities
 						break ;
 						case "C":
