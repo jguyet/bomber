@@ -161,15 +161,14 @@ io.on('connection', (socket) => {
     socket.skinId = data.skinId;
   });
 
-  // Handle room join
-  socket.on('joinRoom', (roomId) => {
+  // Handle room join (supports both string roomId and { roomId, spectator } object)
+  socket.on('joinRoom', (data) => {
+    const roomId = typeof data === 'string' ? data : data.roomId;
+    const isSpectator = typeof data === 'object' && data.spectator === true;
+
     const room = roomManager.getRoom(roomId);
     if (!room) {
       socket.emit('roomError', 'Room not found');
-      return;
-    }
-    if (room.players.size >= room.maxPlayers) {
-      socket.emit('roomError', 'Room is full');
       return;
     }
 
@@ -178,8 +177,38 @@ io.on('connection', (socket) => {
       handleLeaveRoom(socket);
     }
 
+    // ─── Spectator join ───────────────────────────────────────────────────
+    if (isSpectator) {
+      socket.join('room:' + roomId);
+      socket.currentRoomId = roomId;
+      socket.isSpectator = true;
+      room.addSpectator(socket);
+
+      // Confirm join as spectator
+      socket.emit('roomJoined', {
+        roomId: room.id,
+        roomName: room.name,
+        isCreator: false,
+        themeId: room.activeTheme,
+        spectator: true
+      });
+
+      // Send full world state if room is playing
+      if (room.state === 'playing') {
+        room.sendSpectatorWorldState(socket);
+      }
+      return;
+    }
+
+    // ─── Normal player join ───────────────────────────────────────────────
+    if (room.players.size >= room.maxPlayers) {
+      socket.emit('roomError', 'Room is full');
+      return;
+    }
+
     socket.join('room:' + roomId);
     socket.currentRoomId = roomId;
+    socket.isSpectator = false;
 
     const player = room.createPlayer(socket);
 
@@ -235,6 +264,7 @@ io.on('connection', (socket) => {
   socket.on('game', (message) => {
     const roomId = socket.currentRoomId;
     if (!roomId) return;
+    if (socket.isSpectator) return; // Spectators cannot send game input
     const room = roomManager.getRoom(roomId);
     if (!room) return;
     const player = room.players.get(socket.id);
@@ -298,6 +328,17 @@ function handleLeaveRoom(socket) {
   const room = roomManager.getRoom(roomId);
   if (!room) {
     socket.currentRoomId = null;
+    socket.isSpectator = false;
+    return;
+  }
+
+  // Handle spectator leave — don't affect room player state
+  if (room.isSpectator(socket.id)) {
+    room.removeSpectator(socket.id);
+    socket.leave('room:' + roomId);
+    socket.currentRoomId = null;
+    socket.isSpectator = false;
+    // Don't destroy room just because a spectator left — check players only
     return;
   }
 
