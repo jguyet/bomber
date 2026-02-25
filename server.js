@@ -209,7 +209,8 @@ io.on('connection', (socket) => {
     socket.emit('roomJoined', {
       roomId: room.id,
       roomName: room.name,
-      isCreator: room.creatorId === socket.id
+      isCreator: room.creatorId === socket.id,
+      themeId: room.activeTheme
     });
 
     // Send theme
