@@ -1,5 +1,7 @@
-var World = function(data)
+var World = function(data, theme)
 {
+	this.theme = theme || 'default';
+	this.tilesetPath = THEME_TILESETS[this.theme] || THEME_TILESETS['default'];
 	this.width = data.split("|")[0];
 	this.height = data.split("|")[1];
 	this.data = [];
@@ -88,7 +90,7 @@ var World = function(data)
 				var id = c.split(",")[0];
 				var groundId = c.split(",")[1];
 
-				tmp.push(fosfo0.drawframe("case" + id, 'assets/maps/1.png', groundId, countx, county));
+				tmp.push(fosfo0.drawframe("case" + id, this.tilesetPath, groundId, countx, county));
 
 				if ((y % this.height) == 0 && (x % this.width) == 0)
 				{
