@@ -356,6 +356,8 @@ function InitializeSocket()
 		// Room creator started the game - transition from waiting room to game
 		if (typeof RoomUI !== 'undefined') RoomUI.hideWaitingRoom();
 		document.getElementById('chat').style.display = '';
+		// Initialize chat smart scroll
+		if (typeof initChatScroll === 'function') initChatScroll();
 		// Show room & theme HUD
 		if (typeof HUD !== 'undefined' && HUD.setRoomInfo) {
 			HUD.setRoomInfo(currentRoomName || '', currentTheme || 'default');
@@ -401,6 +403,9 @@ function addKillToChat(killerNick, victimNick) {
 	elem.innerHTML = '<span class="ico bombed"></span> <b class="nickname">' + escapeHtml(killerNick) + '</b> killed <b class="nickname">' + escapeHtml(victimNick) + '</b>';
 	var chat = document.getElementById("endchat");
 	chat.parentNode.insertBefore(elem, chat);
-	var chatList = document.getElementById("listChat");
-	if (chatList) chatList.scrollTop = chatList.scrollHeight;
+	if (typeof pruneOldMessages === 'function') pruneOldMessages();
+	if (typeof chatAutoScroll !== 'undefined' && chatAutoScroll) {
+		var chatList = document.getElementById("listChat");
+		if (chatList) chatList.scrollTop = chatList.scrollHeight;
+	}
 }

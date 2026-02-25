@@ -1,4 +1,7 @@
 
+var CHAT_MAX_MESSAGES = 100;
+var chatAutoScroll = true;
+
 function escapeHtml(str) {
 	var div = document.createElement('div');
 	div.textContent = str;
@@ -34,6 +37,25 @@ var onchatdelete = function(event)
 		current_line = current_line.substr(0, current_line.length - 1);
 };
 
+function pruneOldMessages() {
+	var chatList = document.getElementById("listChat");
+	if (!chatList) return;
+	var items = chatList.querySelectorAll("li:not(#endchat)");
+	while (items.length > CHAT_MAX_MESSAGES) {
+		chatList.removeChild(items[0]);
+		items = chatList.querySelectorAll("li:not(#endchat)");
+	}
+}
+
+function initChatScroll() {
+	var chatList = document.getElementById("listChat");
+	if (!chatList) return;
+	chatList.addEventListener("scroll", function() {
+		var atBottom = (chatList.scrollTop + chatList.clientHeight >= chatList.scrollHeight - 5);
+		chatAutoScroll = atBottom;
+	});
+}
+
 var addmessagetochat = function(nickname, data)
 {
 	var isMyMsg = (nickname === playerNickname);
@@ -47,9 +69,11 @@ var addmessagetochat = function(nickname, data)
 	var chat = document.getElementById("endchat");
 	var parentdiv = chat.parentNode;
 	parentdiv.insertBefore(elem, chat);
-	// Auto-scroll to bottom
-	var chatList = document.getElementById("listChat");
-	if (chatList) {
-		chatList.scrollTop = chatList.scrollHeight;
+	pruneOldMessages();
+	if (chatAutoScroll) {
+		var chatList = document.getElementById("listChat");
+		if (chatList) {
+			chatList.scrollTop = chatList.scrollHeight;
+		}
 	}
 };

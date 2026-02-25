@@ -54,6 +54,8 @@ function initWorld()
 	document.addEventListener('keyup', onKeyUp, false );
 	document.addEventListener('mousewheel', onrool, false);
 	window.addEventListener( 'resize', onWindowResize, false );
+	// Initialize chat smart auto-scroll
+	if (typeof initChatScroll === 'function') initChatScroll();
 	console.log("START");
 	var tilesetPath = THEME_TILESETS[currentTheme] || THEME_TILESETS['default'];
 	fosfo0.setFramesToImg(tilesetPath, 8, 24);
