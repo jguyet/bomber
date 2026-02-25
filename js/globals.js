@@ -41,3 +41,17 @@ var killFeed = []; // [{ killerId, killerNick, victimId, victimNick, time }, ...
 
 // Spectator
 var isSpectating = false;
+
+// Room system
+var currentRoomId = null;    // ID of the room the player is in
+var currentRoomName = '';     // Name of current room
+var isRoomCreator = false;    // Whether current player created the room
+var roomPlayerList = [];      // Players in the waiting room [{ id, nickname, skinId }]
+
+// Theme system
+var currentTheme = 'default'; // Active theme: 'default' | 'winter' | 'moon'
+var THEME_TILESETS = {
+  'default': 'assets/maps/1.png',
+  'winter': 'assets/maps/1-winter.png',
+  'moon': 'assets/maps/tileset-moon.png'
+};
