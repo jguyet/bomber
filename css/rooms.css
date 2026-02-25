@@ -326,6 +326,46 @@
   box-shadow: none;
 }
 
+/* ─── Room card buttons wrapper (JOIN + WATCH side by side) ───────────────── */
+.room-card-buttons {
+  display: flex;
+  gap: 6px;
+  justify-content: flex-end;
+  margin-top: 8px;
+}
+
+.room-card-buttons .room-card-join {
+  width: auto;
+  flex: 1;
+}
+
+/* WATCH button */
+.room-card-watch {
+  background: transparent;
+  border: 1px solid #888;
+  color: #ccc;
+  padding: 6px 14px;
+  border-radius: 6px;
+  font-family: 'Open Sans', sans-serif;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-left: 6px;
+  transition: all 0.2s ease;
+}
+
+.room-card-watch:hover {
+  background: rgba(255, 255, 255, 0.1);
+  border-color: #ffd21f;
+  color: #ffd21f;
+}
+
+.room-card-watch:active {
+  transform: scale(0.98);
+}
+
 /* ═══════════════════════════════════════════════════════════════════════════ */
 /*  CREATE ROOM MODAL                                                        */
 /* ═══════════════════════════════════════════════════════════════════════════ */
