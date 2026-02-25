@@ -38,8 +38,8 @@ const BOMB_TIMER_MS = 3000;
 const CHAIN_EXPLOSION_DELAY_MS = 350; // delay between chained bomb explosions (ms)
 // Player hitbox: (x, y) is the top-left corner of the hitbox.
 // The hitbox must be smaller than TILE_SIZE to fit through 1-tile corridors.
-const PLAYER_W = 28;  // hitbox width  (centered in 32px tile → 2px padding each side)
-const PLAYER_H = 28;  // hitbox height
+const PLAYER_W = 14;  // hitbox width  (half-size, centered in 32px tile → 9px padding each side)
+const PLAYER_H = 14;  // hitbox height
 // Direction bitmasks (same as Java BinaryDirection enum)
 const DIR = {
   up:    4,
