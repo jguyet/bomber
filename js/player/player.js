@@ -5,6 +5,7 @@ var Player = function(id, x, y)
 	this.x = x;
 	this.y = y;
 	this.speed = 1.5;
+	this.nickname = "Player";
 	this.anims = [
 		{'frames' : [0, 1, 2, 3], 'name' : 'up', 'id' : 0},
 		{ 'frames' : [4, 5, 6, 7], 'name' : 'right', 'id' : 1},

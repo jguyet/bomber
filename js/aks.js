@@ -19,13 +19,14 @@ function InitializeSocket()
 			ConnectionStatus.onConnected();
 			LoadingManager.assetLoaded('Server connection');
 			LoadingManager.setStatus('Loading world...');
+			sendSocketMessage("NI" + playerNickname + "|" + playerSkinId);
 			sendSocketMessage("WL");
 			initWorld();
 			console.log("Connection OK");
 		};
 
-		socket.onmessage = function (evt) 
-		{ 
+		socket.onmessage = function (evt)
+		{
 			var received_msg = evt.data;
 			var type = received_msg.charAt(0);
 			var action = received_msg.charAt(1);
@@ -108,7 +109,8 @@ function InitializeSocket()
 							var skin = Number(received_msg.substring(2).split("|")[4]);
 							var speed = Number(received_msg.substring(2).split("|")[5]);
 							var bcurrent = Number(received_msg.substring(2).split("|")[6]);
-							world.addplayer(id, x, y, dir, skin, speed, bcurrent);
+							var nickname = received_msg.substring(2).split("|")[7] || "Player";
+							world.addplayer(id, x, y, dir, skin, speed, bcurrent, nickname);
 						break ;
 						case "D":
 							var id = Number(received_msg.substring(2).split("|")[0]);
@@ -121,7 +123,8 @@ function InitializeSocket()
 							var dir = Number(received_msg.substring(2).split("|")[3]);
 							var skin = Number(received_msg.substring(2).split("|")[4]);
 							var bytedir = Number(received_msg.substring(2).split("|")[5]);
-							world.moveplayer(id, x, y, dir, skin, false, bytedir);
+							var nickname = received_msg.substring(2).split("|")[7] || "";
+							world.moveplayer(id, x, y, dir, skin, false, bytedir, nickname);
 						break ;
 						case "S":
 							var id = Number(received_msg.substring(2).split("|")[0]);
@@ -130,7 +133,8 @@ function InitializeSocket()
 							var dir = Number(received_msg.substring(2).split("|")[3]);
 							var skin = Number(received_msg.substring(2).split("|")[4]);
 							var bytedir = Number(received_msg.substring(2).split("|")[5]);
-							world.moveplayer(id, x, y, dir, skin, true, bytedir);
+							var nickname = received_msg.substring(2).split("|")[7] || "";
+							world.moveplayer(id, x, y, dir, skin, true, bytedir, nickname);
 						break ;
 					}
 				break ;
