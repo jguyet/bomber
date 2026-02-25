@@ -400,9 +400,11 @@ function InitializeSocket()
 function addKillToChat(killerNick, victimNick) {
 	var elem = document.createElement("li");
 	elem.setAttribute("class", "ng-scope kill-info");
+	elem.setAttribute("data-category", "kill");
 	elem.innerHTML = '<span class="ico bombed"></span> <b class="nickname">' + escapeHtml(killerNick) + '</b> killed <b class="nickname">' + escapeHtml(victimNick) + '</b>';
 	var chat = document.getElementById("endchat");
 	chat.parentNode.insertBefore(elem, chat);
+	if (typeof ChatFilters !== 'undefined') ChatFilters.onNewMessage(elem);
 	if (typeof pruneOldMessages === 'function') pruneOldMessages();
 	if (typeof chatAutoScroll !== 'undefined' && chatAutoScroll) {
 		var chatList = document.getElementById("listChat");
