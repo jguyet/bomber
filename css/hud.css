@@ -373,6 +373,50 @@
 }
 
 /* ═══════════════════════════════════════════════════════════════════════════ */
+/*  ROOM & THEME INFO (top-left during gameplay)                              */
+/* ═══════════════════════════════════════════════════════════════════════════ */
+
+#hud-room-info {
+  position: fixed;
+  top: 8px;
+  left: 8px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  z-index: 100;
+  pointer-events: none;
+  animation: hudFadeIn 0.3s ease-out;
+}
+
+.hud-room-name {
+  font-family: 'Open Sans', Arial, sans-serif;
+  font-size: 13px;
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.7);
+  background: rgba(0, 0, 0, 0.5);
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+  padding: 4px 10px;
+  border-radius: 4px;
+  white-space: nowrap;
+  max-width: 160px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.hud-theme-badge {
+  font-family: 'Open Sans', Arial, sans-serif;
+  font-size: 13px;
+  color: rgba(255, 255, 255, 0.7);
+  background: rgba(0, 0, 0, 0.5);
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+  padding: 4px 10px;
+  border-radius: 4px;
+  white-space: nowrap;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════ */
 /*  SHARED ANIMATIONS                                                         */
 /* ═══════════════════════════════════════════════════════════════════════════ */
 
@@ -408,6 +452,22 @@
 /* ═══════════════════════════════════════════════════════════════════════════ */
 
 @media (max-width: 768px) {
+  #hud-room-info {
+    top: 6px;
+    left: 6px;
+    gap: 6px;
+  }
+
+  .hud-room-name,
+  .hud-theme-badge {
+    font-size: 11px;
+    padding: 3px 8px;
+  }
+
+  .hud-room-name {
+    max-width: 120px;
+  }
+
   #round-timer {
     top: 8px;
     padding: 6px 16px;
@@ -463,6 +523,22 @@
 }
 
 @media (max-width: 480px) {
+  #hud-room-info {
+    top: 4px;
+    left: 4px;
+    gap: 4px;
+  }
+
+  .hud-room-name,
+  .hud-theme-badge {
+    font-size: 10px;
+    padding: 2px 6px;
+  }
+
+  .hud-room-name {
+    max-width: 90px;
+  }
+
   #round-timer {
     top: 4px;
     padding: 4px 12px;

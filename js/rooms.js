@@ -336,6 +336,10 @@ var RoomUI = (function() {
     isRoomCreator = false;
     roomPlayerList = [];
     updateChatRoomLabel('---');
+    // Hide room info HUD
+    if (typeof HUD !== 'undefined' && HUD.hideRoomInfo) {
+      HUD.hideRoomInfo();
+    }
     hideWaitingRoom();
     showBrowser();
   }
