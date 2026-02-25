@@ -170,30 +170,35 @@ function getCellPos(px, py) {
   return getCellByGridPos(gx, gy);
 }
 
-// Get cells in a direction (matching Java: getdircell)
+// Wrap grid coordinate into [0, size) range
+function wrapGrid(v, size) {
+  return ((v % size) + size) % size;
+}
+
+// Get cells in a direction, wrapping around map edges
 function getDirCells(cell, dir, range) {
   const result = [];
   if ((dir & DIR.up) !== 0) {
     for (let i = 1; i < range; i++) {
-      const c = getCellByGridPos(cell.x, cell.y - i);
+      const c = getCellByGridPos(cell.x, wrapGrid(cell.y - i, MAP_HEIGHT));
       if (c) result.push(c);
     }
   }
   if ((dir & DIR.right) !== 0) {
     for (let i = 1; i < range; i++) {
-      const c = getCellByGridPos(cell.x + i, cell.y);
+      const c = getCellByGridPos(wrapGrid(cell.x + i, MAP_WIDTH), cell.y);
       if (c) result.push(c);
     }
   }
   if ((dir & DIR.down) !== 0) {
     for (let i = 1; i < range; i++) {
-      const c = getCellByGridPos(cell.x, cell.y + i);
+      const c = getCellByGridPos(cell.x, wrapGrid(cell.y + i, MAP_HEIGHT));
       if (c) result.push(c);
     }
   }
   if ((dir & DIR.left) !== 0) {
     for (let i = 1; i < range; i++) {
-      const c = getCellByGridPos(cell.x - i, cell.y);
+      const c = getCellByGridPos(wrapGrid(cell.x - i, MAP_WIDTH), cell.y);
       if (c) result.push(c);
     }
   }
