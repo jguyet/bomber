@@ -84,7 +84,7 @@ function initWorld()
 	fosfo0.setFramesToImg('assets/maps/1.png', 8, 24);
 	fosfo1.setFramesToImg('assets/bombs/1.png', 1, 9);
 	fosfo1.setFramesToImg('assets/bombs/explode/1.png', 4, 2);
-	fosfo1.setFramesToImg('assets/items/1.png', 5, 4);
+	fosfo1.setFramesToImg('assets/items/1.png', 3, 9);
 	function loop() {
 		interval();
 		requestAnimationFrame(loop);
