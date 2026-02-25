@@ -11,13 +11,25 @@
     var playBtn = document.getElementById('play-btn');
     var nicknameInput = document.getElementById('nickname-input');
 
-    // Default skin selection
-    playerSkinId = 0;
+    // Restore from localStorage if available
+    var savedNickname = localStorage.getItem('bomber_nickname');
+    var savedSkinId = localStorage.getItem('bomber_skinId');
+
+    if (savedNickname) {
+      playerNickname = savedNickname;
+      nicknameInput.value = savedNickname;
+    }
+
+    // Default skin selection (use saved or 0)
+    playerSkinId = (savedSkinId !== null) ? parseInt(savedSkinId, 10) : 0;
+    if (isNaN(playerSkinId) || playerSkinId < 0 || playerSkinId >= TOTAL_SKINS) {
+      playerSkinId = 0;
+    }
 
     // Generate skin cards
     for (var i = 0; i < TOTAL_SKINS; i++) {
       var card = document.createElement('div');
-      card.className = 'skin-card' + (i === 0 ? ' selected' : '');
+      card.className = 'skin-card' + (i === playerSkinId ? ' selected' : '');
       card.setAttribute('data-skin-id', i);
 
       var canvas = document.createElement('canvas');
@@ -103,6 +115,10 @@
     if (nickname.length === 0) {
       playerNickname = 'Player';
     }
+
+    // Persist nickname and skin to localStorage
+    localStorage.setItem('bomber_nickname', playerNickname);
+    localStorage.setItem('bomber_skinId', playerSkinId);
 
     // Hide lobby
     document.getElementById('lobby-screen').style.display = 'none';
