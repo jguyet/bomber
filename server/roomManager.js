@@ -435,6 +435,7 @@ class Room {
   }
 
   despawnItem(item) {
+    if (!item) return;
     if (item.cell) item.cell.item = null;
     const idx = this.items.indexOf(item);
     if (idx !== -1) this.items.splice(idx, 1);
@@ -442,6 +443,8 @@ class Room {
   }
 
   pickupItem(player, item) {
+    // Guard: dead players cannot pick up items
+    if (!player.alive) return;
     // Guard: prevent double-pickup if two players are on the same cell in the same tick
     const idx = this.items.indexOf(item);
     if (idx === -1) return; // Already picked up
@@ -453,11 +456,9 @@ class Room {
     // Apply effect (with stacking caps)
     if (item.templateId === 0) {
       player.maxBombs = Math.min(player.maxBombs + 1, 8); // cap at 8 bombs
-    }
-    if (item.templateId === 4) {
+    } else if (item.templateId === 4) {
       player.range = Math.min(player.range + 1, 10); // cap at 10 range
-    }
-    if (item.templateId === 6) {
+    } else if (item.templateId === 6) {
       player.speed = Math.min(player.speed + 0.1, 3.0); // cap at 3.0 speed
       this.broadcastAll('IS' + player.id + '|' + player.speed);
     }
