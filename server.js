@@ -3,6 +3,7 @@ const fs = require('fs');
 const path = require('path');
 const { Server } = require('socket.io');
 const { RoomManager, MIN_PLAYERS_TO_START } = require('./server/roomManager');
+const { StatsManager } = require('./server/statsManager');
 
 // ─── Configuration ───────────────────────────────────────────────────────────
 const PORT = 9998;
@@ -98,6 +99,28 @@ const server = http.createServer((req, res) => {
     return;
   }
 
+  // ─── API: GET /api/stats/:nickname ─────────────────────────────────────
+  if (urlPath.startsWith('/api/stats/') && req.method === 'GET') {
+    const nickname = decodeURIComponent(urlPath.substring('/api/stats/'.length));
+    if (!nickname || nickname.trim().length === 0) {
+      res.writeHead(400, { 'Content-Type': 'application/json', ...CORS_HEADERS });
+      res.end(JSON.stringify({ error: 'Nickname required' }));
+      return;
+    }
+    const stats = statsManager.getPlayerStats(nickname);
+    res.writeHead(200, { 'Content-Type': 'application/json', ...CORS_HEADERS });
+    res.end(JSON.stringify(stats));
+    return;
+  }
+
+  // ─── API: GET /api/leaderboard ────────────────────────────────────────
+  if (urlPath === '/api/leaderboard' && req.method === 'GET') {
+    const leaderboard = statsManager.getLeaderboard(20);
+    res.writeHead(200, { 'Content-Type': 'application/json', ...CORS_HEADERS });
+    res.end(JSON.stringify(leaderboard));
+    return;
+  }
+
   // ─── Static File Serving ────────────────────────────────────────────────
   let filePath = urlPath;
   if (filePath === '/') filePath = '/index.html';
@@ -141,6 +164,8 @@ const io = new Server(server, {
 });
 
 const roomManager = new RoomManager(io);
+const statsManager = new StatsManager();
+roomManager.statsManager = statsManager;
 
 // ─── Helper: broadcast room player list ──────────────────────────────────────
 function broadcastRoomPlayerList(room) {
@@ -386,6 +411,7 @@ server.listen(PORT, () => {
   console.log(`Open http://localhost:${PORT} in your browser`);
   console.log(`Socket.io endpoint: http://localhost:${PORT}/echo`);
   console.log(`API: GET/POST http://localhost:${PORT}/api/rooms`);
+  console.log(`API: GET /api/stats/:nickname, GET /api/leaderboard`);
 });
 
 // ─── Graceful Shutdown ───────────────────────────────────────────────────────
