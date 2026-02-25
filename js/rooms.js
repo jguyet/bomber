@@ -146,15 +146,7 @@ var RoomUI = (function() {
     currentRoomId = roomId;
     stopAutoRefresh();
 
-    // Connect socket if not connected, then join room
-    if (!socket || !socket.connected) {
-      InitializeSocket();
-    } else {
-      socket.emit('joinRoom', roomId);
-    }
-
-    // Listen for roomJoined to transition to waiting room
-    // (handled in aks.js roomJoined handler, but we also set up a one-time listener here)
+    // One-time listener for roomJoined to transition to waiting room
     var onRoomJoined = function(data) {
       hideBrowser();
       showWaitingRoom(data.roomName, data.themeId || currentTheme);
@@ -162,8 +154,15 @@ var RoomUI = (function() {
       socket.off('roomJoined', onRoomJoined);
     };
 
-    if (socket && socket.on) {
+    // Connect socket if not connected, then join room
+    if (!socket || !socket.connected) {
+      InitializeSocket();
+      // Socket created by InitializeSocket, attach listener now
+      // aks.js connect handler will emit joinRoom with currentRoomId
       socket.on('roomJoined', onRoomJoined);
+    } else {
+      socket.on('roomJoined', onRoomJoined);
+      socket.emit('joinRoom', roomId);
     }
   }
 

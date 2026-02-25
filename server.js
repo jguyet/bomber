@@ -144,13 +144,11 @@ const roomManager = new RoomManager(io);
 
 // ─── Helper: broadcast room player list ──────────────────────────────────────
 function broadcastRoomPlayerList(room) {
-  // Format: RL{p1Id}|{p1Nick}|{p1SkinId};{p2Id}|{p2Nick}|{p2SkinId};...
-  const entries = [];
+  const playerList = [];
   for (const [, p] of room.players) {
-    entries.push(p.id + '|' + p.nickname + '|' + (p.skinId || 0));
+    playerList.push({ id: p.id, nickname: p.nickname, skinId: p.skinId || 0 });
   }
-  const message = 'RL' + entries.join(';');
-  io.to('room:' + room.id).emit('game', message);
+  io.to('room:' + room.id).emit('roomPlayerList', playerList);
 }
 
 // ─── Socket.io Connection Handler ────────────────────────────────────────────
@@ -167,12 +165,17 @@ io.on('connection', (socket) => {
   socket.on('joinRoom', (roomId) => {
     const room = roomManager.getRoom(roomId);
     if (!room) {
-      socket.emit('error', 'Room not found');
+      socket.emit('roomError', 'Room not found');
       return;
     }
     if (room.players.size >= room.maxPlayers) {
-      socket.emit('error', 'Room is full');
+      socket.emit('roomError', 'Room is full');
       return;
+    }
+
+    // Leave previous room if any
+    if (socket.currentRoomId && socket.currentRoomId !== roomId) {
+      handleLeaveRoom(socket);
     }
 
     socket.join('room:' + roomId);
@@ -202,6 +205,13 @@ io.on('connection', (socket) => {
       room.creatorId = socket.id;
     }
 
+    // Confirm join
+    socket.emit('roomJoined', {
+      roomId: room.id,
+      roomName: room.name,
+      isCreator: room.creatorId === socket.id
+    });
+
     // Send theme
     socket.emit('game', 'TH' + room.activeTheme);
 
@@ -210,6 +220,14 @@ io.on('connection', (socket) => {
 
     // Start tick if first player
     if (!room.tickInterval) room.startTick();
+
+    // If room is already playing (late join / rejoin), send world data immediately
+    if (room.state === 'playing') {
+      room.handleWorldLoad(player, socket);
+      setTimeout(() => {
+        room.handleWorldEntities(player, socket);
+      }, 100);
+    }
   });
 
   // Handle game messages (same protocol as before, using ^ separator)
@@ -236,18 +254,27 @@ io.on('connection', (socket) => {
     if (!room) return;
     if (room.creatorId !== socket.id) return; // only creator can start
     if (room.players.size < MIN_PLAYERS_TO_START) return;
-    room.state = 'playing';
+    if (room.state === 'playing') return; // already playing
 
-    // Send world load to all players in room
+    room.state = 'playing';
+    room.initializeMap();
+    room.startTick();
+
+    // Broadcast game start to all players in room
+    io.to('room:' + room.id).emit('gameStart');
+
+    // Send world data to each player
     for (const [sid, p] of room.players) {
       const s = io.sockets.sockets.get(sid);
       if (s) room.handleWorldLoad(p, s);
     }
-    // Then entities
-    for (const [sid, p] of room.players) {
-      const s = io.sockets.sockets.get(sid);
-      if (s) room.handleWorldEntities(p, s);
-    }
+    // Then entities (short delay for world load)
+    setTimeout(() => {
+      for (const [sid, p] of room.players) {
+        const s = io.sockets.sockets.get(sid);
+        if (s) room.handleWorldEntities(p, s);
+      }
+    }, 100);
   });
 
   // Handle room leave
@@ -279,14 +306,26 @@ function handleLeaveRoom(socket) {
     room.broadcastAll('PD' + player.id);
     room.players.delete(socket.id);
 
+    // Transfer creator if creator left
+    if (room.creatorId === socket.id) {
+      const firstPlayer = room.players.keys().next().value;
+      room.creatorId = firstPlayer || null;
+      if (firstPlayer) {
+        const creatorSocket = io.sockets.sockets.get(firstPlayer);
+        if (creatorSocket) {
+          creatorSocket.emit('roomCreatorTransfer');
+        }
+      }
+    }
+
     // Check if round should end
-    if (room.roundState.state === 'active') {
+    if (room.state === 'playing' && room.roundState.state === 'active') {
       room.checkRoundEnd();
     }
 
     // Destroy room if empty
     if (room.players.size === 0) {
-      room.stopTick();
+      room.cleanup();
       roomManager.removeRoom(roomId);
       console.log('Room ' + roomId + ' destroyed (empty)');
     } else {
@@ -313,15 +352,7 @@ process.on('SIGINT', () => {
 
   // Stop all room ticks and clear all timers
   for (const [, room] of roomManager.rooms) {
-    room.stopTick();
-    if (room.roundState.timer) clearTimeout(room.roundState.timer);
-    if (room.roundState.timeInterval) clearInterval(room.roundState.timeInterval);
-    for (const b of room.bombs) {
-      if (b.timer) clearTimeout(b.timer);
-    }
-    for (const item of room.items) {
-      if (item.timer) clearTimeout(item.timer);
-    }
+    room.cleanup();
   }
 
   io.close();
