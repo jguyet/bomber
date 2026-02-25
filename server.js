@@ -248,22 +248,20 @@ function addBomb(player) {
   bomb.timer = setTimeout(() => explodeBomb(bomb), BOMB_TIMER_MS);
 }
 
-function explodeLine(cellList) {
+function explodeLine(cellList, bomb) {
   let count = 0;
   const brokenWalls = [];
   const chainBombs = [];
 
   for (const cell of cellList) {
-    // check if player is on this cell => respawn them
-    let playerDied = false;
+    // check if player is on this cell => kill them
     for (const [, p] of players) {
+      if (!p.alive) continue;
       const pCell = getPlayerCurCell(p);
       if (pCell && pCell.id === cell.id) {
-        respawnPlayer(p);
-        playerDied = true;
+        killPlayer(p, bomb);
       }
     }
-    if (playerDied) break;
 
     // Destroy items on explosion-affected cells
     if (cell.item) {
@@ -313,16 +311,17 @@ function explodeBomb(bomb) {
   }
 
   const cell = bomb.cell;
-  const sup   = explodeLine(getDirCells(cell, DIR.UP, bomb.range));
-  const down  = explodeLine(getDirCells(cell, DIR.DOWN, bomb.range));
-  const left  = explodeLine(getDirCells(cell, DIR.LEFT, bomb.range));
-  const right = explodeLine(getDirCells(cell, DIR.RIGHT, bomb.range));
+  const sup   = explodeLine(getDirCells(cell, DIR.UP, bomb.range), bomb);
+  const down  = explodeLine(getDirCells(cell, DIR.DOWN, bomb.range), bomb);
+  const left  = explodeLine(getDirCells(cell, DIR.LEFT, bomb.range), bomb);
+  const right = explodeLine(getDirCells(cell, DIR.RIGHT, bomb.range), bomb);
 
   // check center cell for player kills
   for (const [, p] of players) {
+    if (!p.alive) continue;
     const pCell = getPlayerCurCell(p);
     if (pCell && pCell.id === cell.id) {
-      respawnPlayer(p);
+      killPlayer(p, bomb);
     }
   }
 
@@ -372,23 +371,46 @@ function findPlayerById(id) {
   return null;
 }
 
-function respawnPlayer(player) {
-  const cell = getRandomWalkableCellStart();
-  if (!cell) return;
-  player.x = (cell.x * TILE_SIZE) - 5;
-  player.y = (cell.y * TILE_SIZE) + 10;
+function killPlayer(player, bomb) {
+  if (!player.alive) return; // already dead
+
+  player.alive = false;
+  player.deaths++;
   player.dir = 0;
-  player.olddir = 2;
   player.onmove = false;
 
-  broadcastAll('PM' + player.id
-    + '|' + player.x
-    + '|' + player.y
-    + '|' + getClientDirection(player)
-    + '|' + player.skin
-    + '|' + player.dir
-    + '|' + player.onmove
-    + '|' + player.nickname);
+  // Find killer via bomb launcher
+  let killer = null;
+  if (bomb) {
+    killer = findPlayerById(bomb.launcherId);
+  }
+
+  // Increment killer's kills (unless self-kill)
+  if (killer && killer.id !== player.id) {
+    killer.kills++;
+  }
+
+  // Broadcast kill feed: KF{killerId}|{killerNick}|{victimId}|{victimNick}
+  const killerId = killer ? killer.id : '';
+  const killerNick = killer ? killer.nickname : '';
+  broadcastAll('KF' + killerId + '|' + killerNick + '|' + player.id + '|' + player.nickname);
+
+  // Broadcast player death: PK{id}
+  broadcastAll('PK' + player.id);
+
+  // Broadcast updated scoreboard
+  broadcastScoreboard();
+
+  // Check if round should end
+  checkRoundEnd();
+}
+
+function broadcastScoreboard() {
+  const entries = [];
+  for (const [, p] of players) {
+    entries.push(p.id + '|' + p.nickname + '|' + p.kills + '|' + p.deaths);
+  }
+  broadcastAll('SB' + entries.join(';'));
 }
 
 // ─── Item System ─────────────────────────────────────────────────────────────
@@ -615,6 +637,7 @@ function broadcastRoundState() {
 
 // ─── Movement ────────────────────────────────────────────────────────────────
 function movePlayer(player) {
+  if (!player.alive) return;
   if (!player.onmove) return;
 
   const speed = player.speed;
@@ -684,6 +707,7 @@ function forceKeyUp(player, binDir) {
 
 // ─── Message Handlers ────────────────────────────────────────────────────────
 function handleKeyDown(player, message) {
+  if (!player.alive) return;
   const key = parseInt(message.substring(2), 10);
   if (isNaN(key)) return;
 
