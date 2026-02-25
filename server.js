@@ -163,9 +163,8 @@ const io = new Server(server, {
   cors: { origin: '*' }
 });
 
-const roomManager = new RoomManager(io);
 const statsManager = new StatsManager();
-roomManager.statsManager = statsManager;
+const roomManager = new RoomManager(io, statsManager);
 
 // ─── Helper: broadcast room player list ──────────────────────────────────────
 function broadcastRoomPlayerList(room) {
