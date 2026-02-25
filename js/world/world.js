@@ -34,7 +34,8 @@ var World = function(data, theme)
 
 	this.setDup = function() {
 		this.dup = [];
-		
+		if (!currentPlayer) return;
+
 		let x = (currentPlayer.x % (this.width * 32));
 		let y = (currentPlayer.y % (this.height * 32));
 		if (x < (this.width * 32) / 2 && y < (this.height * 32) / 2) { // top left

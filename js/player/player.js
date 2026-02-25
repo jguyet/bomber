@@ -122,7 +122,7 @@ var Player = function(id, x, y)
 		//////////////////////////////////////////////
 		// MAP MOVE MODE (Disable for normal mode)
 		//////////////////////////////////////////////
-		if (this.id == currentPlayer.id) {
+		if (currentPlayer && this.id == currentPlayer.id) {
 
 			let tileSize = 32;
 			let worldWidthPxs = (world.width * tileSize);
