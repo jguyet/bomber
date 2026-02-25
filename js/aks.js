@@ -18,12 +18,22 @@ function InitializeSocket()
 		LoadingManager.assetLoaded('Server connection');
 		LoadingManager.setStatus('Joining room...');
 
-		// Send nickname/skin init
+		// Restore nickname/skin from localStorage if globals are empty (e.g. page refresh reconnect)
+		if (!playerNickname && localStorage.getItem('bomber_nickname')) {
+			playerNickname = localStorage.getItem('bomber_nickname');
+		}
+		if ((playerSkinId === undefined || playerSkinId === null) && localStorage.getItem('bomber_skinId') !== null) {
+			playerSkinId = parseInt(localStorage.getItem('bomber_skinId'), 10);
+		}
+
+		// Send nickname/skin init FIRST, then join room after server has processed it
 		socket.emit('nicknameInit', { nickname: playerNickname, skinId: playerSkinId });
 
-		// Join room (currentRoomId must be set before calling InitializeSocket)
+		// Use setTimeout(0) to ensure nicknameInit is processed before joinRoom
 		if (currentRoomId) {
-			socket.emit('joinRoom', currentRoomId);
+			setTimeout(function() {
+				socket.emit('joinRoom', currentRoomId);
+			}, 0);
 		}
 
 		console.log("Socket.io connected");
