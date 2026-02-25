@@ -30,6 +30,7 @@
     <link rel="stylesheet" href="./css/connection-status.css">
     <link rel="stylesheet" href="./css/hud.css">
     <link rel="stylesheet" href="./css/rooms.css">
+    <link rel="stylesheet" href="./css/touch-controls.css">
 
 	<!--JS---------------------------------->
 	<script src="//ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
@@ -43,8 +44,10 @@
 	<script src="./js/item/item.js"></script>
 	<script src="./js/aks.js"></script>
 	<script src="./js/chat.js"></script>
+	<script src="./js/chat-filters.js"></script>
 	<script src="./js/hud.js"></script>
 	<script src="./js/events.js"></script>
+	<script src="./js/touch-controls.js"></script>
 	<script src="./js/connection-status.js"></script>
 	<script src="./js/loading.js"></script>
 	<script src="./js/initworld.js"></script>
@@ -169,10 +172,10 @@
 		</div>
 	</div>
 
-	<div id="viewport" style="left: 0px;">
+	<div id="viewport" role="application" style="left: 0px;">
 	<div style="position: absolute; left: 0px; top: 0px; margin-left: -160px;">
-		<canvas id="layer0" width="1708" height="557" style="position: absolute; left: 160px; top: 0px;background-color: black;"></canvas>
-		<canvas id="layer1" width="1708" height="557" style="position: absolute; left: 160px; top: 0px;"></canvas>
+		<canvas id="layer0" width="1708" height="557" style="position: absolute; left: 160px; top: 0px;background-color: black;" aria-label="Game world - background layer"></canvas>
+		<canvas id="layer1" width="1708" height="557" style="position: absolute; left: 160px; top: 0px;" aria-label="Game world - entity layer" tabindex="0"></canvas>
 	</div>
 
 	<!-- Room & Theme HUD -->
@@ -226,6 +229,9 @@
 		</div>
 	</div>
 
+	<div id="explosion-flash" style="display:none;"></div>
+	<div id="touch-controls" style="display:none;"></div>
+
 	</div>
 	
 	<div id="chat" style="display:none">
@@ -247,29 +253,29 @@
 			</div>
 		</div>
 
-		<ul class="chat-list" id="listChat">
+		<ul class="chat-list" id="listChat" aria-live="polite" aria-label="Chat messages">
 			<li id="endchat"></li>
 		</ul>
   
 		<!--<div id="chatmsg" class="chatmsg" ng-controller="ChatInputCtrl"></div>-->
 		<div class="chatmsg">
-			<textarea area-auto="" maxlength="140" onkeypress="onchatpress(event)" onkeydown="onchatdelete(event)" rows="1" id="msgText" style="height: 28px;" placeholder="Message" data-mentions-input="true"></textarea>
+			<textarea area-auto="" maxlength="140" onkeypress="onchatpress(event)" onkeydown="onchatdelete(event)" rows="1" id="msgText" style="height: 28px;" placeholder="Message" data-mentions-input="true" aria-label="Game chat input"></textarea>
 			<div class="helperHeight" area-helper=""></div>
 			<div class="mentions-input-box"><div class="mentions"><div></div></div><div class="mentions-autocomplete-list"></div></div>
 		</div>
 		<ul class="chat-filters">
 			<li>
-				<button class="text" >&nbsp;</button>
+				<button class="text" aria-label="Show text messages">&nbsp;</button>
 			</li><li>
-				<button class="text" >&nbsp;</button>
+				<button class="text" aria-label="Show text messages">&nbsp;</button>
 			</li><li>
-				<button class="kill" >&nbsp;</button>
+				<button class="kill" aria-label="Show kill feed">&nbsp;</button>
 			</li><li>
-				<button class="mod" >&nbsp;</button>
+				<button class="mod" aria-label="Show mod messages">&nbsp;</button>
 			</li><li>
-				<button class="common" >&nbsp;</button>
+				<button class="common" aria-label="Show common messages">&nbsp;</button>
 			</li><li>
-				<button class="filter-all" >CHAT</button>
+				<button class="filter-all" aria-label="Show all messages">CHAT</button>
 			</li><li>
 				&nbsp;&nbsp;<a href="https://www.facebook.com/" target="_blank"><button class="fb">fb</button></a>
 			</li>
