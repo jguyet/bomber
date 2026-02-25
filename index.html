@@ -28,6 +28,7 @@
     <link rel="stylesheet" href="./css/lobby.css">
     <link rel="stylesheet" href="./css/loading.css">
     <link rel="stylesheet" href="./css/connection-status.css">
+    <link rel="stylesheet" href="./css/hud.css">
 
 	<!--JS---------------------------------->
 	<script src="//ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
@@ -40,6 +41,7 @@
 	<script src="./js/item/item.js"></script>
 	<script src="./js/aks.js"></script>
 	<script src="./js/chat.js"></script>
+	<script src="./js/hud.js"></script>
 	<script src="./js/events.js"></script>
 	<script src="./js/connection-status.js"></script>
 	<script src="./js/loading.js"></script>
@@ -94,6 +96,52 @@
 		<canvas id="layer0" width="1708" height="557" style="position: absolute; left: 160px; top: 0px;background-color: black;"></canvas>
 		<canvas id="layer1" width="1708" height="557" style="position: absolute; left: 160px; top: 0px;"></canvas>
 	</div>
+
+	<!-- Round Timer HUD -->
+	<div id="round-timer" style="display:none;">
+		<div class="round-timer-text" id="round-timer-text">3:00</div>
+		<div class="round-timer-state" id="round-timer-state"></div>
+	</div>
+
+	<!-- HUD Scoreboard -->
+	<div id="hud-scoreboard" style="display:none;">
+		<div class="hud-scoreboard-title">SCOREBOARD</div>
+		<table class="hud-scoreboard-table" id="hud-scoreboard-table">
+			<thead>
+				<tr>
+					<th>Player</th>
+					<th>K</th>
+					<th>D</th>
+				</tr>
+			</thead>
+			<tbody id="hud-scoreboard-body">
+			</tbody>
+		</table>
+	</div>
+
+	<!-- Results Screen Overlay -->
+	<div id="results-screen" style="display:none;">
+		<div class="results-container">
+			<h1 class="results-title" id="results-title">Round Over!</h1>
+			<div class="results-winner" id="results-winner"></div>
+			<div class="results-summary">
+				<table class="results-table" id="results-table">
+					<thead>
+						<tr>
+							<th>#</th>
+							<th>Player</th>
+							<th>Kills</th>
+							<th>Deaths</th>
+						</tr>
+					</thead>
+					<tbody id="results-table-body">
+					</tbody>
+				</table>
+			</div>
+			<div class="results-countdown" id="results-countdown">Next round in 5s...</div>
+		</div>
+	</div>
+
 	</div>
 	
 	<div id="chat" style="display:none">
