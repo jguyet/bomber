@@ -9874,32 +9874,14 @@ body {
   background: #e6c200;
 }
 
-/* --- Skin Grid --- */
-#skin-grid {
-  display: grid;
-  grid-template-columns: repeat(6, 42px);
-  gap: 6px;
-  margin: 16px 0;
-  justify-content: center;
-}
-
-.skin-thumb {
-  width: 42px;
-  height: 42px;
-  cursor: pointer;
-  border: 2px solid transparent;
-  border-radius: 4px;
-  image-rendering: pixelated;
-  transition: border-color 0.15s;
-  box-sizing: border-box;
-}
-
-.skin-thumb.selected {
-  border-color: #FFD700;
-}
-
-.skin-thumb:hover {
-  border-color: #888;
+/* --- Lobby Subtitle --- */
+.lobby-subtitle {
+  font-family: 'Open Sans', sans-serif;
+  font-size: 1rem;
+  color: #888;
+  margin: -8px 0 16px 0;
+  letter-spacing: 2px;
+  text-transform: uppercase;
 }
 
 /* --- Loading Overlay --- */

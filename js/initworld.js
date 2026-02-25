@@ -1,31 +1,6 @@
-var selectedSkinId = 0;
-
 function showLobby() {
 	var lobby = document.getElementById('lobby-screen');
 	if (lobby) lobby.style.display = 'flex';
-
-	// Populate skin grid with 24 thumbnails
-	var grid = document.getElementById('skin-grid');
-	if (grid) {
-		grid.innerHTML = '';
-		for (var i = 0; i < 24; i++) {
-			(function(skinIdx) {
-				var img = document.createElement('img');
-				img.src = 'assets/characters/' + skinIdx + '.png';
-				img.width = 42;
-				img.height = 42;
-				img.className = 'skin-thumb' + (skinIdx === 0 ? ' selected' : '');
-				img.setAttribute('data-skin', skinIdx);
-				img.addEventListener('click', function() {
-					var all = grid.querySelectorAll('.skin-thumb');
-					for (var j = 0; j < all.length; j++) all[j].classList.remove('selected');
-					img.classList.add('selected');
-					selectedSkinId = skinIdx;
-				});
-				grid.appendChild(img);
-			})(i);
-		}
-	}
 
 	// Wire PLAY button
 	var playBtn = document.getElementById('play-btn');
@@ -34,7 +9,7 @@ function showLobby() {
 			var nicknameInput = document.getElementById('nickname-input');
 			var nickname = nicknameInput ? nicknameInput.value.trim() : '';
 			if (!nickname) nickname = 'Player';
-			startGame(nickname, selectedSkinId);
+			startGame(nickname, 1);
 		};
 	}
 }
