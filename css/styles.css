@@ -5752,6 +5752,7 @@ ul.task-tab li.select {
   padding: 0 17px;
   margin: 0 5px;
 }
+/* UNUSED: mentions-input-box and mentions-autocomplete-list HTML elements removed */
 .chatmsg .mentions-input-box .mentions {
   display: none;
 }
@@ -5797,6 +5798,7 @@ ul.task-tab li.select {
   width: 212px;
   background-color: #252525;
 }
+/* UNUSED: #dropDownChat HTML element removed — Angular-era dropdown */
 #chat #dropDownChat {
   position: absolute;
   background: #252525;
@@ -5858,11 +5860,13 @@ ul.task-tab li.select {
   border: 0;
   outline: 0;
 }
+/* UNUSED: .helperHeight HTML element removed */
 #chat .chatmsg .helperHeight {
   word-wrap: break-word;
   padding: 5px;
   display: none;
 }
+/* NOTE: .misc-bottom HTML element removed; rules kept for .misc-top */
 #chat .misc-top,
 #chat .misc-bottom {
   position: absolute;
@@ -5934,6 +5938,7 @@ ul.task-tab li.select {
 #chat ul.chat-filters button.common {
   background-position: -40px 50%;
 }
+/* UNUSED: .fb button HTML element removed */
 #chat ul.chat-filters button.fb {
   background-position: -60px 50%;
 }

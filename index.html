@@ -235,13 +235,6 @@
 	</div>
 	
 	<div id="chat" style="display:none">
-		<div id="dropDownChat" dropdown-on-event="nicknamePopup">
-			<ul>
-            <li class="nicknameChat">@ </li>
-            <li>Send message</li>
-            <li>Add friend</li>			
-            </ul>
-		</div>
 		<div class="misc-top">
 			<h1 id="chat-room-name">Room</h1>
 			<div class="out_butt">
@@ -257,11 +250,8 @@
 			<li id="endchat"></li>
 		</ul>
   
-		<!--<div id="chatmsg" class="chatmsg" ng-controller="ChatInputCtrl"></div>-->
 		<div class="chatmsg">
-			<textarea area-auto="" maxlength="140" onkeypress="onchatpress(event)" onkeydown="onchatdelete(event)" rows="1" id="msgText" style="height: 28px;" placeholder="Message" data-mentions-input="true" aria-label="Game chat input"></textarea>
-			<div class="helperHeight" area-helper=""></div>
-			<div class="mentions-input-box"><div class="mentions"><div></div></div><div class="mentions-autocomplete-list"></div></div>
+			<textarea area-auto="" maxlength="140" onkeypress="onchatpress(event)" onkeydown="onchatdelete(event)" rows="1" id="msgText" style="height: 28px;" placeholder="Message" aria-label="Game chat input"></textarea>
 		</div>
 		<ul class="chat-filters">
 			<li>
@@ -276,12 +266,8 @@
 				<button class="common" aria-label="Show common messages">&nbsp;</button>
 			</li><li>
 				<button class="filter-all" aria-label="Show all messages">CHAT</button>
-			</li><li>
-				&nbsp;&nbsp;<a href="https://www.facebook.com/" target="_blank"><button class="fb">fb</button></a>
 			</li>
 		</ul>
-		<div class="misc-bottom">
-		</div>
 	</div>
 </body>
 </html>
