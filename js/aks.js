@@ -207,11 +207,36 @@ function InitializeSocket()
 							roundWinner = { id: Number(parts[0]), nickname: parts[1] };
 						break ;
 						case "R": // Round reset: RR
+							// Clear local game state for new round
+							if (world != null) {
+								// Remove all bomb sprites
+								for (var i = 0; i < world.bombs.length; i++) {
+									if (world.bombs[i]) fosfo1.undraw('bomb' + world.bombs[i].id);
+								}
+								world.bombs = [];
+
+								// Remove all item sprites
+								for (var i = 0; i < world.items.length; i++) {
+									if (world.items[i]) fosfo1.undraw('item' + world.items[i].id);
+								}
+								world.items = [];
+
+								// Remove all player sprites (they'll be re-added via PA messages)
+								for (var i = 0; i < world.players.length; i++) {
+									if (world.players[i]) fosfo1.undraw('player' + world.players[i].id);
+								}
+								world.players = [];
+							}
+
+							// Reset spectating
+							isSpectating = false;
+
+							// Reset HUD and round globals
 							if (typeof HUD !== 'undefined') HUD.hideResults();
 							roundWinner = null;
 							roundResults = [];
 							killFeed = [];
-							isSpectating = false;
+							scoreboardData = [];
 						break ;
 						case "E": // Round end results: RE{winnerId}|{winnerNick}|{id}|{nick}|{kills}|{deaths};...
 							var data = received_msg.substring(2);
