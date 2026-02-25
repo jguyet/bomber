@@ -56,6 +56,7 @@ public class Aks implements Runnable{
 		}
 		catch(IOException e)
 		{
+			e.printStackTrace();
 			client.kick();
 		}
 	}
@@ -74,7 +75,7 @@ public class Aks implements Runnable{
     	}
 		catch(Exception e)
     	{
-			
+			e.printStackTrace();
     	}
     	finally
     	{
@@ -146,29 +147,34 @@ public class Aks implements Runnable{
 	
 	private void waitMessages()
 	{
-		String message = "";
-		
-		while(Start.isRunning)
-    	{
-    		byte[] byteMessage = _codec.decode(_inStream);
-    		
-    		message = new String(byteMessage);
-    		
-    		if(message != null && !message.isEmpty())
-	    	{
-    			message = ToUnicode.parse(message);
-    			char type = ' ';
-    			char action = ' ';
-    			
-    			if (message != null && StringUtils.isAsciiPrintable(message))
-    			{
-	    			type = message.charAt(0);
-	    			if (message.length() > 1)
-	    				action = message.charAt(1);
-	    			processor.postProcess(type, action, message, client);
-    			}
-	    		message = "";
-	    	}
-    	}
+		try {
+			String message = "";
+
+			while(Start.isRunning)
+			{
+				byte[] byteMessage = _codec.decode(_inStream);
+
+				message = new String(byteMessage);
+
+				if(message != null && !message.isEmpty())
+				{
+					message = ToUnicode.parse(message);
+					char type = ' ';
+					char action = ' ';
+
+					if (message != null && StringUtils.isAsciiPrintable(message))
+					{
+						String[] messages = message.split("\\^");
+						for (String m : messages) {
+							type = m.charAt(0);
+							if (m.length() > 1)
+								action = m.charAt(1);
+							processor.postProcess(type, action, m, client);
+						}
+					}
+				}
+			}
+		} catch (Exception e) {
+		}
 	}
 }

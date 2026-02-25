@@ -8,7 +8,7 @@ var BLOCSIZE = 32;
 var SCREENWIDTH = 100000;
 var SCREENHEIGHT = 100000;
 var MOUSEPOS = [0,0];
-var SIZE = 0;
+var SIZE = 1;
 var keyState = [0];
 
 //websocket

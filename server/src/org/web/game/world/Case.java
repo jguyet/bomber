@@ -65,6 +65,10 @@ public class Case {
 	{
 		this.ground = id;
 	}
+
+	public boolean isDestructible() {
+		return this.ground == 104;
+	}
 	
 	public void sendCell()
 	{

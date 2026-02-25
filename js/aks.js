@@ -238,7 +238,7 @@ function InitializeSocket()
 							killFeed = [];
 							scoreboardData = [];
 						break ;
-						case "E": // Round end results: RE{winnerId}|{winnerNick}|{id}|{nick}|{kills}|{deaths};...
+						case "E": // Round end results: RE{winnerId}|{winnerNick}|{id}|{nick}|{kills}|{deaths};{id2}|{nick2}|{kills2}|{deaths2};...
 							var data = received_msg.substring(2);
 							var playerEntries = data.split(";");
 							var firstEntry = playerEntries[0].split("|");
@@ -247,7 +247,11 @@ function InitializeSocket()
 							for (var i = 0; i < playerEntries.length; i++) {
 								var p = playerEntries[i].split("|");
 								if (p.length >= 6) {
+									// First entry: winnerId|winnerNick|playerId|playerNick|kills|deaths
 									roundResults.push({ id: Number(p[2]), nickname: p[3], kills: Number(p[4]), deaths: Number(p[5]) });
+								} else if (p.length >= 4) {
+									// Subsequent entries: playerId|playerNick|kills|deaths
+									roundResults.push({ id: Number(p[0]), nickname: p[1], kills: Number(p[2]), deaths: Number(p[3]) });
 								}
 							}
 							if (typeof HUD !== 'undefined') HUD.showResults(roundWinner, roundResults);

@@ -1,8 +1,8 @@
 var Bomb = function(id, x, y, range)
 {
 	this.id = id;
-	this.x = Math.round(x);
-	this.y = Math.round(y);
+	this.x = Math.floor(x);
+	this.y = Math.floor(y);
 	this.skin = 1;
 	this.anims = {
 		'state1' : { 'frames' : [8, 8, 8, 8, 8, 8, 8, 8, 7, 7, 7, 7, 7, 7, 7, 7, 6, 6, 6, 6, 6, 6, 6, 6], 'size' : [17.5, 16.25, 15, 13.25, 12.5, 11.25, 10, 9.25, 7.5, 6.25, 5, 4.5, 4, 4.5, 5, 6.25, 7.5, 9.25, 10, 11.25, 12.5, 13.25, 15, 16.25], 'name' : 'state1', 'time' : 2000},
@@ -30,7 +30,9 @@ var Bomb = function(id, x, y, range)
 		this.resetTimeUpdate();
 		if (this.anim == 4)
 		{
-			this.explode();
+			if (this.exploding) {
+				this.explode();
+			}
 			return;
 		}
 		if (this.getTime() > this.currentanim.time)
@@ -50,6 +52,7 @@ var Bomb = function(id, x, y, range)
 	this.explode = function()
 	{
 		this.anim = 4;
+		this.exploding = true;
 		this.currentanim = this.anims['state4'];
 		this.fps = 1000 / 60;
 		if (this.currentanimid > this.currentanim.rotate.length)
@@ -174,6 +177,11 @@ var Bomb = function(id, x, y, range)
 	{
 		fosfo1.undraw('bomb' + this.id);
 		fosfo1.drawframe("bomb" + this.id, 'assets/bombs/' + this.skin + '.png', this.currentanim.frames[this.currentanimid], (this.x + (size / 2)) - 6, (this.y + (size / 2)) - 11, 45 - size, 45 - size);
+	}
+
+	this.remove = function()
+	{
+		fosfo1.undraw('bomb' + this.id);
 	}
 	
 	this.getTimeUpdate = function()

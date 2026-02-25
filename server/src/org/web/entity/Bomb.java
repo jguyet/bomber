@@ -1,8 +1,9 @@
 package org.web.entity;
 
 import java.util.ArrayList;
+import java.util.Timer;
+import java.util.TimerTask;
 
-import org.web.Console;
 import org.web.Start;
 import org.web.bot.Bot;
 import org.web.client.Client;
@@ -14,7 +15,7 @@ import org.web.utils.TimerWaiter;
 import org.web.utils.Tuple;
 import org.web.utils.TupleThree;
 
-public class Bomb implements Runnable{
+public class Bomb extends TimerTask {
 	
 	private int id;
 	private double x;
@@ -22,7 +23,7 @@ public class Bomb implements Runnable{
 	private Player launcher;
 	private Case curcell;
 	private int skin;
-	private TimerWaiter timer = new TimerWaiter();
+	private Timer timer = new Timer();
 	private int range = 4;
 	private boolean haveExplode = false;
 
@@ -36,7 +37,7 @@ public class Bomb implements Runnable{
 		this.skin = skin;
 		this.range = launcher.getRange();
 		this.curcell.addBomb(this);
-		timer.addNext(this, 3000);
+		timer.schedule(this, 3000);
 	}
 	
 	public int getId()
@@ -74,15 +75,20 @@ public class Bomb implements Runnable{
 		return (this.range);
 	}
 
-	public TimerWaiter getTimer() {
+	public void setTimer(Timer timer) {
+		this.timer = timer;
+	}
+
+	public Timer getTimer() {
 		return this.timer;
 	}
 	
-	public TupleThree<Integer, ArrayList<Case>, ArrayList<Bomb>> explodeline(ArrayList<Case> cells)
+	public TupleThree<Integer, ArrayList<Case>, ArrayList<Tuple<Bomb, BinaryDirection>>> explodeline(ArrayList<Case> cells, BinaryDirection dir)
 	{
 		int count = 0;
 		ArrayList<Case> brokenWalls = new ArrayList<Case>();
-		ArrayList<Bomb> bombToExplode = new ArrayList<Bomb>();
+		ArrayList<Tuple<Bomb, BinaryDirection>> bombToExplode = new ArrayList<Tuple<Bomb, BinaryDirection>>();
+		ArrayList<Bot> bots = new ArrayList<>(World.bots);
 		for (Case cell : cells)
 		{
 			boolean pdie = false;
@@ -90,14 +96,23 @@ public class Bomb implements Runnable{
 			{
 				if (c.player.getCurCell().getId() == cell.getId())
 				{
+//					if (this.launcher.getBot() != null) {
+//						this.launcher.getBot().addToScore(1.0); // killed one player
+//					}
 					c.player.die(this);
 					pdie = true;
 				}
 			}
-			for (Bot b : World.bots)
+			for (Bot b : bots)
 			{
-				if (b.getPlayer().getCurCell().getId() == cell.getId())
+				if (b != null && b.getPlayer().getCurCell().getId() == cell.getId())
 				{
+					if (this.launcher.getBot() != null && b.getPlayer().getId() == this.launcher.getId()) {
+//						this.launcher.getBot().addToScore(-50.0); // died by his bomb
+//						this.launcher.getBot().trainDeath(this);
+					} else if (this.launcher.getBot() != null) {
+//						this.launcher.getBot().addToScore(500.0); // killed one bot
+					}
 					b.getPlayer().die(this);
 					pdie = true;
 				}
@@ -106,7 +121,8 @@ public class Bomb implements Runnable{
 				break ;
 			if (cell.hasBomb())
 			{
-				bombToExplode.add(cell.getBomb());
+				bombToExplode.add(new Tuple<>(cell.getBomb(), dir));
+//				cell.getBomb().explode(this, dir);
 				break ;
 			}
 			else if (!cell.isWalkable() && cell.getGroundId() == 104)
@@ -115,6 +131,9 @@ public class Bomb implements Runnable{
 				cell.setGround(0);
 				cell.sendCell();
 				brokenWalls.add(cell);
+				if (this.launcher.getBot() != null) {
+					this.launcher.getBot().addToScore(50); // destructed a wall
+				}
 				count++;
 				break ;
 			}
@@ -131,41 +150,75 @@ public class Bomb implements Runnable{
 		return (new TupleThree<>(count, brokenWalls, bombToExplode));
 	}
 	
-	public void explode()
+	public void explode(Bomb from, BinaryDirection dir)
 	{
+		this.timer.cancel();
 		if (haveExplode) {
 			this.curcell.addBomb(null);
 			World.bombs.remove(this);
 			return;
 		}
+		haveExplode = true;
 		this.curcell.addBomb(null);
 		World.bombs.remove(this);
-		this.timer = null;
-		haveExplode = true;
-		this.launcher.setBombCounter(this.launcher.getBombCounter() - 1);
-		ArrayList<Case> cellsup = World.map.getdircell(curcell, BinaryDirection.up.getId(), range);
-		ArrayList<Case> cellsdown = World.map.getdircell(curcell, BinaryDirection.down.getId(), range);
-		ArrayList<Case> cellsleft = World.map.getdircell(curcell, BinaryDirection.left.getId(), range);
-		ArrayList<Case> cellsright = World.map.getdircell(curcell, BinaryDirection.right.getId(), range);
 
-		TupleThree<Integer, ArrayList<Case>, ArrayList<Bomb>> sup = this.explodeline(cellsup);
-		TupleThree<Integer, ArrayList<Case>, ArrayList<Bomb>> down = this.explodeline(cellsdown);
-		TupleThree<Integer, ArrayList<Case>, ArrayList<Bomb>> left = this.explodeline(cellsleft);
-		TupleThree<Integer, ArrayList<Case>, ArrayList<Bomb>> right = this.explodeline(cellsright);
+		BinaryDirection directionToSkip = null;
+
+		if (from != null) {
+			if (dir == BinaryDirection.left) {
+				directionToSkip = BinaryDirection.right;
+			}
+			if (dir == BinaryDirection.right) {
+				directionToSkip = BinaryDirection.left;
+			}
+			if (dir == BinaryDirection.up) {
+				directionToSkip = BinaryDirection.down;
+			}
+			if (dir == BinaryDirection.down) {
+				directionToSkip = BinaryDirection.up;
+			}
+		}
+
+		this.launcher.setBombCounter(this.launcher.getBombCounter() - 1);
+		ArrayList<Case> cellsup = directionToSkip == BinaryDirection.up ? new ArrayList<>() : World.map.getdircell(curcell, BinaryDirection.up.getId(), range);
+		ArrayList<Case> cellsdown = directionToSkip == BinaryDirection.down ? new ArrayList<>() : World.map.getdircell(curcell, BinaryDirection.down.getId(), range);
+		ArrayList<Case> cellsleft = directionToSkip == BinaryDirection.left ? new ArrayList<>() : World.map.getdircell(curcell, BinaryDirection.left.getId(), range);
+		ArrayList<Case> cellsright = directionToSkip == BinaryDirection.right ? new ArrayList<>() : World.map.getdircell(curcell, BinaryDirection.right.getId(), range);
+
+		ArrayList<Case> current = new ArrayList<>();
+		current.add(this.curcell);
+		this.explodeline(current, BinaryDirection.all);
+		TupleThree<Integer, ArrayList<Case>, ArrayList<Tuple<Bomb, BinaryDirection>>> sup = this.explodeline(cellsup, BinaryDirection.up);
+		TupleThree<Integer, ArrayList<Case>, ArrayList<Tuple<Bomb, BinaryDirection>>> down = this.explodeline(cellsdown, BinaryDirection.down);
+		TupleThree<Integer, ArrayList<Case>, ArrayList<Tuple<Bomb, BinaryDirection>>> left = this.explodeline(cellsleft, BinaryDirection.left);
+		TupleThree<Integer, ArrayList<Case>, ArrayList<Tuple<Bomb, BinaryDirection>>> right = this.explodeline(cellsright, BinaryDirection.right);
+
 		for (Client c : Start.webServer.getClients()) {
 			if (c == null)
 				continue;
 			SocketSender.sendMessage(c, "BE" + this.id + "|" + sup.getFirst() + "|" + down.getFirst() + "|" + left.getFirst() + "|" + right.getFirst());
 		}
 
-		ArrayList<Bomb> bombsToExplode = new ArrayList<Bomb>();
+		ArrayList<Tuple<Bomb, BinaryDirection>> bombsToExplode = new ArrayList<Tuple<Bomb, BinaryDirection>>();
 		bombsToExplode.addAll(sup.getThird());
 		bombsToExplode.addAll(down.getThird());
 		bombsToExplode.addAll(left.getThird());
 		bombsToExplode.addAll(right.getThird());
 
-		for (Bomb b: bombsToExplode) {
-			b.getTimer().addNext(b, 1);//.run();
+		for (Tuple<Bomb, BinaryDirection> b: bombsToExplode) {
+			if (!b.getFirst().haveExplode) {
+				try {
+					Bomb tmp = this;
+//					b.getFirst().getTimer().cancel();
+					b.getFirst().timer.schedule(new TimerTask() {
+						@Override
+						public void run() {
+							b.getFirst().timer.cancel();
+							b.getFirst().explode(tmp, b.getSecond());
+						}
+					}, 100);
+				} catch (Exception e) {}
+			}
 		}
 
 		ArrayList<Case> brokenWalls = new ArrayList<Case>();
@@ -181,6 +234,6 @@ public class Bomb implements Runnable{
 
 	@Override
 	public void run() {
-		explode();
+		explode(null, null);
 	}
 }

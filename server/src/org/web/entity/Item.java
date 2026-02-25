@@ -7,14 +7,17 @@ import org.web.game.world.Case;
 import org.web.game.world.World;
 import org.web.utils.TimerWaiter;
 
-public class Item implements Runnable {
+import java.util.Timer;
+import java.util.TimerTask;
+
+public class Item extends TimerTask {
 
     private int id;
     private int templateId;
     private double x;
     private double y;
     private Case curcell;
-    private TimerWaiter timer = new TimerWaiter();
+    private Timer timer = new Timer();
 
     public Item(int id, int templateId, double x, double y, Case cell) {
         this.id = id;
@@ -23,7 +26,7 @@ public class Item implements Runnable {
         this.y = y;
         this.curcell = cell;
         this.curcell.addItem(this);
-        timer.addNext(this, 10000);
+        timer.schedule(this, 10000);
     }
 
     public int getId() {
@@ -45,8 +48,9 @@ public class Item implements Runnable {
     }
 
     public void disappear() {
-        this.curcell.addItem(null);
+        this.timer.cancel();
         World.items.remove(this);
+        this.curcell.addItem(null);
         for (Client ci : Start.webServer.getClients())
         {
             if (ci == null)

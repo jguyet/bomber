@@ -11,6 +11,7 @@ var Item = function(id, templateId, x, y)
 		// 'state3' : { 'frames' : [2, 2, 2, 2, 1, 1, 1, 1, 0, 0, 0, 0], 'size' : [17.5, 15, 12.5, 10, 7.5, 5, 4, 5, 7.5, 10, 12.5, 15], 'name' : 'state3', 'time' : 1000},
 		// 'state4' : { 'rotate' : [0, 180], 'name' : 'state3'}
 	};
+	this.initTime = (new Date()).getTime();
 	this.startTime = 0;
 	this.currentanim = this.anims.state1;
 	this.anim = 1;
@@ -45,6 +46,10 @@ var Item = function(id, templateId, x, y)
 			this.currentanimid = -1;
 		this.currentanimid++;
 		this.print(this.currentanim.size[this.currentanimid]);
+
+		// if ((new Date()).getTime() - this.initTime > 10000) {
+		// 	this.delete();
+		// }
 	};
 	
 	this.delete = function()

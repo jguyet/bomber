@@ -47,6 +47,16 @@ public class DataProcessor {
 				}
 				break ;
 			}
+			case 'T':
+			{
+				switch (action)
+				{
+					case 'P':
+						client.aks.playermessage.tpPlayer(message, client);
+						break ;
+				}
+				break ;
+			}
 			case 'W':
 			{
 				switch (action)

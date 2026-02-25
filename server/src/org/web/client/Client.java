@@ -17,13 +17,14 @@ public class Client{
 	public Socket								session;
 	public Aks									aks;
 	public Player								player;
+	public ArrayList<String>                    queueOfMessages = new ArrayList<>();
 
 	public Client(Socket session)
 	{
 		System.out.println("NEW CLIENT");
 		this.session = session;
-		Case walkable = World.map.getRandomWalkableCellStart();
-		this.player = new Player(World.getnextPlayerId(), (walkable.getx() * 32) - 5, (walkable.gety() * 32) + 10, 8, this, null);
+		Case walkable = World.map.getNextRandomStartCell();
+		this.player = new Player(World.getnextPlayerId(), (walkable.getx() * 32) + (32 / 2), (walkable.gety() * 32) + (32 / 2), 1, this, null);
 		this.aks = new Aks(this);
 	}
 	
@@ -45,6 +46,12 @@ public class Client{
 	    		session.close();
 			}
 	    	this.aks.closeDescriptors();
+			if (this.player != null) {
+				this.player.die(null);
+				this.player.stopScheduler();
+				this.player = null;
+				this.aks = null;
+			}
 	    	Console.println("Client disconnected ", Color.BLACK);
 		}
 		catch (Exception e1)
