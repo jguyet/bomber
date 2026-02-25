@@ -75,6 +75,7 @@ function getRandomInt(min, max) {
 
 // ─── Map Initialization ─────────────────────────────────────────────────────
 function initializeMap() {
+  cells.length = 0; // clear before regenerating
   let id = 0;
   for (let y = 0; y < MAP_HEIGHT; y++) {
     for (let x = 0; x < MAP_WIDTH; x++) {
@@ -595,16 +596,66 @@ function resetRound() {
   cells.length = 0;
   initializeMap();
 
+  // Reset all players for new round
+  for (const [, player] of players) {
+    player.alive = true;
+    player.kills = 0;
+    player.deaths = 0;
+    player.speed = DEFAULT_SPEED;
+    player.range = DEFAULT_RANGE;
+    player.maxBombs = DEFAULT_MAX_BOMBS;
+    player.bombCounter = 0;
+    player.dir = 0;
+    player.olddir = 2;
+    player.onmove = false;
+    // Respawn at random walkable position
+    const spawnCell = getRandomWalkableCellStart();
+    if (spawnCell) {
+      player.x = (spawnCell.x * TILE_SIZE) - 5;
+      player.y = (spawnCell.y * TILE_SIZE) + 10;
+    }
+  }
+
   // Broadcast round reset then new map data
   broadcastAll('RR');
   broadcastAll('WL' + MAP_WIDTH + '|' + MAP_HEIGHT + '|' + getMapData());
 
+  // Send entity data (PA messages) for all players to each client
+  for (const [ws, player] of players) {
+    // Send self
+    sendTo(ws, 'PA' + player.id
+      + '|' + player.x
+      + '|' + player.y
+      + '|' + getClientDirection(player)
+      + '|' + player.skin
+      + '|' + player.speed
+      + '|1'
+      + '|' + player.nickname);
+
+    // Send other players
+    for (const [otherWs, otherPlayer] of players) {
+      if (otherWs === ws) continue;
+      sendTo(ws, 'PA' + otherPlayer.id
+        + '|' + otherPlayer.x
+        + '|' + otherPlayer.y
+        + '|' + getClientDirection(otherPlayer)
+        + '|' + otherPlayer.skin
+        + '|' + otherPlayer.speed
+        + '|0'
+        + '|' + otherPlayer.nickname);
+    }
+  }
+
   // Set state to waiting
   roundState.state = 'waiting';
 
-  // Check if enough players to auto-start
+  // Check if enough players to auto-start (with delay to allow clients to load)
   if (players.size >= MIN_PLAYERS_TO_START) {
-    startRound();
+    setTimeout(() => {
+      if (roundState.state === 'waiting' && players.size >= MIN_PLAYERS_TO_START) {
+        startRound();
+      }
+    }, 2000);
   }
 }
 
