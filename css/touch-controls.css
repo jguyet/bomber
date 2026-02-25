@@ -1,0 +1,277 @@
+/* ─── Touch Controls Overlay — D-Pad & Bomb Button ─────────────────────────── */
+/* Design tokens: rgba(0,0,0,0.5) dark semi-transparent, rgba(255,255,255,0.3)
+   active state, #ffd21f gold accent, border-radius: 8px, Open Sans font.
+   Matches existing HUD/overlay patterns from hud.css & connection-status.css. */
+
+/* ═══════════════════════════════════════════════════════════════════════════ */
+/*  CONTAINER                                                                  */
+/* ═══════════════════════════════════════════════════════════════════════════ */
+
+#touch-controls {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 1000;
+  pointer-events: none;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════ */
+/*  D-PAD (bottom-left)                                                        */
+/* ═══════════════════════════════════════════════════════════════════════════ */
+
+.touch-dpad {
+  position: fixed;
+  left: 20px;
+  bottom: 20px;
+  width: 150px;
+  height: 150px;
+  display: grid;
+  grid-template-columns: repeat(3, 50px);
+  grid-template-rows: repeat(3, 50px);
+  gap: 0;
+  pointer-events: none;
+}
+
+/* ─── Directional buttons — shared base ─────────────────────────────────── */
+
+.dpad-up,
+.dpad-down,
+.dpad-left,
+.dpad-right {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 50px;
+  height: 50px;
+  background: rgba(0, 0, 0, 0.5);
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 8px;
+  color: #fff;
+  font-size: 20px;
+  line-height: 1;
+  cursor: pointer;
+  pointer-events: auto;
+  user-select: none;
+  -webkit-user-select: none;
+  touch-action: manipulation;
+  transition: background 0.1s ease, border-color 0.1s ease, transform 0.1s ease;
+}
+
+/* ─── Grid placement ────────────────────────────────────────────────────── */
+
+.dpad-up {
+  grid-column: 2;
+  grid-row: 1;
+}
+
+.dpad-left {
+  grid-column: 1;
+  grid-row: 2;
+}
+
+.dpad-center {
+  grid-column: 2;
+  grid-row: 2;
+  /* Empty center cell */
+}
+
+.dpad-right {
+  grid-column: 3;
+  grid-row: 2;
+}
+
+.dpad-down {
+  grid-column: 2;
+  grid-row: 3;
+}
+
+/* ─── Arrow indicators (CSS triangles) ──────────────────────────────────── */
+
+.dpad-up::after,
+.dpad-down::after,
+.dpad-left::after,
+.dpad-right::after {
+  content: '';
+  display: block;
+  width: 0;
+  height: 0;
+}
+
+.dpad-up::after {
+  border-left: 8px solid transparent;
+  border-right: 8px solid transparent;
+  border-bottom: 10px solid #fff;
+}
+
+.dpad-down::after {
+  border-left: 8px solid transparent;
+  border-right: 8px solid transparent;
+  border-top: 10px solid #fff;
+}
+
+.dpad-left::after {
+  border-top: 8px solid transparent;
+  border-bottom: 8px solid transparent;
+  border-right: 10px solid #fff;
+}
+
+.dpad-right::after {
+  border-top: 8px solid transparent;
+  border-bottom: 8px solid transparent;
+  border-left: 10px solid #fff;
+}
+
+/* ─── Touch / active state ──────────────────────────────────────────────── */
+
+.dpad-up:active,
+.dpad-down:active,
+.dpad-left:active,
+.dpad-right:active {
+  background: rgba(255, 255, 255, 0.3);
+  border-color: rgba(255, 210, 31, 0.5);
+  transform: scale(0.93);
+}
+
+.dpad-up.active,
+.dpad-down.active,
+.dpad-left.active,
+.dpad-right.active {
+  background: rgba(255, 255, 255, 0.3);
+  border-color: rgba(255, 210, 31, 0.5);
+  transform: scale(0.93);
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════ */
+/*  BOMB BUTTON (bottom-right)                                                 */
+/* ═══════════════════════════════════════════════════════════════════════════ */
+
+.touch-bomb {
+  position: fixed;
+  right: 30px;
+  bottom: 40px;
+  width: 70px;
+  height: 70px;
+  border-radius: 50%;
+  background: rgba(0, 0, 0, 0.5);
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+  border: 2px solid rgba(255, 255, 255, 0.15);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 28px;
+  color: #fff;
+  cursor: pointer;
+  pointer-events: auto;
+  user-select: none;
+  -webkit-user-select: none;
+  touch-action: manipulation;
+  transition: background 0.1s ease, border-color 0.1s ease, transform 0.1s ease,
+    box-shadow 0.1s ease;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3);
+}
+
+/* ─── Bomb touch / active state ─────────────────────────────────────────── */
+
+.touch-bomb:active {
+  background: rgba(255, 0, 0, 0.4);
+  border-color: rgba(255, 80, 80, 0.6);
+  transform: scale(0.92);
+  box-shadow: 0 2px 20px rgba(255, 0, 0, 0.3);
+}
+
+.touch-bomb.active {
+  background: rgba(255, 0, 0, 0.4);
+  border-color: rgba(255, 80, 80, 0.6);
+  transform: scale(0.92);
+  box-shadow: 0 2px 20px rgba(255, 0, 0, 0.3);
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════ */
+/*  FADE-IN ANIMATION                                                          */
+/* ═══════════════════════════════════════════════════════════════════════════ */
+
+.touch-dpad,
+.touch-bomb {
+  animation: touchControlsFadeIn 0.3s ease-out;
+}
+
+@keyframes touchControlsFadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════ */
+/*  RESPONSIVE                                                                 */
+/* ═══════════════════════════════════════════════════════════════════════════ */
+
+/* ─── Desktop safety: hide on wide screens ──────────────────────────────── */
+@media (min-width: 1024px) {
+  #touch-controls {
+    display: none !important;
+  }
+}
+
+/* ─── Small phones (< 400px) — compact layout ──────────────────────────── */
+@media (max-width: 400px) {
+  .touch-dpad {
+    left: 12px;
+    bottom: 12px;
+    width: 126px;
+    height: 126px;
+    grid-template-columns: repeat(3, 42px);
+    grid-template-rows: repeat(3, 42px);
+  }
+
+  .dpad-up,
+  .dpad-down,
+  .dpad-left,
+  .dpad-right {
+    width: 42px;
+    height: 42px;
+    font-size: 16px;
+    border-radius: 6px;
+  }
+
+  .dpad-up::after {
+    border-left-width: 6px;
+    border-right-width: 6px;
+    border-bottom-width: 8px;
+  }
+
+  .dpad-down::after {
+    border-left-width: 6px;
+    border-right-width: 6px;
+    border-top-width: 8px;
+  }
+
+  .dpad-left::after {
+    border-top-width: 6px;
+    border-bottom-width: 6px;
+    border-right-width: 8px;
+  }
+
+  .dpad-right::after {
+    border-top-width: 6px;
+    border-bottom-width: 6px;
+    border-left-width: 8px;
+  }
+
+  .touch-bomb {
+    right: 16px;
+    bottom: 24px;
+    width: 58px;
+    height: 58px;
+    font-size: 24px;
+  }
+}
