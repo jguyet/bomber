@@ -423,8 +423,15 @@ function InitializeSocket()
 		LoadingManager.setTotal(6);
 		loadGameAssets(function() {
 			LoadingManager.setStatus('Loading world...');
-			sendSocketMessage('WL');
+			// Spectators don't send WL — server pushes world state to them
+			if (!isFullSpectator) {
+				sendSocketMessage('WL');
+			}
 			initWorld();
+			// Show spectator badge if in spectator mode
+			if (isFullSpectator && typeof HUD !== 'undefined' && HUD.showSpectatorBadge) {
+				HUD.showSpectatorBadge();
+			}
 		});
 	});
 

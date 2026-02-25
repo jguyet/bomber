@@ -23,7 +23,16 @@ Multiplayer Bomberman online game built with Node.js, Socket.io, and the [Fosfo]
 - **Connection status** — Auto-reconnect with retry counter and permanent-failure state
 - **Late-join sync** — New players receive full game state, round state, and scoreboard on connect
 - **Room persistence** — Room ID counter persisted to `.db/rooms.json` across server restarts
-- **REST API** — `GET /api/rooms` and `POST /api/rooms` for room listing and creation
+- **Persistent stats** — Player stats (kills, deaths, wins, games played, win rate) persisted to `.db/stats.json` across sessions
+- **Stats overlay** — In-game player profile with K/D ratio, win rate, and top-20 leaderboard
+- **Spectator mode** — "Watch" button on room cards to join as spectator; full game view with blocked input
+- **REST API** — `GET/POST /api/rooms` for rooms, `GET /api/stats/:nickname` for player stats, `GET /api/leaderboard` for top players
+- **Touch controls** — Virtual D-pad and bomb button overlay for mobile/touch devices; multi-touch support, hidden on desktop
+- **Explosion feedback** — Red flash overlay and canvas shake when the local player is caught in an explosion or killed
+- **Chat filters** — Toggle buttons to filter chat by category (all, chat, kill, mod, common)
+- **Smart chat** — Message cap (100 entries) with auto-scroll that pauses when the user scrolls up
+- **Nickname labels** — Improved legibility with badge-style background, polyfill for `roundRect`, and current-player highlight
+- **Accessibility** — ARIA roles/labels on canvas, chat input, and chat list; semantic attributes across all interactive elements
 - **Responsive design** — Lobby and room browser adapt from desktop to mobile with glassmorphism styling
 - **SEO / Open Graph** — Meta tags, favicon, and social sharing cards
 - **Docker-ready** — Multi-stage Dockerfile with health check, non-root user, single-port deployment
@@ -101,6 +110,7 @@ bomber/
   server.js              # Unified server: Socket.io + REST API + static files (port 9998)
   server/
     roomManager.js       # Room class (isolated game state) + RoomManager
+    statsManager.js      # Persistent player stats (JSON file DB)
   index.html             # Main HTML (lobby + room browser + waiting room + game + HUD)
   package.json           # Node.js project config (v3.0.0)
   Dockerfile             # Multi-stage Docker build (node:20-alpine)
@@ -112,16 +122,20 @@ bomber/
     rooms.css            # Room browser + waiting room styles
     loading.css          # Loading overlay styles
     connection-status.css  # Connection overlay styles
-    hud.css              # HUD: timer, scoreboard, results, room/theme indicator
+    hud.css              # HUD: timer, scoreboard, results, room/theme indicator, explosion feedback
+    touch-controls.css   # Virtual D-pad + bomb button overlay styling
     normalize-2.1.0.css  # CSS reset
   js/
     lobby.js             # Pre-connect lobby (nickname + skin selection)
     rooms.js             # Room browser UI, create room form, waiting room
     loading.js           # Loading overlay manager
     connection-status.js # Disconnect/reconnect overlay
-    hud.js               # HUD: timer, scoreboard, results, room info, death notice
+    hud.js               # HUD: timer, scoreboard, results, room info, death notice, explosion feedback
+    stats-overlay.js     # Player stats + leaderboard overlay
     aks.js               # Socket.io client + protocol handler + reconnect
-    chat.js              # In-game chat + kill feed
+    chat.js              # In-game chat + kill feed + message cap + smart auto-scroll
+    chat-filters.js      # Chat filter button logic (all/chat/kill/mod/common)
+    touch-controls.js    # Virtual D-pad + bomb button for touch devices
     events.js            # Keyboard input handling + spectator blocking
     globals.js           # Shared global state (room, theme, round, scoreboard)
     initworld.js         # World initialization + theme-aware tileset loading
@@ -136,7 +150,7 @@ bomber/
     maps/                # Map tilesets: 1.png (default), 1-winter.png, tileset-moon.png
     favicon.svg          # Site favicon
     og-image.png         # Open Graph share image
-  .db/                   # Runtime persistence (rooms.json)
+  .db/                   # Runtime persistence (rooms.json, stats.json)
   scripts/
     start.sh             # Bash start script
     start.ps1            # PowerShell start script
@@ -148,6 +162,8 @@ bomber/
 |--------|------|------|----------|
 | `GET` | `/api/rooms` | — | `[{ id, name, playerCount, maxPlayers, status, themeId }]` |
 | `POST` | `/api/rooms` | `{ name, maxPlayers, themeId }` | `{ id, name, maxPlayers, themeId, status }` |
+| `GET` | `/api/stats/:nickname` | — | `{ nickname, kills, deaths, gamesPlayed, wins, winRate }` |
+| `GET` | `/api/leaderboard` | — | `[{ nickname, kills, deaths, gamesPlayed, wins, winRate }]` (top 20) |
 
 ## Game Protocol
 
@@ -213,6 +229,8 @@ Packets are `^`-separated, each with a 2-character prefix, transmitted over Sock
 | `D` / `Arrow Right` | Move right |
 | `Space` | Place bomb |
 | `Enter` | Send chat message |
+
+On **touch devices**, a virtual D-pad (bottom-left) and bomb button (bottom-right) appear automatically. Multi-touch is supported.
 
 ## Requirements
 

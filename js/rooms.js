@@ -333,7 +333,7 @@ var RoomUI = (function() {
     var onRoomJoined = function(data) {
       hideBrowser();
       // Skip waiting room — go straight to game if room is playing
-      if (data.spectator) {
+      if (data.spectator && data.status === 'playing') {
         document.getElementById('chat').style.display = '';
         if (typeof initChatScroll === 'function') initChatScroll();
         if (typeof HUD !== 'undefined' && HUD.setRoomInfo) {

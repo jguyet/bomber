@@ -1,0 +1,247 @@
+{
+  "stats": {
+    "todo": 0,
+    "in_progress": 0,
+    "to_check": 0,
+    "done": 12,
+    "total": 12
+  },
+  "tasks": [
+    {
+      "id": "task-1",
+      "title": "Fix spectator null-player crashes in world/player rendering",
+      "description": "**Bug**: When a user joins as spectator via the \"Watch\" button, `currentPlayer` is null because no player entity is created for spectators. This causes crashes in two places:\n\n1. `js/world/world.js` → `setDup()` (line 38): accesses `currentPlayer.x` and `currentPlayer.y` without null guard. This function is called every frame from `interval()` in `initworld.js`.\n2. `js/player/player.js` → `print()` (line 125): `this.id == currentPlayer.id` when `currentPlayer` is null → TypeError.\n\n**Fix in `js/world/world.js`**:\n- In `setDup()`, add a null guard: `if (!currentPlayer) { this.dup = []; return; }` at the top.\n\n**Fix in `js/player/player.js`**:\n- In `print()` (line 125), change `if (this.id == currentPlayer.id)` to `if (currentPlayer && this.id == currentPlayer.id)`.\n\n**Fix in `js/initworld.js`**:\n- In the `interval()` function nickname-drawing loop (line 131+), guard `typeof currentPlayer !== 'undefined' && currentPlayer` — already present but verify the `setDup` call path is safe.\n- In `updatelayer1()` (line 126-128): already has `if (currentPlayer == null) return;` — this is fine.\n\n**Acceptance criteria**:\n- Spectators can watch a room without any console errors\n- World renders correctly for spectators (camera centered or at default position)\n- Other players' characters render and animate correctly for spectators",
+      "status": "done",
+      "priority": "high",
+      "assignee": "developer-1",
+      "assigneeRole": "developer",
+      "dependencies": [],
+      "files": [
+        "js/world/world.js",
+        "js/player/player.js"
+      ],
+      "branch": "agent/developer-1",
+      "createdBy": "ceo",
+      "checkResult": "Added null guard for currentPlayer in World.setDup() (returns empty dup array when null) and guarded currentPlayer.id access in Player.print(). Spectators can now watch without crashes. updatelayer1() in events.js already had a null check.",
+      "createdAt": 1772030613809,
+      "updatedAt": 1772030978676
+    },
+    {
+      "id": "task-2",
+      "title": "Fix nickname persistence across reconnects",
+      "description": "**Regression check**: Verify and fix nickname persistence when Socket.io reconnects (disconnect + auto-reconnect).\n\n**Current flow** in `js/aks.js`:\n- On connect, restores `playerNickname` from `localStorage` if globals are empty (lines 22-27)\n- Sends `nicknameInit` with nickname/skinId\n- Then joins room with `currentRoomId`\n\n**Issues to verify/fix**:\n1. On Socket.io auto-reconnect, the `connect` handler fires again — verify `playerNickname` is still populated from globals (not empty string) and falls back to localStorage correctly\n2. Verify `playerSkinId` is restored correctly (check `=== undefined || === null` vs falsy 0)\n3. When reconnecting to a room mid-game, ensure the server re-applies the nickname to the player object (check `server.js` joinRoom handler: lines 239-252 apply `socket.nickname` to player)\n4. Verify room rejoin sends correct `joinRoom` event format (not spectator unless `isFullSpectator` is true)\n\n**Fix if needed**:\n- In `js/aks.js` connect handler, ensure `playerNickname` is always restored: check `if (!playerNickname || playerNickname.length === 0)` before localStorage fallback\n- In `js/lobby.js`, verify `localStorage.setItem('bomber_nickname', playerNickname)` is called before any connection attempt\n\n**Acceptance criteria**:\n- Disconnect and reconnect: nickname and skin persist\n- Page refresh with same browser: nickname and skin pre-filled in lobby\n- No \"Player1\" or \"undefined\" nicknames after reconnection",
+      "status": "done",
+      "priority": "high",
+      "assignee": "developer-2",
+      "assigneeRole": "developer",
+      "dependencies": [],
+      "files": [
+        "js/aks.js",
+        "js/lobby.js",
+        "js/globals.js"
+      ],
+      "branch": "agent/developer-2",
+      "createdBy": "ceo",
+      "checkResult": "Fixed nickname/skin persistence across reconnects: (1) aks.js connect handler now always restores playerSkinId from localStorage when present (old check missed skinId=0 since globals default to 0, not undefined/null), with 0-23 range validation; (2) Added explicit empty-string check for playerNickname with fallback to 'Player' before emitting nicknameInit; (3) Server-side nicknameInit handler now validates nickname (trim, max 16 chars, type check) and skinId (parseInt, range 0-23) with safe defaults, preventing undefined/null from propagating to player objects.",
+      "createdAt": 1772030620855,
+      "updatedAt": 1772031062574
+    },
+    {
+      "id": "task-3",
+      "title": "Fix power-up edge cases: rapid collection guard and stacking caps",
+      "description": "**Regression check**: Verify power-up collection edge cases in `server/roomManager.js`.\n\n**Current implementation** (roomManager.js lines 444-466):\n- `pickupItem()` has a guard: `const idx = this.items.indexOf(item); if (idx === -1) return;` — prevents double-pickup\n- Stacking caps exist: maxBombs capped at 8, range at 10, speed at 3.0\n\n**Issues to verify/fix**:\n\n1. **Rapid collection race condition**: Two players on same cell in same tick — the guard `items.indexOf(item) === -1` should prevent double pickup. Verify this actually works: `gameTick()` iterates `this.players` and calls `movePlayer()` which calls `pickupItem()` — this is sequential per tick, so double-pickup is handled. **Confirm this path.**\n\n2. **Explosion destroying items**: `explodeLine()` (line 312-315) destroys items on explosion cells — verify `cell.item && this.items.indexOf(cell.item) !== -1` guard works when item was already picked up in same tick.\n\n3. **Item stacking display**: Client never receives an explicit \"your stats changed\" message for bomb/range pickups (only `IS` for speed). The client has no way to know the player's current bomb count or range. Consider broadcasting a new message `PU{playerId}|{maxBombs}|{range}|{speed}` on pickup so the HUD could display current power-up levels. **For now, just verify existing behavior is stable.**\n\n4. **Item persistence**: Items no longer auto-despawn (timer is set to null at line 434). Verify items don't accumulate infinitely — they're destroyed by explosions and collected by players.\n\n5. **Power-ups after round reset**: `resetRound()` (lines 643-750) clears all items and resets player stats. Verify `items.length = 0` properly clears item references and `cell.item = null` is set.\n\n**Acceptance criteria**:\n- Collecting multiple power-ups in quick succession works correctly\n- No crashes or double-application of power-up effects\n- Power-ups destroyed by explosions are properly cleaned up\n- After round reset, no stale power-up references remain",
+      "status": "done",
+      "priority": "medium",
+      "assignee": "developer-1",
+      "assigneeRole": "developer",
+      "dependencies": [],
+      "files": [
+        "server/roomManager.js"
+      ],
+      "branch": "agent/developer-1",
+      "createdBy": "ceo",
+      "checkResult": "Audited all 5 power-up concerns. Existing guards (double-pickup indexOf, explosion-item despawn, stacking caps, round reset cleanup) are all correct. Added 3 hardening fixes: (1) dead-player guard in pickupItem(), (2) null-item guard in despawnItem(), (3) else-if chain for mutually-exclusive templateId checks.",
+      "createdAt": 1772030640935,
+      "updatedAt": 1772031276758
+    },
+    {
+      "id": "task-4",
+      "title": "Fix room isolation: verify bombs/state don't leak between rooms",
+      "description": "**Regression check**: Confirm strict room isolation in `server/roomManager.js` and `server.js`.\n\n**Current architecture**:\n- Each Room instance has its own `cells[]`, `players Map`, `bombs[]`, `items[]`, `roundState`\n- Broadcasts use `io.to('room:' + this.id).emit(...)` for room-scoped messaging\n- `server.js` game message handler (line 288-304) looks up room by `socket.currentRoomId`\n\n**Issues to verify/fix**:\n\n1. **Broadcast isolation**: Verify `broadcast()` and `broadcastAll()` methods (lines 180-194) use `io.to('room:' + this.id)` — they do. Confirm no global `io.emit()` calls exist anywhere in the game logic.\n\n2. **Player ID collision**: Each room has its own `nextPlayerId` counter (line 65). Two rooms can have player ID 1. On the client, players are stored in a flat array `world.players[]`. If a spectator switches rooms, stale player IDs from room A could conflict with room B. **Fix**: When leaving a room (`leaveRoom` in rooms.js), clear client-side game state (world, players, bombs arrays) before joining new room.\n\n3. **Game tick isolation**: Each room runs its own `setInterval(() => this.gameTick(), TICK_MS)` (line 859). Verify `gameTick()` only iterates `this.players` (line 853) — it does.\n\n4. **Socket room cleanup**: When player disconnects (server.js `handleLeaveRoom`), verify `socket.leave('room:' + roomId)` is called — it is (line 403).\n\n5. **Room destruction**: When all players leave, `roomManager.removeRoom(roomId)` is called with `room.cleanup()`. Verify all timers (tick, round, bombs) are cleared — `cleanup()` (lines 871-892) handles this.\n\n**Fix needed in `js/rooms.js`**:\n- In `leaveRoom()` function: after `socket.emit('leaveRoom')`, clear game state: `if (world) { world.players = []; world.bombs = []; world.items = []; }; currentPlayer = null;`\n\n**Acceptance criteria**:\n- Two simultaneous rooms: bombs in room A don't appear in room B\n- Leaving room A and joining room B: no stale state from room A visible\n- Room destruction properly stops all timers",
+      "status": "done",
+      "priority": "high",
+      "assignee": "developer-2",
+      "assigneeRole": "developer",
+      "dependencies": [],
+      "files": [
+        "server/roomManager.js",
+        "server.js",
+        "js/rooms.js"
+      ],
+      "branch": "agent/developer-2",
+      "createdBy": "ceo",
+      "checkResult": "Fixed room isolation: (1) Client-side leaveRoom() now fully clears game state — removes all player/bomb/item sprites from fosfo1, empties world arrays, nulls currentPlayer, resets round/scoreboard/killFeed state, hides HUD overlays. Prevents stale entity IDs from room A conflicting with room B. (2) Server-side handleLeaveRoom() now resets socket.isSpectator for normal player leaves. Verified server-side isolation is correct: all broadcasts use io.to('room:'+id), no global io.emit(), gameTick scoped to this.players, cleanup() clears all timers.",
+      "createdAt": 1772030655382,
+      "updatedAt": 1772031277084
+    },
+    {
+      "id": "task-5",
+      "title": "Fix round transitions for edge-case player counts (0, 1, 2, max)",
+      "description": "**Regression check**: Verify round state machine handles unusual player counts in `server/roomManager.js`.\n\n**Scenarios to test/fix**:\n\n1. **0 players**: All players disconnect during active round. `checkRoundEnd()` (line 752-770) counts alive players. If `aliveCount <= 1`, round ends. But if room is empty (0 players), `endRound()` is called with `lastAlive = null` → `endRound(null, null)`. Then `resetRound()` fires after 5s delay. With 0 players, `resetRound()` iterates empty `this.players` Map — safe but wasteful.\n   - **Fix**: In `endRound()`, after recording stats, check `if (this.players.size === 0)` and skip the resetRound timeout (room will be destroyed by disconnect handler anyway). But verify the timeout doesn't fire after room is destroyed — `cleanup()` should clear `resetTimeout`.\n\n2. **1 player**: Single player in room. `MIN_PLAYERS_TO_START = 2` means round can't start via auto-start. But room creator can hit \"Start Game\" — `server.js` line 311 checks `room.players.size < MIN_PLAYERS_TO_START` and returns. **Verify** this guard works.\n   - **Fix**: Ensure client hides \"Start Game\" button when < 2 players (already in rooms.js `updateWaitingRoom()` line 299-301 — verify).\n\n3. **2 players**: Both die simultaneously (chain bomb). `checkRoundEnd()` should fire with `aliveCount = 0`, `lastAlive = null` → draw. Verify `endRound(null, null)` works — `RW|` is broadcast, client handles empty winner.\n   - **Verify** `HUD.showResults()` handles `winner = { id: NaN, nickname: '' }` — line 104: `winner && winner.nickname ? ... : 'Draw — No Winner'` — empty string is falsy, so it shows \"Draw\". Good.\n\n4. **Max players (8)**: Verify round resets correctly with 8 players. `resetRound()` uses unique spawn cells with 50-attempt limit. With MAP_WIDTH=80, MAP_HEIGHT=42, plenty of cells. Verify no performance issues.\n\n5. **Player joins mid-round**: `handleWorldEntities()` handles late join — sends world + all players + bombs + items + round state. **Verify** this works smoothly.\n\n6. **Player disconnects mid-round**: `handleLeaveRoom()` → `checkRoundEnd()`. Verify round ends correctly if disconnecting player was last alive.\n\n**Acceptance criteria**:\n- 0-player room: no lingering timers or errors after room destruction\n- 1-player room: can't start game, UI reflects this\n- Simultaneous deaths: draw handled gracefully\n- No crash or timer leak in any player count scenario",
+      "status": "done",
+      "priority": "medium",
+      "assignee": "developer-1",
+      "assigneeRole": "developer",
+      "dependencies": [],
+      "files": [
+        "server/roomManager.js",
+        "server.js"
+      ],
+      "branch": "agent/developer-1",
+      "createdBy": "ceo",
+      "checkResult": "Added empty-room guards in endRound() (skip resetTimeout scheduling) and resetRound() (skip map regen/broadcasts). Verified all 6 scenarios: 0-player rooms cleaned up without lingering timers, 1-player start blocked by MIN_PLAYERS_TO_START, simultaneous deaths produce draw, max players has no issues, mid-round join/disconnect handled correctly.",
+      "createdAt": 1772030677383,
+      "updatedAt": 1772031346291
+    },
+    {
+      "id": "task-6",
+      "title": "Polish touch controls for various screen sizes",
+      "description": "**Regression check**: Verify mobile touch controls work correctly on various screen sizes.\n\n**Current implementation**:\n- `js/touch-controls.js`: Detects touch capability, builds D-pad + bomb button\n- `css/touch-controls.css`: Styles for overlays\n\n**Issues to verify/fix**:\n\n1. **Touch control sizing on small screens**: D-pad and bomb button use fixed px sizes. On very small screens (320px width), they may overlap or be too large. Verify `css/touch-controls.css` has responsive breakpoints.\n   - **Fix if needed**: Add `@media (max-width: 480px)` breakpoint to scale down D-pad button size and spacing. Also add `@media (max-height: 500px)` for landscape mode on small phones.\n\n2. **Touch controls z-index**: Ensure touch controls appear above the game canvas but below modals/overlays (results screen, stats overlay).\n\n3. **Touch controls when spectating**: `bindDirection()` and `bindBomb()` check `if (isSpectating) return;` — but this checks the global, which is correct for both death-spectating and full spectating. **Verify**.\n\n4. **Multi-touch**: Holding a direction + tapping bomb. The current implementation uses separate event listeners per button. Verify `passive: false` and `e.preventDefault()` prevent scroll/zoom.\n\n5. **D-pad visual feedback**: Add `:active` state visual feedback (background color change) on touch. Check if `css/touch-controls.css` has this.\n\n6. **Chat textarea interaction**: On mobile, tapping the chat textarea should bring up keyboard. Verify touch controls don't interfere. The touch controls are in `#viewport`, chat is outside viewport — should be fine.\n\n7. **Landscape vs portrait**: Game canvas assumes wide viewport. On portrait mobile, controls may overlap with chat panel. Verify layout.\n\n**Acceptance criteria**:\n- Touch controls visible and functional on 320px, 375px, 414px, 768px widths\n- No overlap between D-pad and bomb button\n- No overlap with HUD elements (scoreboard, timer)\n- Multi-touch works: move + bomb simultaneously\n- Controls hidden on desktop (non-touch devices)",
+      "status": "done",
+      "priority": "medium",
+      "assignee": "designer-1",
+      "assigneeRole": "designer",
+      "dependencies": [],
+      "files": [
+        "css/touch-controls.css",
+        "js/touch-controls.js"
+      ],
+      "branch": "agent/designer-1",
+      "createdBy": "ceo",
+      "checkResult": "Polished touch controls for all screen sizes: added 480px medium phone breakpoint, 320px tiny phone breakpoint (scale 0.65), landscape max-height 500px breakpoint, portrait tall phone offset. Added JS .active class toggling for reliable touch feedback. Verified z-index layering, spectator blocking, multi-touch, and preventDefault.",
+      "createdAt": 1772030690605,
+      "updatedAt": 1772031118880
+    },
+    {
+      "id": "task-7",
+      "title": "Fix HUD visual inconsistencies and spectator mode indicator",
+      "description": "**Polish pass**: Address visual inconsistencies in HUD elements across all game states.\n\n**Issues to verify/fix in `css/hud.css`**:\n\n1. **Stats button positioning**: `#stats-btn` is an absolute-positioned button. Verify it doesn't overlap with scoreboard (`#hud-scoreboard` top-right), round timer (`#round-timer` top-center), or room info (`#hud-room-info` top-left). Check z-index layering.\n\n2. **Scoreboard header alignment**: `#hud-scoreboard-table` headers (Player, K, D) — verify column widths are consistent and text doesn't overflow.\n\n3. **Round timer urgency colors**: Timer has `.urgent` (≤30s) and `.critical` (≤10s) classes. Verify these transition smoothly and don't flash/flicker on class toggle (use CSS transitions, not just color change).\n\n4. **Results screen overlay**: Verify `#results-screen` fully covers the viewport on all screen sizes. Check `display:flex; align-items:center; justify-content:center` works.\n\n5. **Spectator badge styling**: `.spectator-badge` exists in `css/hud.css` (line 983+). Verify `HUD.showSpectatorBadge()` makes the badge visible and positioned correctly. Currently it sets text on `#round-timer-state` — verify this element is visible in spectator mode.\n\n6. **Kill feed in chat**: Kill feed entries use `.kill-info` class with `.ico.bombed` icon. Verify icon renders correctly (may need background-image in `css/styles.css`).\n\n7. **Room info HUD**: `#hud-room-info` shows room name + theme badge. Verify positioning doesn't overlap with chat panel toggle area.\n\n8. **Death notice**: `HUD.showDeathNotice()` adds text \"YOU DIED — Spectating\" to `#round-timer-state`. Verify `.death-notice` class has appropriate styling (red color, animation).\n\n**Acceptance criteria**:\n- All HUD elements visible without overlap on 1280x720 and 1920x1080 viewports\n- Spectator badge clearly visible when spectating\n- Timer urgency transitions smooth\n- Kill feed entries properly styled with bomb icon\n- Stats button accessible but non-intrusive",
+      "status": "done",
+      "priority": "medium",
+      "assignee": "designer-1",
+      "assigneeRole": "designer",
+      "dependencies": [],
+      "files": [
+        "css/hud.css",
+        "js/hud.js"
+      ],
+      "branch": "agent/designer-1",
+      "createdBy": "ceo",
+      "checkResult": "Fixed HUD visual inconsistencies: smooth urgency transitions (0.4s ease on color/border), non-intrusive stats button (0.7 opacity, backdrop-blur, responsive mobile sizing), spectator badge with .spectator-state class and pulse animation, death notice cleanup, kill feed CSS-only fallback icon for missing chatlog.png sprite. Reset cleans up all state classes.",
+      "createdAt": 1772030707740,
+      "updatedAt": 1772031346617
+    },
+    {
+      "id": "task-8",
+      "title": "Fix loading screen to cover all asset paths including themes",
+      "description": "**Regression check**: Verify loading screen tracks all asset loading paths correctly.\n\n**Current implementation** in `js/initworld.js` and `js/loading.js`:\n- `loadGameAssets()` loads: tileset (1) → bombs + explosion + items (3) → character skin (1) = 5 assets\n- `gameStart` handler in `aks.js` (line 403): `LoadingManager.setTotal(7)` but loads 5 assets + \"Server connection\" + \"World data\" = 7. Correct.\n- Spectator flow in `rooms.js` (line 350): `LoadingManager.setTotal(6)` — missing one count. Should be 6 = 5 assets + \"World data\" (no \"Server connection\" because socket already connected). **Verify this is correct.**\n\n**Issues to verify/fix**:\n\n1. **Asset count mismatch**: `loadGameAssets` calls `assetLoaded()` for: tilesetPath, bombs/1.png, explode/1.png, items/1.png, character skin = 5 calls. Plus \"Server connection\" (called in aks.js connect handler) = 6. Plus \"World data\" (called in WL handler) = 7. For spectator flow, no \"Server connection\" is counted because socket is already connected and `assetLoaded('Server connection')` was already called. But spectator calls `setTotal(6)` and gets: 5 assets + 1 world = 6. **This should work but verify no off-by-one.**\n\n2. **Theme-specific tileset loading**: When theme changes mid-game (round reset with random theme), tileset is reloaded via `fosfo0.loadimage()` in the TH handler (aks.js lines 236-245). This doesn't go through LoadingManager. Fine for mid-game, but verify no flash/artifacts during theme change.\n\n3. **Other player skin loading**: When a new player joins (PA message), `Player.load()` calls `fosfo1.loadimage('assets/characters/' + this.skin + '.png')`. This is not tracked by LoadingManager — could cause brief invisible player. Not a blocker but note for future.\n\n4. **Loading screen dismissal**: `worldReady()` hides loading screen with 300ms fade. Verify this is called after world is fully rendered. Currently called from WL handler in aks.js (line 263).\n\n**Fix if needed**:\n- Ensure `LoadingManager.setTotal()` matches actual `assetLoaded()` call count in each flow path\n- If mismatch found, loading bar never reaches 100% and screen stays visible → fix the count\n\n**Acceptance criteria**:\n- Loading bar reaches 100% and dismisses in all join flows (normal join, spectator join, reconnect)\n- No stuck loading screen\n- No flash of unloaded content",
+      "status": "done",
+      "priority": "medium",
+      "assignee": "developer-2",
+      "assigneeRole": "developer",
+      "dependencies": [],
+      "files": [
+        "js/loading.js",
+        "js/initworld.js",
+        "js/aks.js",
+        "js/rooms.js"
+      ],
+      "branch": "agent/developer-2",
+      "createdBy": "ceo",
+      "checkResult": "Fixed loading screen asset count mismatch: gameStart handler had setTotal(7) but only 6 assetLoaded() calls fire (socket already connected, so \"Server connection\" never counted). Changed to setTotal(6). Added guard in loading.js assetLoaded() for totalAssets<=0 to prevent NaN on reconnect, and capped percentage at 100%. Verified spectator flow setTotal(6) is already correct.",
+      "createdAt": 1772030725500,
+      "updatedAt": 1772031346951
+    },
+    {
+      "id": "task-9",
+      "title": "Clean up dead UI and remove unused code",
+      "description": "**Polish pass**: Remove or implement all dead/unused UI elements and code.\n\n**Dead code to clean up**:\n\n1. **`js/player/player.js`**: \n   - `load2()` method (lines 183-188): exact duplicate of `load()` — remove it\n   - `sendpos()` (lines 166-169): appears unused in current architecture (server is authoritative). Check if any code calls it → `events.js` has `sendpos` var but it's only defined, never called in an interval. Remove if unused.\n   - `getposPlayer()` in `world.js` (lines 139-143): function body just computes x,y but doesn't return or use them. Dead code — remove.\n\n2. **`js/world/world.js`**:\n   - Commented-out `printWorld()` method (lines 109-137): large block of commented code. Remove entirely.\n   - `getCellPos` and `hasBombOnCell` referenced by player.js but never defined in world.js → possible missing methods that would cause errors if player client-side collision is used. Verify these aren't called, or add stub implementations.\n\n3. **`js/events.js`**:\n   - `checkKeyStates()` function (lines 85-122): appears to be old key handling code. Check if it's called anywhere — it's defined as a `var` but never invoked. If unused, remove.\n   - `sendpos` var (lines 131-134): defined but never called in any interval. Remove if unused.\n\n4. **`index.html`**:\n   - Verify all `<script>` tags reference existing files\n   - Verify all HTML element IDs referenced by JS actually exist in the DOM\n   - Check for any placeholder or stub elements that were never implemented\n\n5. **`js/initworld.js`**:\n   - `requestAnimFrame()` function (lines 92-105): computes fps but never displays or uses it. Consider removing or leaving as debug utility.\n\n**Acceptance criteria**:\n- No dead code (unused functions, commented-out blocks > 5 lines)\n- No JS errors from calling undefined functions\n- All UI elements in index.html are either functional or removed\n- No orphan CSS selectors for removed elements",
+      "status": "done",
+      "priority": "low",
+      "assignee": "developer-2",
+      "assigneeRole": "developer",
+      "dependencies": [],
+      "files": [
+        "js/player/player.js",
+        "js/world/world.js",
+        "js/events.js",
+        "js/initworld.js"
+      ],
+      "branch": "agent/developer-2",
+      "createdBy": "ceo",
+      "checkResult": "Removed 118 lines of dead code: player.js load2() duplicate, sendpos() (unused with authoritative server), debug draw comments; world.js printWorld() commented block, dead getposPlayer(); events.js checkKeyStates() (never called), sendpos var; initworld.js commented-out conditional. Kept getposibleCell/hasBombOnTargetCell (used by player update) and requestAnimFrame (used by render loop).",
+      "createdAt": 1772030742348,
+      "updatedAt": 1772031407334
+    },
+    {
+      "id": "task-10",
+      "title": "Fix duplicate escapeHtml and consolidate global utilities",
+      "description": "**Bug**: `escapeHtml()` is defined in multiple files, creating potential conflicts:\n- `js/chat.js` line 5-9: defines `escapeHtml(str)` \n- `js/rooms.js` line 143-147: defines `escapeHtml(text)` (inside RoomUI IIFE — scoped, not global)\n- `js/hud.js`: uses `escapeHtml()` but doesn't define it — relies on `chat.js` being loaded first\n- `js/stats-overlay.js`: uses `escapeHtml()` but doesn't define it — relies on `chat.js` being loaded first\n\n**Issue**: The global `escapeHtml` from `chat.js` works because chat.js is loaded before hud.js and stats-overlay.js (verified in index.html script order: chat.js → chat-filters.js → hud.js → stats-overlay.js). The RoomUI version is scoped inside an IIFE so it doesn't conflict.\n\n**Fix**: \n- Move the global `escapeHtml()` from `js/chat.js` to `js/globals.js` (loaded first, before all other scripts) so the dependency is explicit and not reliant on script ordering.\n- Remove the `escapeHtml()` definition from `js/chat.js`.\n- The RoomUI scoped version in `js/rooms.js` can stay (it's private to the IIFE), or remove it since the global version will be available.\n\n**Acceptance criteria**:\n- Single authoritative `escapeHtml()` in `js/globals.js`\n- No duplicate definitions in other files (except intentionally scoped ones)\n- All files that use `escapeHtml` work correctly\n- No console errors related to undefined `escapeHtml`",
+      "status": "done",
+      "priority": "low",
+      "assignee": "developer-1",
+      "assigneeRole": "developer",
+      "dependencies": [],
+      "files": [
+        "js/globals.js",
+        "js/chat.js",
+        "js/rooms.js"
+      ],
+      "branch": "agent/developer-1",
+      "createdBy": "ceo",
+      "checkResult": "Moved escapeHtml() to js/globals.js as single authoritative definition. Removed duplicate from chat.js and scoped copy from rooms.js IIFE. Verified script load order: globals.js loads before all consumers (chat.js, hud.js, aks.js, rooms.js, stats-overlay.js).",
+      "createdAt": 1772030751895,
+      "updatedAt": 1772031347175
+    },
+    {
+      "id": "task-11",
+      "title": "Fix spectator camera positioning when no currentPlayer",
+      "description": "**Bug**: When spectating, `currentPlayer` is null so the camera (fosfo0.x/fosfo1.y) never updates from its initial position. Spectators see the world from a fixed default camera position rather than following the action.\n\n**Current behavior**:\n- `initCanvas()` in `js/initworld.js` sets initial camera: `fosfo0.x = (window.innerWidth - (40 * 32)) / 2; fosfo0.y = 32;`\n- Camera tracking happens in `player.js` `print()` (lines 125-151) — only for `currentPlayer`\n- Spectators have no `currentPlayer`, so camera stays at initial position\n\n**Fix in `js/initworld.js`**:\n- In the `interval()` function, after `updatelayer1()`, add spectator camera logic:\n```\nif (isFullSpectator && world && world.players && world.players.length > 0 && !currentPlayer) {\n  // Follow the first alive player for spectators\n  var target = null;\n  for (var i = 0; i < world.players.length; i++) {\n    if (world.players[i] && world.players[i].alive !== false) { target = world.players[i]; break; }\n  }\n  if (!target) target = world.players[0]; // fallback to first player even if dead\n  if (target) {\n    var tileSize = 32;\n    var worldWidthPxs = world.width * tileSize;\n    var worldHeightPxs = world.height * tileSize;\n    var baseX = ((window.innerWidth - worldWidthPxs) / 2);\n    var baseY = ((window.innerHeight - worldHeightPxs) / 2);\n    fosfo0.x = (baseX + worldWidthPxs / 2) - (target.x % worldWidthPxs);\n    fosfo1.x = fosfo0.x;\n    fosfo0.y = (baseY + worldHeightPxs / 2) - (target.y % worldHeightPxs);\n    fosfo1.y = fosfo0.y;\n  }\n}\n```\n\n**Dependency**: Requires task-1 (null guard fixes) to be completed first.\n\n**Acceptance criteria**:\n- Spectators see the game action centered on the first alive player\n- Camera follows player movement smoothly\n- When tracked player dies, camera switches to next alive player\n- When all players dead, camera stays on last position (no crash)",
+      "status": "done",
+      "priority": "medium",
+      "assignee": "developer-1",
+      "assigneeRole": "developer",
+      "dependencies": [
+        "task-1"
+      ],
+      "files": [
+        "js/initworld.js"
+      ],
+      "branch": "agent/developer-1",
+      "createdBy": "ceo",
+      "checkResult": "Added spectator camera logic in interval(). When isFullSpectator && !currentPlayer, camera follows the first alive player using the same formula as player.js print(). Falls back to first player if all dead. No crash when world.players is empty.",
+      "createdAt": 1772030767839,
+      "updatedAt": 1772031277301
+    },
+    {
+      "id": "task-12",
+      "title": "Polish stats overlay and leaderboard styling",
+      "description": "**Polish pass**: Ensure the stats overlay and leaderboard display correctly across viewport sizes.\n\n**Current implementation**:\n- `css/hud.css` has comprehensive stats overlay styles (lines 769-980)\n- `index.html` has the stats overlay HTML (lines 237-261)\n- Stats button (`#stats-btn`) positioned in the HUD area\n\n**Issues to verify/fix**:\n\n1. **Stats overlay scroll**: On small screens, the overlay content (player stats + leaderboard table) may overflow. `stats-overlay-container` has `overflow-y: auto` — verify scrollbar styling matches dark theme.\n\n2. **Leaderboard empty state**: When no stats exist yet (fresh `.db/stats.json`), the leaderboard tbody is empty. Show \"No data yet\" placeholder text.\n   - **Fix in `js/stats-overlay.js`**: In `renderLeaderboard()`, if `data.length === 0`, set `tbody.innerHTML = '<tr><td colspan=\"5\" style=\"text-align:center;opacity:0.5;\">No data yet</td></tr>';`\n\n3. **Stats overlay close on Escape key**: Currently only closeable via X button click. Add `keydown` listener for Escape key to close the overlay.\n   - **Fix in `js/stats-overlay.js`**: In `show()`, add `document.addEventListener('keydown', onEscKey)` where `onEscKey` checks `e.keyCode === 27` and calls `hide()`. Remove listener in `hide()`.\n\n4. **Stats button visibility**: `#stats-btn` should only be visible during gameplay (not in lobby, room browser, or waiting room). Currently it's always in the DOM.\n   - **Fix**: Hide `#stats-btn` by default (`display:none`), show it when game starts (in `aks.js` gameStart handler or initWorld), hide when leaving room.\n\n5. **Win rate formatting**: `renderStats()` shows `(stats.winRate * 100).toFixed(1) + '%'`. Verify this handles `NaN` (0 games played, winRate = 0).\n\n**Acceptance criteria**:\n- Stats overlay opens/closes cleanly\n- Escape key closes overlay\n- Empty leaderboard shows placeholder\n- Stats button only visible during gameplay\n- All stats display correctly with 0 games played",
+      "status": "done",
+      "priority": "low",
+      "assignee": "developer-1",
+      "assigneeRole": "developer",
+      "dependencies": [],
+      "files": [
+        "js/stats-overlay.js",
+        "css/hud.css",
+        "js/aks.js"
+      ],
+      "branch": "agent/developer-1",
+      "createdBy": "ceo",
+      "checkResult": "All 5 fixes: (1) Escape key closes stats overlay via keydown listener. (2) Empty leaderboard shows \"No data yet\" placeholder. (3) KD ratio guards against undefined kills. (4) Stats button hidden by default in CSS, shown on gameStart and spectator join, hidden on leaveRoom via new showButton/hideButton API. (5) Win rate already handled NaN correctly.",
+      "createdAt": 1772030780450,
+      "updatedAt": 1772031511902
+    }
+  ]
+}

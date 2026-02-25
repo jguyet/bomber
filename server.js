@@ -226,7 +226,8 @@ io.on('connection', (socket) => {
         roomName: room.name,
         isCreator: false,
         themeId: room.activeTheme,
-        spectator: true
+        spectator: true,
+        status: room.state
       });
 
       // Send full world state if room is playing
@@ -340,6 +341,11 @@ io.on('connection', (socket) => {
       for (const [sid, p] of room.players) {
         const s = io.sockets.sockets.get(sid);
         if (s) room.handleWorldEntities(p, s);
+      }
+      // Also send world state to any spectators waiting in the room
+      for (const specId of room.spectators) {
+        const s = io.sockets.sockets.get(specId);
+        if (s) room.sendSpectatorWorldState(s);
       }
     }, 100);
   });
