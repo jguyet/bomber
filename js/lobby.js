@@ -107,8 +107,10 @@
     // Hide lobby
     document.getElementById('lobby-screen').style.display = 'none';
 
-    // Start the game
-    preload();
+    // Show room browser instead of directly starting game
+    if (typeof RoomUI !== 'undefined') {
+      RoomUI.showBrowser();
+    }
   }
 
   // Initialize lobby when DOM is ready

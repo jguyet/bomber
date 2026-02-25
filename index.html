@@ -29,6 +29,7 @@
     <link rel="stylesheet" href="./css/loading.css">
     <link rel="stylesheet" href="./css/connection-status.css">
     <link rel="stylesheet" href="./css/hud.css">
+    <link rel="stylesheet" href="./css/rooms.css">
 
 	<!--JS---------------------------------->
 	<script src="//ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
@@ -48,6 +49,7 @@
 	<script src="./js/loading.js"></script>
 	<script src="./js/initworld.js"></script>
 	<script src="./js/lobby.js"></script>
+	<script src="./js/rooms.js"></script>
 	<!-------------------------------------->
 </head>
 <body>
@@ -68,6 +70,81 @@
 				</div>
 			</div>
 			<button id="play-btn" class="play-btn" disabled>PLAY</button>
+		</div>
+	</div>
+
+	<!-- Room Browser Screen -->
+	<div id="room-browser" style="display:none;">
+		<div class="room-browser-container">
+			<h1 class="room-browser-title">Game Rooms</h1>
+			<p class="room-browser-subtitle">Join an existing room or create your own</p>
+
+			<div class="room-browser-actions">
+				<button id="create-room-btn" class="create-room-btn">+ CREATE ROOM</button>
+				<button id="refresh-rooms-btn" class="refresh-rooms-btn">↻ REFRESH</button>
+			</div>
+
+			<div id="room-list" class="room-list">
+				<!-- Room cards populated by JS -->
+				<div class="room-list-empty" id="room-list-empty">No rooms available. Create one!</div>
+			</div>
+
+			<!-- Create Room Modal -->
+			<div id="create-room-modal" class="create-room-modal" style="display:none;">
+				<div class="create-room-form">
+					<h2>Create New Room</h2>
+					<div class="form-group">
+						<label for="room-name-input">Room Name</label>
+						<input type="text" id="room-name-input" maxlength="20" placeholder="My Room" autocomplete="off">
+					</div>
+					<div class="form-group">
+						<label for="room-max-players">Max Players</label>
+						<div class="slider-group">
+							<input type="range" id="room-max-players" min="2" max="8" value="4">
+							<span id="room-max-players-label">4</span>
+						</div>
+					</div>
+					<div class="form-group">
+						<label>Map Theme</label>
+						<div class="theme-selector" id="theme-selector">
+							<div class="theme-option selected" data-theme="random">
+								<span class="theme-icon">🎲</span>
+								<span>Random</span>
+							</div>
+							<div class="theme-option" data-theme="default">
+								<span class="theme-icon">🌿</span>
+								<span>Default</span>
+							</div>
+							<div class="theme-option" data-theme="winter">
+								<span class="theme-icon">❄️</span>
+								<span>Winter</span>
+							</div>
+							<div class="theme-option" data-theme="moon">
+								<span class="theme-icon">🌙</span>
+								<span>Moon</span>
+							</div>
+						</div>
+					</div>
+					<div class="form-actions">
+						<button id="create-room-confirm" class="create-room-confirm">CREATE</button>
+						<button id="create-room-cancel" class="create-room-cancel">CANCEL</button>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+
+	<!-- Waiting Room Screen -->
+	<div id="waiting-room" style="display:none;">
+		<div class="waiting-room-container">
+			<h1 class="waiting-room-title" id="waiting-room-title">Room Name</h1>
+			<div class="waiting-room-theme" id="waiting-room-theme"></div>
+			<div class="waiting-room-players" id="waiting-room-players">
+				<!-- Player cards populated by JS -->
+			</div>
+			<div class="waiting-room-status" id="waiting-room-status">Waiting for players...</div>
+			<button id="start-game-btn" class="start-game-btn" style="display:none;">START GAME</button>
+			<button id="leave-room-btn" class="leave-room-btn">LEAVE ROOM</button>
 		</div>
 	</div>
 
