@@ -123,10 +123,47 @@
     // Hide lobby
     document.getElementById('lobby-screen').style.display = 'none';
 
-    // Show room browser instead of directly starting game
-    if (typeof RoomUI !== 'undefined') {
-      RoomUI.showBrowser();
-    }
+    // Auto-join first available room
+    var xhr = new XMLHttpRequest();
+    xhr.open('GET', '/api/rooms', true);
+    xhr.onreadystatechange = function() {
+      if (xhr.readyState === 4 && xhr.status === 200) {
+        try {
+          var rooms = JSON.parse(xhr.responseText);
+          if (rooms && rooms.length > 0) {
+            // Pick first room with space available
+            var target = null;
+            for (var i = 0; i < rooms.length; i++) {
+              if (rooms[i].playerCount < rooms[i].maxPlayers) {
+                target = rooms[i];
+                break;
+              }
+            }
+            if (!target) target = rooms[0]; // fallback to first room
+            if (typeof RoomUI !== 'undefined') {
+              RoomUI.joinRoom(target.id);
+            }
+          } else {
+            // Fallback: create a room via POST (shouldn't happen with auto-create)
+            var postXhr = new XMLHttpRequest();
+            postXhr.open('POST', '/api/rooms', true);
+            postXhr.setRequestHeader('Content-Type', 'application/json');
+            postXhr.onreadystatechange = function() {
+              if (postXhr.readyState === 4 && (postXhr.status === 201 || postXhr.status === 200)) {
+                var room = JSON.parse(postXhr.responseText);
+                if (typeof RoomUI !== 'undefined') {
+                  RoomUI.joinRoom(room.id);
+                }
+              }
+            };
+            postXhr.send(JSON.stringify({ name: 'Arena', maxPlayers: 8, themeId: 'random' }));
+          }
+        } catch (e) {
+          console.error('Failed to fetch rooms:', e);
+        }
+      }
+    };
+    xhr.send();
   }
 
   // Initialize lobby when DOM is ready

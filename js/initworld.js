@@ -65,8 +65,14 @@ function preload()
 		InitializeSocket();
 	});
 }
+var _worldIntervalId = null;
 function initWorld()
 {
+	// Clear previous game loop if re-entering (prevents duplicate intervals)
+	if (_worldIntervalId) {
+		clearInterval(_worldIntervalId);
+		_worldIntervalId = null;
+	}
 	//Events------------------------------------------//
 	document.addEventListener('click', onMouseClick, false );
 	document.addEventListener('mousedown', onMouseDown, false);
@@ -85,7 +91,7 @@ function initWorld()
 	fosfo1.setFramesToImg('assets/bombs/1.png', 1, 9);
 	fosfo1.setFramesToImg('assets/bombs/explode/1.png', 4, 2);
 	fosfo1.setFramesToImg('assets/items/1.png', 3, 9);
-	setInterval(interval, 1000 / 60);
+	_worldIntervalId = setInterval(interval, 1000 / 60);
 	resize(false);
 	// Initialize touch controls for mobile devices
 	if (typeof TouchControls !== 'undefined') TouchControls.init();

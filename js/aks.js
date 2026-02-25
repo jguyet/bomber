@@ -211,6 +211,11 @@ function InitializeSocket()
 							var bytedir = Number(received_msg.substring(2).split("|")[5]);
 							var nickname = received_msg.substring(2).split("|")[7] || "";
 							world.moveplayer(id, x, y, dir, skin, false, bytedir, nickname);
+							// When server resets currentPlayer movement (e.g. round start),
+							// clear keyState so held keys re-trigger KD on next autorepeat
+							if (currentPlayer && id == currentPlayer.id && bytedir === 0) {
+								keyState = [0];
+							}
 						}
 					break ;
 					case "S":

@@ -16,7 +16,7 @@ const DEFAULT_RANGE = 2;
 const DEFAULT_MAX_BOMBS = 1;
 const ROUND_DURATION_MS = 180000; // 3 minutes
 const ROUND_END_DISPLAY_MS = 5000; // 5 seconds results screen
-const MIN_PLAYERS_TO_START = 2;
+const MIN_PLAYERS_TO_START = 1;
 
 // ─── Binary Directions (bitmask) ─────────────────────────────────────────────
 const DIR = { UP: 4, RIGHT: 8, DOWN: 16, LEFT: 32 };
@@ -1065,7 +1065,7 @@ class Room {
         if (this.roundState.state === 'waiting' && this.players.size >= MIN_PLAYERS_TO_START) {
           this.startRound();
         }
-      }, 3000);
+      }, 100);
     }
   }
 
@@ -1170,6 +1170,11 @@ class RoomManager {
     this.statsManager = statsManager || null;
     this._ensureDbDir();
     this._loadRooms();
+    // Auto-create a default room if none exist
+    if (this.rooms.size === 0) {
+      this.createRoom('Arena', 8, 'random', null);
+      console.log('Auto-created default room');
+    }
   }
 
   _ensureDbDir() {
@@ -1239,6 +1244,11 @@ class RoomManager {
       room.cleanup();
       this.rooms.delete(roomId);
       this._saveRooms();
+      // Auto-create a new default room if none remain
+      if (this.rooms.size === 0) {
+        this.createRoom('Arena', 8, 'random', null);
+        console.log('Auto-created default room (last room destroyed)');
+      }
       return true;
     }
     return false;

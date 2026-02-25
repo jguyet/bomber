@@ -38,64 +38,52 @@ var Player = function(id, x, y)
 		if (this.onmove) {
 			let speedForMove = this.speed;
 			if (this.bytedir & 16 && this.bytedir != 16 || this.bytedir & 4 && this.bytedir != 4 || this.bytedir & 32 && this.bytedir != 32 || this.bytedir & 8 && this.bytedir != 8) {
-				speedForMove *= 0.9;
+				speedForMove *= Math.SQRT1_2;
 			}
-			let speed = deltaTime * speedForMove; // Le déplacement basé sur le temps écoulé
+			let baseSpeed = deltaTime * speedForMove;
 
 			if ((this.bytedir & 4) != 0) {
-				let c = this.getposibleCell(0.0, -speed);
-				while (c === undefined || c.split(",")[0] != 0) {
-					speed -= 0.1;
-					if (speed <= 0) {
-						break ;
-					}
-					c = this.getposibleCell(0.0, -speed);
+				let s = baseSpeed;
+				let c = this.getposibleCell(0.0, -s);
+				while (c === undefined || c.split(",")[1] != 0) {
+					s -= 0.1;
+					if (s <= 0) { s = 0; break; }
+					c = this.getposibleCell(0.0, -s);
 				}
-				if (speed > 0) {
-					this.y -= speed;
-				}
+				if (s > 0) this.y -= s;
 			}
 
 			if ((this.bytedir & 16) != 0) {
-				let c = this.getposibleCell(0.0, speed);
-				while (c === undefined || c.split(",")[0] != 0) {
-					speed -= 0.1;
-					if (speed <= 0) {
-						break ;
-					}
-					c = this.getposibleCell(0.0, speed);
+				let s = baseSpeed;
+				let c = this.getposibleCell(0.0, s);
+				while (c === undefined || c.split(",")[1] != 0) {
+					s -= 0.1;
+					if (s <= 0) { s = 0; break; }
+					c = this.getposibleCell(0.0, s);
 				}
-				if (speed > 0) {
-					this.y += speed;
-				}
+				if (s > 0) this.y += s;
 			}
 
 			if ((this.bytedir & 32) != 0) {
-				let c = this.getposibleCell(-speed, 0.0);
-				while (c === undefined || c.split(",")[0] != 0) {
-					speed -= 0.1;
-					if (speed <= 0) {
-						break ;
-					}
-					c = this.getposibleCell(-speed, 0.0);
+				let s = baseSpeed;
+				let c = this.getposibleCell(-s, 0.0);
+				while (c === undefined || c.split(",")[1] != 0) {
+					s -= 0.1;
+					if (s <= 0) { s = 0; break; }
+					c = this.getposibleCell(-s, 0.0);
 				}
-				if (speed > 0) {
-					this.x -= speed;
-				}
+				if (s > 0) this.x -= s;
 			}
 
 			if ((this.bytedir & 8) != 0) {
-				let c = this.getposibleCell(speed, 0.0);
-				while (c === undefined || c.split(",")[0] != 0) {
-					speed -= 0.1;
-					if (speed <= 0) {
-						break ;
-					}
-					c = this.getposibleCell(speed, 0.0);
+				let s = baseSpeed;
+				let c = this.getposibleCell(s, 0.0);
+				while (c === undefined || c.split(",")[1] != 0) {
+					s -= 0.1;
+					if (s <= 0) { s = 0; break; }
+					c = this.getposibleCell(s, 0.0);
 				}
-				if (speed > 0) {
-					this.x += speed;
-				}
+				if (s > 0) this.x += s;
 			}
 
 			if (this.x < 0) {

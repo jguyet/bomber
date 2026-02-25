@@ -2,8 +2,8 @@ var World = function(data, theme)
 {
 	this.theme = theme || 'default';
 	this.tilesetPath = THEME_TILESETS[this.theme] || THEME_TILESETS['default'];
-	this.width = data.split("|")[0];
-	this.height = data.split("|")[1];
+	this.width = Number(data.split("|")[0]);
+	this.height = Number(data.split("|")[1]);
 	this.data = [];
 	this.dataimg = [];
 	this.bombs = [];
@@ -135,8 +135,12 @@ var World = function(data, theme)
 			player.currentanim = player.anims[dir];
 			player.currentanimid = 0;
 		}
-		player.x = x;
-		player.y = y;
+		// Skip position snap for currentPlayer (trust client-side prediction)
+		// Exception: bytedir=0 means server teleport (round start) — accept position
+		if (!currentPlayer || id != currentPlayer.id || bytedir === 0) {
+			player.x = x;
+			player.y = y;
+		}
 		player.skin = skin;
 		player.bytedir = bytedir;
 		if (bytedir != 0)
@@ -237,6 +241,32 @@ var World = function(data, theme)
 			if (value != null)
 				value.update();
 		});
+	};
+
+	this.getCellPos = function(px, py)
+	{
+		var tx = Math.round(Math.round(px) / 32) % this.width;
+		var ty = Math.round(Math.round(py) / 32) % this.height;
+		if (tx < 0) tx += this.width;
+		if (ty < 0) ty += this.height;
+		if (this.data[ty] && this.data[ty][tx]) {
+			return this.data[ty][tx];
+		}
+		return undefined;
+	};
+
+	this.hasBombOnCell = function(px, py)
+	{
+		var tx = Math.round(Math.round(px) / 32) % this.width;
+		var ty = Math.round(Math.round(py) / 32) % this.height;
+		if (tx < 0) tx += this.width;
+		if (ty < 0) ty += this.height;
+		for (var i = 0; i < this.bombs.length; i++) {
+			var bx = Math.round(this.bombs[i].x / 32);
+			var by = Math.round(this.bombs[i].y / 32);
+			if (bx === tx && by === ty) return true;
+		}
+		return false;
 	};
 
 	this.createWorld = function(data)

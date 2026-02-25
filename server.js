@@ -2,7 +2,7 @@ const http = require('http');
 const fs = require('fs');
 const path = require('path');
 const { Server } = require('socket.io');
-const { RoomManager, MIN_PLAYERS_TO_START } = require('./server/roomManager');
+const { RoomManager } = require('./server/roomManager');
 const { StatsManager } = require('./server/statsManager');
 
 // ─── Configuration ───────────────────────────────────────────────────────────
@@ -288,12 +288,16 @@ io.on('connection', (socket) => {
     // Start tick if first player
     if (!room.tickInterval) room.startTick();
 
-    // If room is already playing (late join / rejoin), send world data immediately
     if (room.state === 'playing') {
-      room.handleWorldLoad(player, socket);
-      setTimeout(() => {
-        room.handleWorldEntities(player, socket);
-      }, 100);
+      // Late join — emit gameStart so client loads assets and requests WL/WE
+      socket.emit('gameStart');
+    } else if (room.state === 'waiting') {
+      // Auto-start game — map is already initialized from createRoom()
+      room.state = 'playing';
+      if (!room.tickInterval) room.startTick();
+
+      // Emit gameStart — client will load assets then request WL → WE
+      io.to('room:' + room.id).emit('gameStart');
     }
   });
 
@@ -316,39 +320,8 @@ io.on('connection', (socket) => {
     }
   });
 
-  // Handle startGame from room creator
-  socket.on('startGame', () => {
-    const room = roomManager.getRoom(socket.currentRoomId);
-    if (!room) return;
-    if (room.creatorId !== socket.id) return; // only creator can start
-    if (room.players.size < MIN_PLAYERS_TO_START) return;
-    if (room.state === 'playing') return; // already playing
-
-    room.state = 'playing';
-    room.initializeMap();
-    room.startTick();
-
-    // Broadcast game start to all players in room
-    io.to('room:' + room.id).emit('gameStart');
-
-    // Send world data to each player
-    for (const [sid, p] of room.players) {
-      const s = io.sockets.sockets.get(sid);
-      if (s) room.handleWorldLoad(p, s);
-    }
-    // Then entities (short delay for world load)
-    setTimeout(() => {
-      for (const [sid, p] of room.players) {
-        const s = io.sockets.sockets.get(sid);
-        if (s) room.handleWorldEntities(p, s);
-      }
-      // Also send world state to any spectators waiting in the room
-      for (const specId of room.spectators) {
-        const s = io.sockets.sockets.get(specId);
-        if (s) room.sendSpectatorWorldState(s);
-      }
-    }, 100);
-  });
+  // startGame is now a no-op — game auto-starts when players join
+  socket.on('startGame', () => {});
 
   // Handle room leave
   socket.on('leaveRoom', () => {

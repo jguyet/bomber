@@ -1,7 +1,5 @@
-// ─── Room Browser & Waiting Room UI ─────────────────────────────────────────
+// ─── Room Join & Waiting Room UI ─────────────────────────────────────────────
 var RoomUI = (function() {
-  var refreshInterval = null;
-
   var THEME_ICONS = {
     'random': '🎲',
     'default': '🌿',
@@ -10,143 +8,16 @@ var RoomUI = (function() {
   };
 
   function init() {
-    // Create Room button
-    var createBtn = document.getElementById('create-room-btn');
-    if (createBtn) createBtn.addEventListener('click', showCreateModal);
-
-    // Refresh button
-    var refreshBtn = document.getElementById('refresh-rooms-btn');
-    if (refreshBtn) refreshBtn.addEventListener('click', fetchRooms);
-
-    // Create Room modal buttons
-    var confirmBtn = document.getElementById('create-room-confirm');
-    if (confirmBtn) confirmBtn.addEventListener('click', createRoom);
-
-    var cancelBtn = document.getElementById('create-room-cancel');
-    if (cancelBtn) cancelBtn.addEventListener('click', hideCreateModal);
-
-    // Max players slider
-    var slider = document.getElementById('room-max-players');
-    var sliderLabel = document.getElementById('room-max-players-label');
-    if (slider && sliderLabel) {
-      slider.addEventListener('input', function() {
-        sliderLabel.textContent = this.value;
-      });
-    }
-
-    // Theme selector
-    var themeSelector = document.getElementById('theme-selector');
-    if (themeSelector) {
-      themeSelector.addEventListener('click', function(e) {
-        var option = e.target.closest('.theme-option');
-        if (!option) return;
-        var prev = themeSelector.querySelector('.theme-option.selected');
-        if (prev) prev.classList.remove('selected');
-        option.classList.add('selected');
-      });
-    }
-
     // Leave room button
     var leaveBtn = document.getElementById('leave-room-btn');
     if (leaveBtn) leaveBtn.addEventListener('click', leaveRoom);
-
-    // Start game button
-    var startBtn = document.getElementById('start-game-btn');
-    if (startBtn) startBtn.addEventListener('click', startGame);
-  }
-
-  function showBrowser() {
-    document.getElementById('room-browser').style.display = '';
-    hideWaitingRoom();
-    fetchRooms();
-    startAutoRefresh();
-  }
-
-  function hideBrowser() {
-    document.getElementById('room-browser').style.display = 'none';
-    stopAutoRefresh();
-  }
-
-  function fetchRooms() {
-    var xhr = new XMLHttpRequest();
-    xhr.open('GET', '/api/rooms', true);
-    xhr.onreadystatechange = function() {
-      if (xhr.readyState === 4 && xhr.status === 200) {
-        try {
-          var rooms = JSON.parse(xhr.responseText);
-          renderRoomList(rooms);
-        } catch (e) {
-          console.error('Failed to parse rooms:', e);
-        }
-      }
-    };
-    xhr.send();
-  }
-
-  function renderRoomList(rooms) {
-    var list = document.getElementById('room-list');
-    var emptyMsg = document.getElementById('room-list-empty');
-    if (!list) return;
-
-    // Remove existing room cards (keep the empty message element)
-    var cards = list.querySelectorAll('.room-card');
-    for (var i = 0; i < cards.length; i++) {
-      cards[i].parentNode.removeChild(cards[i]);
-    }
-
-    if (!rooms || rooms.length === 0) {
-      if (emptyMsg) emptyMsg.style.display = '';
-      return;
-    }
-
-    if (emptyMsg) emptyMsg.style.display = 'none';
-
-    for (var i = 0; i < rooms.length; i++) {
-      var room = rooms[i];
-      var card = document.createElement('div');
-      card.className = 'room-card';
-      card.setAttribute('data-room-id', room.id);
-
-      var playerCount = room.playerCount || 0;
-      var maxPlayers = room.maxPlayers || 4;
-      var status = room.status || room.state || 'waiting';
-      var statusClass = status === 'waiting' ? 'status-waiting' : 'status-playing';
-      var statusLabel = status === 'waiting' ? 'Waiting' : 'Playing';
-      var themeIcon = THEME_ICONS[room.themeId] || THEME_ICONS['default'];
-
-      card.innerHTML =
-        '<div class="room-card-header">' +
-          '<span class="room-card-name">' + escapeHtml(room.name) + '</span>' +
-          '<span class="room-card-theme">' + themeIcon + '</span>' +
-        '</div>' +
-        '<div class="room-card-info">' +
-          '<span class="room-card-players">' + playerCount + '/' + maxPlayers + ' players</span>' +
-          '<span class="room-card-status ' + statusClass + '">' + statusLabel + '</span>' +
-        '</div>' +
-        '<button class="room-card-join">JOIN</button>' +
-        '<button class="room-card-watch">WATCH</button>';
-
-      list.appendChild(card);
-
-      // Bind join and watch handlers
-      (function(roomId) {
-        card.querySelector('.room-card-join').addEventListener('click', function() {
-          joinRoom(roomId);
-        });
-        card.querySelector('.room-card-watch').addEventListener('click', function() {
-          joinRoomAsSpectator(roomId);
-        });
-      })(room.id);
-    }
   }
 
   function joinRoom(roomId) {
     currentRoomId = roomId;
-    stopAutoRefresh();
 
     // One-time listener for roomJoined to transition to waiting room
     var onRoomJoined = function(data) {
-      hideBrowser();
       showWaitingRoom(data.roomName, data.themeId || currentTheme);
       updateChatRoomLabel(data.roomName || 'Room');
       socket.off('roomJoined', onRoomJoined);
@@ -164,65 +35,6 @@ var RoomUI = (function() {
     }
   }
 
-  function showCreateModal() {
-    var modal = document.getElementById('create-room-modal');
-    if (modal) modal.style.display = '';
-    // Default room name
-    var nameInput = document.getElementById('room-name-input');
-    if (nameInput && !nameInput.value) {
-      nameInput.value = (playerNickname || 'Player') + "'s Room";
-    }
-  }
-
-  function hideCreateModal() {
-    var modal = document.getElementById('create-room-modal');
-    if (modal) modal.style.display = 'none';
-  }
-
-  function createRoom() {
-    var nameInput = document.getElementById('room-name-input');
-    var maxSlider = document.getElementById('room-max-players');
-    var themeSelector = document.getElementById('theme-selector');
-
-    var name = nameInput ? nameInput.value.trim() : 'New Room';
-    if (!name || name.length === 0) {
-      name = (playerNickname || 'Player') + "'s Room";
-    }
-
-    var maxPlayers = maxSlider ? parseInt(maxSlider.value) : 4;
-
-    var selectedTheme = 'random';
-    if (themeSelector) {
-      var selected = themeSelector.querySelector('.theme-option.selected');
-      if (selected) selectedTheme = selected.getAttribute('data-theme');
-    }
-
-    var xhr = new XMLHttpRequest();
-    xhr.open('POST', '/api/rooms', true);
-    xhr.setRequestHeader('Content-Type', 'application/json');
-    xhr.onreadystatechange = function() {
-      if (xhr.readyState === 4) {
-        if (xhr.status === 201 || xhr.status === 200) {
-          try {
-            var room = JSON.parse(xhr.responseText);
-            hideCreateModal();
-            joinRoom(room.id);
-          } catch (e) {
-            console.error('Failed to parse room response:', e);
-          }
-        } else {
-          try {
-            var err = JSON.parse(xhr.responseText);
-            alert(err.error || 'Failed to create room');
-          } catch (e) {
-            alert('Failed to create room');
-          }
-        }
-      }
-    };
-    xhr.send(JSON.stringify({ name: name, maxPlayers: maxPlayers, themeId: selectedTheme }));
-  }
-
   function showWaitingRoom(roomName, themeId) {
     var waitingRoom = document.getElementById('waiting-room');
     if (waitingRoom) waitingRoom.style.display = '';
@@ -234,12 +46,6 @@ var RoomUI = (function() {
     if (themeEl) {
       var icon = THEME_ICONS[themeId] || THEME_ICONS['default'];
       themeEl.textContent = icon + ' ' + (themeId || 'default');
-    }
-
-    // Show/hide start button based on creator status
-    var startBtn = document.getElementById('start-game-btn');
-    if (startBtn) {
-      startBtn.style.display = isRoomCreator ? '' : 'none';
     }
 
     currentRoomName = roomName || '';
@@ -281,17 +87,7 @@ var RoomUI = (function() {
     // Update status
     var status = document.getElementById('waiting-room-status');
     if (status) {
-      if (playerList.length < 2) {
-        status.textContent = 'Waiting for players... (' + playerList.length + '/2 minimum)';
-      } else {
-        status.textContent = playerList.length + ' players ready';
-      }
-    }
-
-    // Show/hide start button (only for creator, only when >= 2 players)
-    var startBtn = document.getElementById('start-game-btn');
-    if (startBtn) {
-      startBtn.style.display = (isRoomCreator && playerList.length >= 2) ? '' : 'none';
+      status.textContent = playerList.length + ' players in room';
     }
   }
 
@@ -328,10 +124,8 @@ var RoomUI = (function() {
     currentRoomId = roomId;
     isFullSpectator = true;
     isSpectating = true;
-    stopAutoRefresh();
 
     var onRoomJoined = function(data) {
-      hideBrowser();
       // Skip waiting room — go straight to game if room is playing
       if (data.spectator && data.status === 'playing') {
         document.getElementById('chat').style.display = '';
@@ -428,25 +222,9 @@ var RoomUI = (function() {
     if (typeof StatsOverlay !== 'undefined' && StatsOverlay.hideButton) StatsOverlay.hideButton();
 
     hideWaitingRoom();
-    showBrowser();
-  }
 
-  function startGame() {
-    if (socket && socket.connected) {
-      socket.emit('startGame');
-    }
-  }
-
-  function startAutoRefresh() {
-    stopAutoRefresh();
-    refreshInterval = setInterval(fetchRooms, 3000);
-  }
-
-  function stopAutoRefresh() {
-    if (refreshInterval) {
-      clearInterval(refreshInterval);
-      refreshInterval = null;
-    }
+    // Return to lobby screen
+    document.getElementById('lobby-screen').style.display = '';
   }
 
   // Initialize when DOM is ready
@@ -458,11 +236,7 @@ var RoomUI = (function() {
 
   return {
     init: init,
-    showBrowser: showBrowser,
-    hideBrowser: hideBrowser,
-    fetchRooms: fetchRooms,
     joinRoom: joinRoom,
-    createRoom: createRoom,
     showWaitingRoom: showWaitingRoom,
     hideWaitingRoom: hideWaitingRoom,
     updateWaitingRoom: updateWaitingRoom,

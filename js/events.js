@@ -84,7 +84,7 @@ var resize = function(bool){
 
 var updatelayer1 = function()
 {
-	if (currentPlayer == null)
+	if (currentPlayer == null || world == null)
 		return ;
 	currentPlayer.update();
 };
