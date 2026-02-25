@@ -10,12 +10,21 @@ docker-compose.yml
 Makefile
 README.md
 PROJECT.md
+KANBAN.json
 1.gif
 *.md
 .DS_Store
 .db
 scripts
+.taskforce
+.worktrees
+
+# Legacy Java server artifacts
 server/server.jar
 server/run.sh
 server/server_lib
 server/src
+server/target
+server/pom.xml
+server/*.zip
+server/gens

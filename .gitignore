@@ -21,8 +21,16 @@ npm-debug.log*
 *.swo
 *~
 
-# Database
+# Database (runtime data)
 .db/
 
 # Docker
 docker-compose.override.yml
+
+# Legacy Java server artifacts
+server/server.jar
+server/server_lib/
+server/src/
+server/target/
+server/pom.xml
+server/*.zip
