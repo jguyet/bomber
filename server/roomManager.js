@@ -304,8 +304,8 @@ class Room {
         }
       }
 
-      // Destroy items on explosion-affected cells
-      if (cell.item) {
+      // Destroy items on explosion-affected cells (guard against already-despawned items)
+      if (cell.item && this.items.indexOf(cell.item) !== -1) {
         this.despawnItem(cell.item);
       }
 
@@ -366,8 +366,8 @@ class Room {
       }
     }
 
-    // Destroy item on center cell
-    if (cell.item) {
+    // Destroy item on center cell (guard against already-despawned items)
+    if (cell.item && this.items.indexOf(cell.item) !== -1) {
       this.despawnItem(cell.item);
     }
 
@@ -437,20 +437,23 @@ class Room {
   }
 
   pickupItem(player, item) {
+    // Guard: prevent double-pickup if two players are on the same cell in the same tick
+    const idx = this.items.indexOf(item);
+    if (idx === -1) return; // Already picked up
+
     if (item.timer) clearTimeout(item.timer);
     if (item.cell) item.cell.item = null;
-    const idx = this.items.indexOf(item);
-    if (idx !== -1) this.items.splice(idx, 1);
+    this.items.splice(idx, 1);
 
-    // Apply effect
+    // Apply effect (with stacking caps)
     if (item.templateId === 0) {
-      player.maxBombs++;
+      player.maxBombs = Math.min(player.maxBombs + 1, 8); // cap at 8 bombs
     }
     if (item.templateId === 4) {
-      player.range++;
+      player.range = Math.min(player.range + 1, 10); // cap at 10 range
     }
     if (item.templateId === 6) {
-      player.speed += 0.1;
+      player.speed = Math.min(player.speed + 0.1, 3.0); // cap at 3.0 speed
       this.broadcastAll('IS' + player.id + '|' + player.speed);
     }
 
