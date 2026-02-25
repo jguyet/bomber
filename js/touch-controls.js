@@ -75,6 +75,7 @@ var TouchControls = (function () {
 		btn.addEventListener('touchstart', function (e) {
 			e.preventDefault();
 			if (isSpectating) return;
+			btn.classList.add('active');
 			if (keyState[keyCode] === true) return;
 			keyState[keyCode] = true;
 			sendSocketMessage('KD' + keyCode);
@@ -82,12 +83,14 @@ var TouchControls = (function () {
 
 		btn.addEventListener('touchend', function (e) {
 			e.preventDefault();
+			btn.classList.remove('active');
 			keyState[keyCode] = false;
 			sendSocketMessage('KU' + keyCode);
 		}, { passive: false });
 
 		btn.addEventListener('touchcancel', function (e) {
 			e.preventDefault();
+			btn.classList.remove('active');
 			keyState[keyCode] = false;
 			sendSocketMessage('KU' + keyCode);
 		}, { passive: false });
@@ -97,9 +100,11 @@ var TouchControls = (function () {
 		btn.addEventListener('touchstart', function (e) {
 			e.preventDefault();
 			if (isSpectating) return;
+			btn.classList.add('active');
 			keyState[KEY_BOMB] = true;
 			sendSocketMessage('KD' + KEY_BOMB);
 			setTimeout(function () {
+				btn.classList.remove('active');
 				keyState[KEY_BOMB] = false;
 				sendSocketMessage('KU' + KEY_BOMB);
 			}, 50);
