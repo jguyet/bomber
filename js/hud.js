@@ -103,6 +103,15 @@ var HUD = (function() {
       titleEl.textContent = 'Round Over!';
       winnerEl.textContent = winner && winner.nickname ? 'Winner: ' + winner.nickname : 'Draw \u2014 No Winner';
 
+      // Make results container focusable for keyboard accessibility
+      var container = screen.querySelector('.results-container');
+      if (container) {
+        container.setAttribute('tabindex', '-1');
+        container.setAttribute('role', 'dialog');
+        container.setAttribute('aria-label', 'Round results');
+        container.focus();
+      }
+
       // Sort results by kills desc
       results.sort(function(a, b) { return b.kills - a.kills || a.deaths - b.deaths; });
 
@@ -170,11 +179,13 @@ var HUD = (function() {
       var stateText = document.getElementById('round-timer-state');
       if (stateText) {
         stateText.textContent = 'YOU DIED \u2014 Spectating';
+        stateText.classList.add('death-notice');
       }
       // Auto-clear the death notice after 2 seconds, revert to empty if round still active
       setTimeout(function() {
         if (stateText && roundState === 'active') {
           stateText.textContent = '';
+          stateText.classList.remove('death-notice');
         }
       }, 2000);
     },

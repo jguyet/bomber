@@ -515,7 +515,8 @@ class Room {
     this.roundState.startTime = Date.now();
     this.roundState.roundNumber++;
 
-    // Reset all player stats and respawn
+    // Reset all player stats and respawn (track used cells to avoid overlap)
+    const usedSpawnCells = new Set();
     for (const [, p] of this.players) {
       p.kills = 0;
       p.deaths = 0;
@@ -525,9 +526,15 @@ class Room {
       p.maxBombs = DEFAULT_MAX_BOMBS;
       p.bombCounter = 0;
 
-      // Respawn player to a new position
-      const spawnCell = this.getRandomWalkableCellStart();
+      // Respawn player to a unique position (avoid overlapping spawns)
+      let spawnCell = null;
+      let attempts = 0;
+      do {
+        spawnCell = this.getRandomWalkableCellStart();
+        attempts++;
+      } while (spawnCell && usedSpawnCells.has(spawnCell.id) && attempts < 50);
       if (spawnCell) {
+        usedSpawnCells.add(spawnCell.id);
         p.x = (spawnCell.x * TILE_SIZE) - 5;
         p.y = (spawnCell.y * TILE_SIZE) + 10;
         p.dir = 0;
@@ -607,8 +614,9 @@ class Room {
     // Broadcast ended state
     this.broadcastAll('RS' + 'ended' + '|0');
 
-    // After display time, reset the round
-    setTimeout(() => {
+    // After display time, reset the round (store ref for cleanup)
+    this.roundState.resetTimeout = setTimeout(() => {
+      this.roundState.resetTimeout = null;
       this.resetRound();
     }, ROUND_END_DISPLAY_MS);
   }
@@ -637,7 +645,8 @@ class Room {
     this.cells.length = 0;
     this.initializeMap();
 
-    // Reset all players for new round
+    // Reset all players for new round (track used cells to avoid overlap)
+    const usedSpawnCells = new Set();
     for (const [, player] of this.players) {
       player.alive = true;
       player.kills = 0;
@@ -649,8 +658,14 @@ class Room {
       player.dir = 0;
       player.olddir = 2;
       player.onmove = false;
-      const spawnCell = this.getRandomWalkableCellStart();
+      let spawnCell = null;
+      let attempts = 0;
+      do {
+        spawnCell = this.getRandomWalkableCellStart();
+        attempts++;
+      } while (spawnCell && usedSpawnCells.has(spawnCell.id) && attempts < 50);
       if (spawnCell) {
+        usedSpawnCells.add(spawnCell.id);
         player.x = (spawnCell.x * TILE_SIZE) - 5;
         player.y = (spawnCell.y * TILE_SIZE) + 10;
       }
@@ -843,6 +858,11 @@ class Room {
     if (this.roundState.timeInterval) {
       clearInterval(this.roundState.timeInterval);
       this.roundState.timeInterval = null;
+    }
+    // Clear the resetRound display timeout to prevent timer leaks on room destruction
+    if (this.roundState.resetTimeout) {
+      clearTimeout(this.roundState.resetTimeout);
+      this.roundState.resetTimeout = null;
     }
     for (const b of this.bombs) {
       if (b.timer) clearTimeout(b.timer);
