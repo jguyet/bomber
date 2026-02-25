@@ -44,7 +44,7 @@ function getRandomInt(min, max) {
 
 // ─── Room Class ──────────────────────────────────────────────────────────────
 class Room {
-  constructor(id, name, maxPlayers, themeId, creatorId, io) {
+  constructor(id, name, maxPlayers, themeId, creatorId, io, statsManager) {
     this.id = id;
     this.name = name;
     this.maxPlayers = maxPlayers; // 2-8
@@ -54,6 +54,7 @@ class Room {
     this.state = 'waiting'; // 'waiting' | 'playing'
     this.createdAt = Date.now();
     this.io = io; // Socket.io server instance for room-scoped broadcasting
+    this.statsManager = statsManager || null;
 
     // Isolated game state
     this.cells = [];
@@ -602,6 +603,24 @@ class Room {
     // Broadcast winner
     this.broadcastAll('RW' + (winnerId || '') + '|' + (winnerNickname || ''));
 
+    // Record persistent stats
+    if (this.statsManager) {
+      const playerStatsData = [];
+      for (const [, p] of this.players) {
+        playerStatsData.push({
+          id: p.id,
+          nickname: p.nickname,
+          kills: p.kills || 0,
+          deaths: p.deaths || 0
+        });
+      }
+      try {
+        this.statsManager.recordRoundResults(playerStatsData, winnerId);
+      } catch (e) {
+        console.error('Failed to record stats:', e.message);
+      }
+    }
+
     // Build and broadcast full results
     const playerResults = [];
     for (const [, p] of this.players) {
@@ -1134,10 +1153,11 @@ class Room {
 // ─── RoomManager Class ──────────────────────────────────────────────────────
 
 class RoomManager {
-  constructor(io) {
+  constructor(io, statsManager) {
     this.rooms = new Map(); // roomId -> Room
     this.nextRoomId = 1;
     this.io = io; // Socket.io server instance
+    this.statsManager = statsManager || null;
     this._ensureDbDir();
     this._loadRooms();
   }
@@ -1192,7 +1212,7 @@ class RoomManager {
 
   createRoom(name, maxPlayers, themeId, creatorId) {
     const id = 'room-' + this.nextRoomId++;
-    const room = new Room(id, name, maxPlayers, themeId, creatorId, this.io);
+    const room = new Room(id, name, maxPlayers, themeId, creatorId, this.io, this.statsManager);
     room.initializeMap();
     this.rooms.set(id, room);
     this._saveRooms();
