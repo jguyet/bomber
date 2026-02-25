@@ -1,0 +1,213 @@
+/* ─── Lobby Screen ─────────────────────────────────────────────────────────── */
+#lobby-screen {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: rgba(0, 0, 0, 0.92);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 10000;
+  overflow-y: auto;
+}
+
+.lobby-container {
+  text-align: center;
+  max-width: 720px;
+  width: 90%;
+  padding: 40px 32px;
+}
+
+/* ─── Title ───────────────────────────────────────────────────────────────── */
+.lobby-title {
+  font-family: 'Open Sans', sans-serif;
+  font-size: 48px;
+  font-weight: 700;
+  color: #fff;
+  margin: 0 0 8px 0;
+  text-shadow: 0 0 20px rgba(255, 204, 0, 0.4);
+  letter-spacing: 2px;
+}
+
+.lobby-subtitle {
+  font-family: 'Open Sans', sans-serif;
+  font-size: 16px;
+  color: #888;
+  margin: 0 0 32px 0;
+}
+
+/* ─── Nickname ────────────────────────────────────────────────────────────── */
+.lobby-nickname {
+  margin-bottom: 28px;
+}
+
+.lobby-nickname label {
+  display: block;
+  font-family: 'Open Sans', sans-serif;
+  font-size: 14px;
+  color: #aaa;
+  margin-bottom: 8px;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+.lobby-nickname input {
+  width: 100%;
+  max-width: 320px;
+  padding: 12px 16px;
+  font-size: 18px;
+  font-family: 'Open Sans', sans-serif;
+  background: #1a1a1a;
+  border: 2px solid #333;
+  border-radius: 8px;
+  color: #fff;
+  outline: none;
+  text-align: center;
+  transition: border-color 0.2s;
+  box-sizing: border-box;
+}
+
+.lobby-nickname input:focus {
+  border-color: #ffcc00;
+}
+
+.lobby-nickname input::placeholder {
+  color: #555;
+}
+
+/* ─── Skin Grid ───────────────────────────────────────────────────────────── */
+.lobby-skins {
+  margin-bottom: 28px;
+}
+
+.lobby-skins h2 {
+  font-family: 'Open Sans', sans-serif;
+  font-size: 16px;
+  color: #aaa;
+  margin: 0 0 16px 0;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  font-weight: 400;
+}
+
+.skin-grid {
+  display: grid;
+  grid-template-columns: repeat(6, 1fr);
+  gap: 12px;
+  max-height: 360px;
+  overflow-y: auto;
+  padding: 4px;
+}
+
+.skin-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  background: #2a2a2a;
+  border: 2px solid #3a3a3a;
+  border-radius: 8px;
+  padding: 10px 4px 8px;
+  cursor: pointer;
+  transition: border-color 0.2s, box-shadow 0.2s, transform 0.15s;
+}
+
+.skin-card:hover {
+  border-color: #666;
+  transform: translateY(-2px);
+}
+
+.skin-card.selected {
+  border-color: #ffcc00;
+  box-shadow: 0 0 12px rgba(255, 204, 0, 0.3);
+}
+
+.skin-card canvas {
+  image-rendering: pixelated;
+  image-rendering: -moz-crisp-edges;
+  width: 48px;
+  height: 48px;
+}
+
+.skin-card span {
+  font-family: 'Open Sans', sans-serif;
+  font-size: 11px;
+  color: #777;
+  margin-top: 4px;
+}
+
+.skin-card.selected span {
+  color: #ffcc00;
+}
+
+/* ─── Play Button ─────────────────────────────────────────────────────────── */
+.play-btn {
+  display: inline-block;
+  width: 100%;
+  max-width: 300px;
+  padding: 16px 32px;
+  font-family: 'Open Sans', sans-serif;
+  font-size: 20px;
+  font-weight: 700;
+  color: #fff;
+  background: #4CAF50;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  transition: background 0.2s, transform 0.15s, opacity 0.2s;
+}
+
+.play-btn:hover:not(:disabled) {
+  background: #45a049;
+  transform: translateY(-1px);
+}
+
+.play-btn:active:not(:disabled) {
+  transform: translateY(0);
+}
+
+.play-btn:disabled {
+  background: #333;
+  color: #666;
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+/* ─── Responsive ──────────────────────────────────────────────────────────── */
+@media (max-width: 600px) {
+  .skin-grid {
+    grid-template-columns: repeat(4, 1fr);
+    gap: 8px;
+  }
+
+  .lobby-title {
+    font-size: 32px;
+  }
+
+  .lobby-container {
+    padding: 24px 16px;
+  }
+}
+
+/* ─── Scrollbar styling for skin grid ─────────────────────────────────────── */
+.skin-grid::-webkit-scrollbar {
+  width: 6px;
+}
+
+.skin-grid::-webkit-scrollbar-track {
+  background: #1a1a1a;
+  border-radius: 3px;
+}
+
+.skin-grid::-webkit-scrollbar-thumb {
+  background: #444;
+  border-radius: 3px;
+}
+
+.skin-grid::-webkit-scrollbar-thumb:hover {
+  background: #555;
+}

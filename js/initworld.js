@@ -78,7 +78,5 @@ var interval = function()
 	fosfo1.update(dup);
 }
 
-window.addEventListener("DOMContentLoaded", function()
-{
-	preload();
-}, false);
+// preload() is now called by the lobby PLAY button (js/lobby.js)
+// Do NOT auto-start on DOMContentLoaded
