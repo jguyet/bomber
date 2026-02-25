@@ -76,6 +76,35 @@ var interval = function()
 	updatelayer1();
 	requestAnimFrame();
 	fosfo1.update(dup);
+	// Draw player nicknames above sprites after canvas render
+	if (world != null && world.players != null) {
+		var ctx = fosfo1.ctx;
+		ctx.save();
+		ctx.font = "bold 11px Arial";
+		ctx.textAlign = "center";
+		for (var i = 0; i < world.players.length; i++) {
+			var p = world.players[i];
+			if (p == null || p.img == null) continue;
+			var px = (p.x % (world.width * 32)) + fosfo1.x + 16;
+			var py = (p.y % (world.height * 32)) - (p.img.height - 20) + fosfo1.y - 4;
+			// Draw text shadow
+			ctx.fillStyle = "rgba(0,0,0,0.7)";
+			ctx.fillText(p.nickname, px + 1, py + 1);
+			// Draw text
+			ctx.fillStyle = "#ffffff";
+			ctx.fillText(p.nickname, px, py);
+			// Draw for duplicates (world wrap)
+			for (var d = 0; d < dup.length; d++) {
+				var dpx = px + dup[d][0];
+				var dpy = py + dup[d][1];
+				ctx.fillStyle = "rgba(0,0,0,0.7)";
+				ctx.fillText(p.nickname, dpx + 1, dpy + 1);
+				ctx.fillStyle = "#ffffff";
+				ctx.fillText(p.nickname, dpx, dpy);
+			}
+		}
+		ctx.restore();
+	}
 }
 
 // preload() is now called by the lobby PLAY button (js/lobby.js)

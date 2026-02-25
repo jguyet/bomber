@@ -140,13 +140,14 @@ var World = function(data)
 		var y = player.y - (player.img.height - 20);
 	}
 	
-	this.addplayer = function(id, x, y, dir, skin, speed, bcurrent)
+	this.addplayer = function(id, x, y, dir, skin, speed, bcurrent, nickname)
 	{
 		var p = new Player(id, x, y);
 		p.currentanim = p.anims[dir];
 		p.currentanimid = 0;
 		p.skin = skin;
 		p.speed = speed;
+		p.nickname = nickname || "Player";
 		p.load();
 		if (bcurrent == 1)
 			currentPlayer = p;
@@ -162,15 +163,16 @@ var World = function(data)
 		}
 	}
 	
-	this.moveplayer = function(id, x, y, dir, skin, bstop, bytedir)
+	this.moveplayer = function(id, x, y, dir, skin, bstop, bytedir, nickname)
 	{
 		var player = this.getPlayer(id);
-		
+
 		if (player == null)
 		{
-			this.addplayer(id, x, y, dir, skin, 0);
+			this.addplayer(id, x, y, dir, skin, 0, 0, nickname);
 			return ;
 		}
+		if (nickname && nickname.length > 0) player.nickname = nickname;
 		if (player.currentanim != null && player.currentanim.id != dir)
 		{
 			player.currentanim = player.anims[dir];
@@ -186,9 +188,13 @@ var World = function(data)
 			player.onmove = false;
 	};
 	
-	this.removeplayer = function(player)
+	this.removeplayer = function(id)
 	{
-		this.players.splice(this.players.indexOf(player), 1);
+		var player = this.getPlayer(id);
+		if (player != null) {
+			fosfo1.undraw('player' + player.id);
+			this.players.splice(this.players.indexOf(player), 1);
+		}
 	};
 	
 	this.updateplayers = function()

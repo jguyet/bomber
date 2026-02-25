@@ -360,7 +360,9 @@ function respawnPlayer(player) {
     + '|' + player.y
     + '|' + getClientDirection(player)
     + '|' + player.skin
-    + '|' + player.dir);
+    + '|' + player.dir
+    + '|' + player.onmove
+    + '|' + player.nickname);
 }
 
 // ─── Item System ─────────────────────────────────────────────────────────────
@@ -485,7 +487,9 @@ function forceKeyUp(player, binDir) {
     + '|' + player.y
     + '|' + getClientDirection(player)
     + '|' + player.skin
-    + '|' + player.dir);
+    + '|' + player.dir
+    + '|' + player.onmove
+    + '|' + player.nickname);
 }
 
 // ─── Message Handlers ────────────────────────────────────────────────────────
@@ -535,7 +539,9 @@ function handleKeyDown(player, message) {
     + '|' + player.y
     + '|' + getClientDirection(player)
     + '|' + player.skin
-    + '|' + player.dir);
+    + '|' + player.dir
+    + '|' + player.onmove
+    + '|' + player.nickname);
 }
 
 function handleKeyUp(player, message) {
@@ -560,7 +566,9 @@ function handleKeyUp(player, message) {
     + '|' + player.y
     + '|' + getClientDirection(player)
     + '|' + player.skin
-    + '|' + player.dir);
+    + '|' + player.dir
+    + '|' + player.onmove
+    + '|' + player.nickname);
 }
 
 function handleChatMessage(player, message) {
@@ -581,7 +589,8 @@ function handleWorldEntities(player, ws) {
     + '|' + getClientDirection(player)
     + '|' + player.skin
     + '|' + player.speed
-    + '|1');
+    + '|1'
+    + '|' + player.nickname);
 
   // Send existing bombs
   for (const b of bombs) {
@@ -604,7 +613,8 @@ function handleWorldEntities(player, ws) {
       + '|' + getClientDirection(otherPlayer)
       + '|' + otherPlayer.skin
       + '|' + otherPlayer.speed
-      + '|0');
+      + '|0'
+      + '|' + otherPlayer.nickname);
 
     // Tell existing player about new client
     sendTo(otherWs, 'PA' + player.id
@@ -613,7 +623,8 @@ function handleWorldEntities(player, ws) {
       + '|' + getClientDirection(player)
       + '|' + player.skin
       + '|' + player.speed
-      + '|0');
+      + '|0'
+      + '|' + player.nickname);
   }
 }
 
@@ -621,11 +632,17 @@ function handleNicknameInit(player, message) {
   // NI{nickname}|{skinId}
   const data = message.substring(2);
   const parts = data.split('|');
-  if (parts.length >= 1) player.nickname = parts[0];
+  if (parts.length >= 1) {
+    let nick = parts[0].trim();
+    if (nick.length > 16) nick = nick.substring(0, 16);
+    if (nick.length === 0) nick = 'Player';
+    player.nickname = nick;
+  }
   if (parts.length >= 2) {
     const skinId = parseInt(parts[1], 10);
     if (!isNaN(skinId) && skinId >= 0 && skinId <= 23) {
       player.skin = skinId;
+      player.skinId = skinId;
     }
   }
 }
