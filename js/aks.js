@@ -60,6 +60,22 @@ function InitializeSocket()
 							var right = Number(received_msg.substring(2).split("|")[4]);
 							var bomb = world.getBomb(id);
 							if (bomb != undefined) {
+								// Check if current player is caught in explosion
+								if (typeof currentPlayer !== 'undefined' && currentPlayer && currentPlayer.alive !== false) {
+									var px = Math.floor(currentPlayer.x / 32);
+									var py = Math.floor(currentPlayer.y / 32);
+									var bx = Math.floor(bomb.x / 32);
+									var by = Math.floor(bomb.y / 32);
+									var inExplosion = false;
+									if (px === bx && py === by) inExplosion = true;
+									if (!inExplosion && px === bx && py < by && py >= by - sup) inExplosion = true;
+									if (!inExplosion && px === bx && py > by && py <= by + down) inExplosion = true;
+									if (!inExplosion && py === by && px < bx && px >= bx - left) inExplosion = true;
+									if (!inExplosion && py === by && px > bx && px <= bx + right) inExplosion = true;
+									if (inExplosion && typeof HUD !== 'undefined') {
+										HUD.showExplosionFeedback();
+									}
+								}
 								bomb.exsup = sup;
 								bomb.exleft = left;
 								bomb.exdown = down;
