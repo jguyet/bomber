@@ -511,12 +511,6 @@ function handleKeyUp(message, player, io) {
   broadcast(io, `PS${player.id}|${Math.round(player.x)}|${Math.round(player.y)}|${player.getClientDirection()}|${player.skin}|${player.dir}|${player.nickname}`);
 }
 
-function handleChat(message, player, io) {
-  // message = "MN<text>" => broadcast prefixed with sender nickname
-  const text = message.substring(2);
-  broadcast(io, `MN${player.nickname}: ${text}`);
-}
-
 function handleNickname(message, player) {
   // message = "NI<nickname>|<skinId>"
   const data = message.substring(2);
@@ -529,6 +523,12 @@ function handleNickname(message, player) {
   const skinRaw = parseInt(data.substring(sep + 1), 10);
   player.nickname = nick;
   player.skin = (skinRaw >= 0 && skinRaw <= 23) ? skinRaw : 1;
+}
+
+function handleChat(message, player, io) {
+  // message = "MN<text>" => broadcast prefixed with sender nickname
+  const text = message.substring(2);
+  broadcast(io, `MN${player.nickname}: ${text}`);
 }
 
 function addBomb(player, io) {
