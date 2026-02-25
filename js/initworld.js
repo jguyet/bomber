@@ -125,6 +125,25 @@ var interval = function()
 		// }
 	}
 	updatelayer1();
+	// Spectator camera: follow first alive player when no currentPlayer
+	if (isFullSpectator && world && world.players && world.players.length > 0 && !currentPlayer) {
+		var target = null;
+		for (var i = 0; i < world.players.length; i++) {
+			if (world.players[i] && world.players[i].alive !== false) { target = world.players[i]; break; }
+		}
+		if (!target) target = world.players[0]; // fallback to first player even if dead
+		if (target) {
+			var tileSize = 32;
+			var worldWidthPxs = world.width * tileSize;
+			var worldHeightPxs = world.height * tileSize;
+			var baseX = ((window.innerWidth / SIZE) - worldWidthPxs) / 2;
+			var baseY = ((window.innerHeight / SIZE) - worldHeightPxs) / 2;
+			fosfo0.x = (baseX + worldWidthPxs / 2) - (target.x % worldWidthPxs);
+			fosfo1.x = fosfo0.x;
+			fosfo0.y = (baseY + worldHeightPxs / 2) - (target.y % worldHeightPxs);
+			fosfo1.y = fosfo0.y;
+		}
+	}
 	requestAnimFrame();
 	fosfo1.update(dup);
 	// Draw player nicknames above sprites after canvas render
