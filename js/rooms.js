@@ -158,6 +158,7 @@ var RoomUI = (function() {
     var onRoomJoined = function(data) {
       hideBrowser();
       showWaitingRoom(data.roomName, data.themeId || currentTheme);
+      updateChatRoomLabel(data.roomName || 'Room');
       socket.off('roomJoined', onRoomJoined);
     };
 
@@ -319,6 +320,13 @@ var RoomUI = (function() {
     img.src = 'assets/characters/' + skinId + '.png';
   }
 
+  function updateChatRoomLabel(roomName) {
+    var label = document.getElementById('chat-room-label');
+    if (label) label.textContent = roomName;
+    var title = document.getElementById('chat-room-name');
+    if (title) title.textContent = roomName;
+  }
+
   function leaveRoom() {
     if (socket && socket.connected) {
       socket.emit('leaveRoom');
@@ -327,6 +335,7 @@ var RoomUI = (function() {
     currentRoomName = '';
     isRoomCreator = false;
     roomPlayerList = [];
+    updateChatRoomLabel('---');
     hideWaitingRoom();
     showBrowser();
   }
@@ -365,6 +374,7 @@ var RoomUI = (function() {
     createRoom: createRoom,
     showWaitingRoom: showWaitingRoom,
     hideWaitingRoom: hideWaitingRoom,
-    updateWaitingRoom: updateWaitingRoom
+    updateWaitingRoom: updateWaitingRoom,
+    updateChatRoomLabel: updateChatRoomLabel
   };
 })();
