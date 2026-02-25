@@ -621,6 +621,11 @@ class Room {
     }
     this.items.length = 0;
 
+    // Re-randomize theme if room is set to random
+    if (this.themeId === 'random') {
+      this.activeTheme = pickRandomTheme();
+    }
+
     // Regenerate map
     this.cells.length = 0;
     this.initializeMap();
@@ -643,6 +648,9 @@ class Room {
         player.y = (spawnCell.y * TILE_SIZE) + 10;
       }
     }
+
+    // Broadcast theme FIRST (so client can preload tileset before round reset)
+    this.broadcastAll('TH' + this.activeTheme);
 
     // Broadcast round reset then new map data
     this.broadcastAll('RR');
@@ -896,6 +904,9 @@ class Room {
   }
 
   handleWorldEntities(player, socket) {
+    // Send theme before world data so client can load correct tileset
+    this.sendTo(socket, 'TH' + this.activeTheme);
+
     // Send self (bcurrent = 1)
     this.sendTo(socket, 'PA' + player.id
       + '|' + player.x
