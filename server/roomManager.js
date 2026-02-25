@@ -812,6 +812,26 @@ class Room {
     }
   }
 
+  // ─── Cleanup (all timers) ───────────────────────────────────────────────
+
+  cleanup() {
+    this.stopTick();
+    if (this.roundState.timer) {
+      clearTimeout(this.roundState.timer);
+      this.roundState.timer = null;
+    }
+    if (this.roundState.timeInterval) {
+      clearInterval(this.roundState.timeInterval);
+      this.roundState.timeInterval = null;
+    }
+    for (const b of this.bombs) {
+      if (b.timer) clearTimeout(b.timer);
+    }
+    for (const item of this.items) {
+      if (item.timer) clearTimeout(item.timer);
+    }
+  }
+
   // ─── Message Handlers ────────────────────────────────────────────────────
 
   handleKeyDown(player, message) {
@@ -1099,15 +1119,7 @@ class RoomManager {
   removeRoom(roomId) {
     const room = this.rooms.get(roomId);
     if (room) {
-      room.stopTick();
-      if (room.roundState.timer) clearTimeout(room.roundState.timer);
-      if (room.roundState.timeInterval) clearInterval(room.roundState.timeInterval);
-      for (const b of room.bombs) {
-        if (b.timer) clearTimeout(b.timer);
-      }
-      for (const item of room.items) {
-        if (item.timer) clearTimeout(item.timer);
-      }
+      room.cleanup();
       this.rooms.delete(roomId);
       this._saveRooms();
       return true;
