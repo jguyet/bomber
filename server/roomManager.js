@@ -201,24 +201,34 @@ class RoomManager {
   _ensureDbDir() {
     if (!fs.existsSync(DB_DIR)) {
       fs.mkdirSync(DB_DIR, { recursive: true });
+      console.log('Created .db/ directory for persistence');
     }
   }
 
   _loadRooms() {
     try {
       if (fs.existsSync(ROOMS_DB)) {
-        const data = JSON.parse(fs.readFileSync(ROOMS_DB, 'utf8'));
-        if (data.nextRoomId) this.nextRoomId = data.nextRoomId;
+        const raw = fs.readFileSync(ROOMS_DB, 'utf8');
+        if (!raw || raw.trim().length === 0) {
+          console.log('rooms.json is empty, starting fresh');
+          return;
+        }
+        const data = JSON.parse(raw);
+        if (data && typeof data.nextRoomId === 'number' && data.nextRoomId > 0) {
+          this.nextRoomId = data.nextRoomId;
+          console.log('Restored room ID counter:', this.nextRoomId);
+        }
         // Don't restore room instances — they need live socket connections
         // Just restore the ID counter so IDs don't collide
       }
     } catch (e) {
-      console.log('No existing rooms.json, starting fresh');
+      console.log('Could not load rooms.json (' + e.message + '), starting fresh');
     }
   }
 
   _saveRooms() {
     try {
+      this._ensureDbDir(); // ensure dir still exists before writing
       const data = {
         nextRoomId: this.nextRoomId,
         rooms: Array.from(this.rooms.values()).map(r => ({
@@ -232,7 +242,7 @@ class RoomManager {
       };
       fs.writeFileSync(ROOMS_DB, JSON.stringify(data, null, 2), 'utf8');
     } catch (e) {
-      console.error('Failed to save rooms.json:', e.message);
+      console.error('Failed to persist rooms to ' + ROOMS_DB + ':', e.message);
     }
   }
 
