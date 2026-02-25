@@ -634,6 +634,9 @@ class Room {
     // Broadcast ended state
     this.broadcastAll('RS' + 'ended' + '|0');
 
+    // Skip reset scheduling if room is empty (will be destroyed by disconnect handler)
+    if (this.players.size === 0) return;
+
     // After display time, reset the round (store ref for cleanup)
     this.roundState.resetTimeout = setTimeout(() => {
       this.roundState.resetTimeout = null;
@@ -642,6 +645,12 @@ class Room {
   }
 
   resetRound() {
+    // Skip reset if room is empty (no players to reset for)
+    if (this.players.size === 0) {
+      this.roundState.state = 'waiting';
+      return;
+    }
+
     // Clear all bombs and their timers
     for (const b of this.bombs) {
       if (b.timer) clearTimeout(b.timer);
