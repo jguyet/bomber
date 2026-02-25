@@ -734,3 +734,244 @@
     font-size: 12px;
   }
 }
+
+/* ═══════════════════════════════════════════════════════════════════════════ */
+/*  STATS BUTTON                                                             */
+/* ═══════════════════════════════════════════════════════════════════════════ */
+
+#stats-btn,
+.stats-btn {
+  position: fixed;
+  top: 60px;
+  left: 10px;
+  z-index: 100;
+  background: rgba(30, 30, 30, 0.85);
+  border: 1px solid #555;
+  color: #ffd21f;
+  font-size: 18px;
+  padding: 6px 12px;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background 0.2s ease, border-color 0.2s ease;
+  font-family: 'Open Sans', Arial, sans-serif;
+}
+
+#stats-btn:hover,
+.stats-btn:hover {
+  background: rgba(50, 50, 50, 0.95);
+  border-color: #ffd21f;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════ */
+/*  STATS OVERLAY                                                            */
+/* ═══════════════════════════════════════════════════════════════════════════ */
+
+#stats-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.7);
+  z-index: 500;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.stats-overlay-container {
+  background: #1e1e1e;
+  border: 1px solid #444;
+  border-radius: 10px;
+  padding: 20px 30px;
+  max-width: 500px;
+  width: 90%;
+  max-height: 80vh;
+  overflow-y: auto;
+  color: #fff;
+  font-family: 'Open Sans', Arial, sans-serif;
+  box-shadow: 0 8px 40px rgba(0, 0, 0, 0.5);
+  animation: resultsSlideUp 0.3s ease-out;
+}
+
+/* ─── Overlay scrollbar ───────────────────────────────────────────────────── */
+.stats-overlay-container::-webkit-scrollbar {
+  width: 4px;
+}
+
+.stats-overlay-container::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.stats-overlay-container::-webkit-scrollbar-thumb {
+  background: rgba(255, 210, 31, 0.3);
+  border-radius: 2px;
+}
+
+.stats-overlay-container::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 210, 31, 0.5);
+}
+
+/* ─── Overlay header ──────────────────────────────────────────────────────── */
+
+.stats-overlay-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+}
+
+.stats-overlay-header h2 {
+  margin: 0;
+  color: #ffd21f;
+  font-size: 20px;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+}
+
+.stats-overlay-close {
+  background: none;
+  border: none;
+  color: #888;
+  font-size: 24px;
+  cursor: pointer;
+  transition: color 0.2s ease;
+  padding: 0 4px;
+  line-height: 1;
+}
+
+.stats-overlay-close:hover {
+  color: #fff;
+}
+
+/* ─── Player info ─────────────────────────────────────────────────────────── */
+
+.stats-player-info {
+  margin-bottom: 12px;
+  font-size: 16px;
+}
+
+.stats-label {
+  color: #888;
+}
+
+.stats-value {
+  color: #ffd21f;
+  font-weight: bold;
+  margin-left: 8px;
+}
+
+/* ─── Player statistics list (scoped under stats overlay) ─────────────────── */
+
+#stats-overlay .player-statistics {
+  list-style: none;
+  margin: 0 0 16px 0;
+  padding: 0;
+}
+
+#stats-overlay .player-statistics li {
+  padding: 4px 8px;
+  height: 28px;
+  line-height: 28px;
+  color: #ffd21f;
+  font-size: 14px;
+  overflow: hidden;
+  font-family: 'Open Sans', Arial, sans-serif;
+}
+
+#stats-overlay .player-statistics li:nth-child(odd) {
+  background-color: #363636;
+}
+
+#stats-overlay .player-statistics li b {
+  float: right;
+  color: #fff;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════ */
+/*  LEADERBOARD TABLE                                                        */
+/* ═══════════════════════════════════════════════════════════════════════════ */
+
+#stats-overlay h3 {
+  color: #ffd21f;
+  font-size: 16px;
+  margin: 12px 0 8px;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+}
+
+.stats-leaderboard {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+  font-family: 'Open Sans', Arial, sans-serif;
+}
+
+.stats-leaderboard th {
+  text-align: left;
+  padding: 6px 8px;
+  background: #2a2a2a;
+  color: #888;
+  border-bottom: 1px solid #444;
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.stats-leaderboard td {
+  padding: 5px 8px;
+  color: #ccc;
+}
+
+.stats-leaderboard tbody tr:nth-child(odd) {
+  background-color: #2a2a2a;
+}
+
+/* ─── Current player highlight ────────────────────────────────────────────── */
+
+.stats-highlight {
+  color: #ffd21f !important;
+}
+
+.stats-highlight td {
+  color: #ffd21f;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════ */
+/*  STATS OVERLAY — RESPONSIVE                                               */
+/* ═══════════════════════════════════════════════════════════════════════════ */
+
+@media (max-width: 600px) {
+  .stats-overlay-container {
+    padding: 12px 16px;
+    max-width: 95%;
+  }
+
+  .stats-overlay-header h2 {
+    font-size: 17px;
+  }
+
+  .stats-player-info {
+    font-size: 14px;
+  }
+
+  #stats-overlay .player-statistics li {
+    font-size: 13px;
+    height: 26px;
+    line-height: 26px;
+  }
+
+  .stats-leaderboard {
+    font-size: 12px;
+  }
+
+  .stats-leaderboard th {
+    padding: 5px 6px;
+    font-size: 10px;
+  }
+
+  .stats-leaderboard td {
+    padding: 4px 6px;
+  }
+}
