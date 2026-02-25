@@ -5,47 +5,68 @@
   left: 0;
   width: 100vw;
   height: 100vh;
-  background: rgba(0, 0, 0, 0.6);
+  background: rgba(0, 0, 0, 0.7);
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
   z-index: 9999;
   display: flex;
   align-items: center;
   justify-content: center;
-  animation: connFadeIn 0.3s ease-in;
+  animation: connOverlayFadeIn 0.3s ease-out;
 }
 
-@keyframes connFadeIn {
+/* ─── Overlay fade-in ────────────────────────────────────────────────────── */
+@keyframes connOverlayFadeIn {
   from { opacity: 0; }
   to { opacity: 1; }
 }
 
+/* ─── Toast card — glass-morphism ────────────────────────────────────────── */
 .connection-toast {
-  background: #333;
-  padding: 24px 32px;
-  border-radius: 12px;
+  background: #2a2a2a;
+  border: 1px solid #444;
+  border-radius: 16px;
+  padding: 32px 40px;
   text-align: center;
   min-width: 320px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
+  animation: connToastSlideUp 0.3s ease-out;
 }
 
+@keyframes connToastSlideUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* ─── Icon — default warning state ───────────────────────────────────────── */
 .connection-icon {
   font-size: 48px;
   color: #ff9800;
   margin-bottom: 12px;
+  line-height: 1;
+  animation: connIconPulse 1.5s ease-in-out infinite;
 }
 
-#connection-overlay.success .connection-icon {
-  color: #4CAF50;
+/* Pulsing animation during reconnection */
+@keyframes connIconPulse {
+  0%   { transform: scale(1); opacity: 1; }
+  50%  { transform: scale(1.1); opacity: 0.7; }
+  100% { transform: scale(1); opacity: 1; }
 }
 
-#connection-overlay.failed .connection-icon {
-  color: #f44336;
-}
-
+/* ─── Text ───────────────────────────────────────────────────────────────── */
 .connection-text {
   color: #fff;
-  font-size: 18px;
+  font-size: 20px;
   font-weight: 600;
   font-family: 'Open Sans', Arial, sans-serif;
-  margin-bottom: 4px;
+  margin-top: 12px;
 }
 
 .connection-detail {
@@ -53,4 +74,61 @@
   font-size: 14px;
   font-family: 'Open Sans', Arial, sans-serif;
   margin-top: 8px;
+}
+
+/* ─── Success state ──────────────────────────────────────────────────────── */
+#connection-overlay.success .connection-icon {
+  color: #4CAF50;
+  animation: connIconSuccessPop 0.4s ease-out;
+}
+
+#connection-overlay.success .connection-toast {
+  animation: connBorderPulseGreen 1s ease-out;
+}
+
+@keyframes connIconSuccessPop {
+  0%   { transform: scale(0.5); opacity: 0; }
+  60%  { transform: scale(1.2); }
+  100% { transform: scale(1); opacity: 1; }
+}
+
+@keyframes connBorderPulseGreen {
+  0%   { border-color: #4CAF50; box-shadow: 0 0 20px rgba(76, 175, 80, 0.4), 0 8px 32px rgba(0, 0, 0, 0.5); }
+  100% { border-color: #444; box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5); }
+}
+
+/* ─── Failed state ───────────────────────────────────────────────────────── */
+#connection-overlay.failed .connection-icon {
+  color: #f44336;
+  animation: none;
+}
+
+#connection-overlay.failed .connection-toast {
+  border-color: #f44336;
+}
+
+#connection-overlay.failed .connection-detail {
+  color: #e57373;
+}
+
+/* ─── Responsive ─────────────────────────────────────────────────────────── */
+@media (max-width: 480px) {
+  .connection-toast {
+    min-width: 0;
+    width: 85vw;
+    padding: 24px 20px;
+    border-radius: 12px;
+  }
+
+  .connection-icon {
+    font-size: 40px;
+  }
+
+  .connection-text {
+    font-size: 18px;
+  }
+
+  .connection-detail {
+    font-size: 13px;
+  }
 }
