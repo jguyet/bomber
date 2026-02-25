@@ -26,3 +26,18 @@ var NBOMBMAX = 1;
 //lobby
 var playerNickname = '';
 var playerSkinId = 0;
+
+// Round state
+var roundState = 'waiting'; // 'waiting' | 'active' | 'ended'
+var roundTimeRemaining = 0;
+var roundWinner = null; // { id, nickname }
+var roundResults = []; // [{ id, nickname, kills, deaths }, ...]
+
+// Scoreboard
+var scoreboardData = []; // [{ id, nickname, kills, deaths }, ...]
+
+// Kill feed
+var killFeed = []; // [{ killerId, killerNick, victimId, victimNick, time }, ...]
+
+// Spectator
+var isSpectating = false;
