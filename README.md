@@ -19,8 +19,7 @@ Multiplayer Bomberman online game built with Node.js, WebSockets, and the [Fosfo
 
 | Layer | Technology |
 |-------|-----------|
-| Server (game) | Node.js + [ws](https://github.com/websockets/ws) on port **9998** |
-| Server (static) | Node.js HTTP on port **8060** |
+| Server | Node.js + [Socket.io](https://socket.io/) — unified HTTP, WebSocket & API on port **9998** |
 | Client engine | Fosfo (custom 2D dual-layer canvas) |
 | Client libs | jQuery 1.9, Lodash |
 | Styling | Vanilla CSS (no framework) |
@@ -55,7 +54,7 @@ make dev
 # Build image
 make docker-build
 
-# Run container (exposes ports 9998 + 8060)
+# Run container (exposes port 9998)
 make docker-run
 
 # Tail logs
@@ -69,7 +68,7 @@ Or manually:
 
 ```bash
 docker build -t bomber:latest .
-docker run -d --name bomber -p 9998:9998 -p 8060:8060 bomber:latest
+docker run -d --name bomber -p 9998:9998 bomber:latest
 ```
 
 ## Environment Variables
@@ -78,8 +77,7 @@ See `.env.example`:
 
 | Variable | Default | Description |
 |----------|---------|-------------|
-| `WS_PORT` | `9998` | WebSocket game server port |
-| `HTTP_PORT` | `8060` | Static file server port |
+| `PORT` | `9998` | Unified server port (HTTP + Socket.io + API) |
 | `NODE_ENV` | `production` | Node environment |
 
 ## Project Structure
