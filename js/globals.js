@@ -22,3 +22,7 @@ var currentPlayer = null;
 var bombs = [];
 var NBOMBS = 1;
 var NBOMBMAX = 1;
+
+//lobby
+var playerNickname = '';
+var playerSkinId = 0;
