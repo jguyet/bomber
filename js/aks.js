@@ -32,7 +32,11 @@ function InitializeSocket()
 		// Use setTimeout(0) to ensure nicknameInit is processed before joinRoom
 		if (currentRoomId) {
 			setTimeout(function() {
-				socket.emit('joinRoom', currentRoomId);
+				if (isFullSpectator) {
+					socket.emit('joinRoom', { roomId: currentRoomId, spectator: true });
+				} else {
+					socket.emit('joinRoom', currentRoomId);
+				}
 			}, 0);
 		}
 
@@ -308,8 +312,10 @@ function InitializeSocket()
 							world.players = [];
 						}
 
-						// Reset spectating
-						isSpectating = false;
+						// Reset spectating (but keep isFullSpectator for lobby spectators)
+						if (!isFullSpectator) {
+							isSpectating = false;
+						}
 
 						// Reset HUD and round globals
 						if (typeof HUD !== 'undefined') HUD.hideResults();

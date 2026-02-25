@@ -41,6 +41,7 @@ var killFeed = []; // [{ killerId, killerNick, victimId, victimNick, time }, ...
 
 // Spectator
 var isSpectating = false;
+var isFullSpectator = false; // True when joined as spectator (not from death)
 
 // Room system
 var currentRoomId = null;    // ID of the room the player is in
