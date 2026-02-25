@@ -4,10 +4,9 @@
   "description": "Bomberman multiplayer online game",
   "main": "server.js",
   "scripts": {
-    "start": "node server.js & node http_server.js",
-    "dev": "node server.js & node http_server.js",
+    "start": "node server.js",
+    "dev": "node server.js",
     "build": "echo 'No build step required'",
-    "serve": "node http_server.js",
     "server": "node server.js"
   },
   "dependencies": {
