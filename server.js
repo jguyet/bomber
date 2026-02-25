@@ -414,6 +414,7 @@ function handleLeaveRoom(socket) {
 
   socket.leave('room:' + roomId);
   socket.currentRoomId = null;
+  socket.isSpectator = false;
 }
 
 // ─── Start Server ────────────────────────────────────────────────────────────
