@@ -37,6 +37,9 @@ const PLAYER_SPEED = 1.5;
 const BOMB_RANGE = 4;
 const BOMB_TIMER_MS = 3000;
 const CHAIN_EXPLOSION_DELAY_MS = 350; // delay between chained bomb explosions (ms)
+const ITEM_DROP_CHANCE = 0.35; // 35% chance to drop an item when a soft wall is destroyed
+const ITEM_TYPES = ['fire', 'bomb', 'boots']; // equal probability
+const SPEED_BOOST = 0.3; // speed increase per boots pickup
 // Player hitbox: (x, y) is the top-left corner of the hitbox.
 // The hitbox must be smaller than TILE_SIZE to fit through 1-tile corridors.
 const PLAYER_W = 14;  // hitbox width  (half-size, centered in 32px tile → 9px padding each side)
@@ -66,6 +69,21 @@ const players = new Map();
 
 // Active bombs: Map<bombId, Bomb>
 const bombs = new Map();
+
+// Active items: Map<itemId, Item>
+let nextItemId = 0;
+const items = new Map();
+
+// ─── Item (Power-up) ────────────────────────────────────────────────────────
+class Item {
+  constructor(id, type, cellX, cellY) {
+    this.id = id;
+    this.type = type; // 'fire', 'bomb', or 'boots'
+    this.cellX = cellX;
+    this.cellY = cellY;
+    this.pickedUp = false;
+  }
+}
 
 // ─── Case (Map Cell) ────────────────────────────────────────────────────────
 class Case {
@@ -250,6 +268,11 @@ class Player {
     this.dir = 0;       // bitmask of active directions
     this.olddir = 1;    // last visual direction (0=up,1=right,2=down,3=left)
     this.onmove = false;
+    // Per-player stats (affected by item pickups)
+    this.bombRange = BOMB_RANGE;   // increased by 'fire' item
+    this.maxBombs = 1;             // increased by 'bomb' item
+    this.activeBombs = 0;          // current bombs placed
+    this.speed = PLAYER_SPEED;     // increased by 'boots' item
   }
 
   getClientDirection() {
@@ -281,7 +304,7 @@ class Player {
 
   move(io) {
     if (!this.onmove) return;
-    const speed = PLAYER_SPEED;
+    const speed = this.speed;
 
     if ((this.dir & DIR.up) !== 0) {
       const edgeY = this.y - speed;
@@ -330,6 +353,11 @@ class Player {
     this.x = spawnCell.x * TILE_SIZE + (TILE_SIZE - PLAYER_W) / 2;
     this.y = spawnCell.y * TILE_SIZE + (TILE_SIZE - PLAYER_H) / 2;
     this.olddir = 0;
+    // Reset stats to defaults on death
+    this.bombRange = BOMB_RANGE;
+    this.maxBombs = 1;
+    this.activeBombs = 0;
+    this.speed = PLAYER_SPEED;
     // Broadcast new position — PS (stopped) since player is teleported, not moving
     broadcast(io, `PS${this.id}|${Math.round(this.x)}|${Math.round(this.y)}|${this.getClientDirection()}|${this.skin}|0|${this.nickname}`);
   }
@@ -343,7 +371,7 @@ class Bomb {
     this.y = y;
     this.launcher = launcher;
     this.skin = skin;
-    this.range = BOMB_RANGE;
+    this.range = launcher.bombRange || BOMB_RANGE;
     this.haveExploded = false;
     this.curcell = launcher.getCurCell();
     this.timer = null;
@@ -390,6 +418,13 @@ class Bomb {
         // Damage soft block (80 → 81)
         cell.setGround(81);
         cell.sendCell(io);
+        // Roll for item drop
+        if (Math.random() < ITEM_DROP_CHANCE) {
+          const type = ITEM_TYPES[Math.floor(Math.random() * ITEM_TYPES.length)];
+          const item = new Item(nextItemId++, type, cell.x, cell.y);
+          items.set(item.id, item);
+          io.emit('msg', 'IA' + item.id + '|' + item.type + '|' + item.cellX + '|' + item.cellY);
+        }
         break;
       } else if (!cell.isWalkable()) {
         break;
@@ -424,6 +459,11 @@ class Bomb {
     // Remove bomb from cell and from global list
     if (cell) cell.setBomb(null);
     bombs.delete(this.id);
+
+    // Decrement launcher's active bomb count (if launcher still connected)
+    if (players.has(this.launcher.socketId)) {
+      this.launcher.activeBombs = Math.max(0, this.launcher.activeBombs - 1);
+    }
   }
 }
 
@@ -460,6 +500,13 @@ function handleWorldLoad(socket, io) {
     const otherSocket = io.sockets.sockets.get(sid);
     if (otherSocket) {
       sendTo(otherSocket, `PA${player.id}|${player.x}|${player.y}|${player.getClientDirection()}|${player.skin}|0|${player.nickname}`);
+    }
+  }
+
+  // Send all active items to the new player
+  for (const [, item] of items) {
+    if (!item.pickedUp) {
+      sendTo(socket, 'IA' + item.id + '|' + item.type + '|' + item.cellX + '|' + item.cellY);
     }
   }
 }
@@ -535,11 +582,14 @@ function addBomb(player, io) {
   const cell = player.getCurCell();
   if (!cell) return;
   if (cell.hasBomb()) return;
+  // Check bomb count limit
+  if (player.activeBombs >= player.maxBombs) return;
 
   const bombId = nextBombId++;
   const bx = cell.x * TILE_SIZE;
   const by = cell.y * TILE_SIZE;
   const bomb = new Bomb(bombId, bx, by, player, 1);
+  player.activeBombs++;
   bomb.start(io);
   bombs.set(bombId, bomb);
 
@@ -582,6 +632,23 @@ function serverTick(io) {
       player.move(io);
       // Broadcast authoritative position every tick while moving
       broadcast(io, `PM${player.id}|${Math.round(player.x)}|${Math.round(player.y)}|${player.getClientDirection()}|${player.skin}|${player.dir}|${player.nickname}`);
+    }
+    // Check item pickup for all players (moving or not — they may be standing on an item)
+    const playerCell = player.getCurCell();
+    if (playerCell) {
+      for (const [itemId, item] of items) {
+        if (item.pickedUp) continue;
+        if (playerCell.x === item.cellX && playerCell.y === item.cellY) {
+          item.pickedUp = true;
+          items.delete(itemId);
+          // Apply power-up
+          if (item.type === 'fire') player.bombRange += 1;
+          else if (item.type === 'bomb') player.maxBombs += 1;
+          else if (item.type === 'boots') player.speed += SPEED_BOOST;
+          // Broadcast pickup
+          io.emit('msg', 'IP' + itemId + '|' + player.id);
+        }
+      }
     }
   }
 }
