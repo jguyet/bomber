@@ -90,11 +90,13 @@ function InitializeSocket(nickname, skinId)
 						var left = Number(fields[3]);
 						var right = Number(fields[4]);
 						var bomb = world.getBomb(id);
-						bomb.exsup = sup;
-						bomb.exleft = left;
-						bomb.exdown = down;
-						bomb.exright = right;
-						bomb.explode();
+						if (bomb) {
+							bomb.exsup = sup;
+							bomb.exleft = left;
+							bomb.exdown = down;
+							bomb.exright = right;
+							bomb.explode();
+						}
 					break;
 				}
 			break;
