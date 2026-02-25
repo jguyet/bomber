@@ -151,7 +151,6 @@ var Player = function(id, x, y)
 		}
 		//////////////////////////////////////////////
 		fosfo1.drawframe3("player" + this.id, 'assets/characters/' + this.skin + '.png', this.currentanim.frames[this.currentanimid], (this.x % (world.width * 32)) - (this.img.width / 2), (this.y % (world.height * 32)) - (this.img.height - 5));
-		fosfo1.drawtext("player" + this.id, this.nickname, (this.x % (world.width * 32)), (this.y % (world.height * 32)) - (this.img.height - 5), 15, 'white', null, true);
 	}
 
 	this.remove = function()
