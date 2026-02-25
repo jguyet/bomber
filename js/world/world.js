@@ -69,16 +69,6 @@ var World = function(data, theme)
 		var x = 0;
 		var first = true;
 		var noput = false;
-		// this.dup.push([-(this.width * 32), 0]); // left
-		// this.dup.push([0, -(this.height * 32)]); // top
-		// this.dup.push([(this.width * 32), 0]); // right
-		// this.dup.push([0, (this.height * 32)]); // bottom
-
-		// this.dup.push([-(this.width * 32), (this.height * 32)]); // bottom left
-		// this.dup.push([(this.width * 32), (this.height * 32)]); // bottom right
-		// this.dup.push([-(this.width * 32), -(this.height * 32)]); // top left
-		// this.dup.push([(this.width * 32), -(this.height * 32)]); // top right
-
 		while (county < (this.height * 32))
 		{
 			countx = 0;
@@ -106,42 +96,6 @@ var World = function(data, theme)
 		}
 		fosfo0.update(this.dup);
 	};
-	
-	// this.printWorld = function()
-	// {
-	// 	fosfo0.clear();
-	// 	var county = 0;
-	// 	var countx = 0;
-	// 	var y = 0;
-	// 	var x = 0;
-	// 	while (county < layer0.height)
-	// 	{
-	// 		countx = 0;
-	// 		x = 0;
-	// 		while (countx < layer0.width)
-	// 		{
-	// 			var c = this.data[y % this.height][x % this.width];
-				
-	// 			if (y > -1 && x > -1 && this.dataimg[y] != null && this.dataimg[x] != null)
-	// 			{
-	// 				var img = this.dataimg[y][x];
-	// 				// this.dataimg[y][x] = fosfo0.drawframe(img.name, 'assets/maps/1.png', img.id, countx, county);
-	// 				this.dataimg[y][x] = fosfo0.drawframe2(img.name, 'assets/maps/1.png', img.id, countx, county, 1.0 + (SIZE / 10), 1.0 + (SIZE / 10));
-	// 			}
-	// 			countx += 32;
-	// 			x++;
-	// 		}
-	// 		y++;
-	// 		county += 32;
-	// 	}
-	// 	fosfo0.update(this.dup);
-	// };
-	
-	this.getposPlayer = function(player)
-	{
-		var x = player.x;
-		var y = player.y - (player.img.height - 20);
-	}
 	
 	this.addplayer = function(id, x, y, dir, skin, speed, bcurrent, nickname)
 	{

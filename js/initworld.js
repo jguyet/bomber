@@ -119,12 +119,8 @@ var interval = function()
 			world.updateitems();
 		world.setDup();
 		dup = world.dup;
-		// if (world.havechange)
-		// {
-
-			fosfo0.update(dup);
-			world.havechange = false;
-		// }
+		fosfo0.update(dup);
+		world.havechange = false;
 	}
 	updatelayer1();
 	// Spectator camera: follow first alive player when no currentPlayer

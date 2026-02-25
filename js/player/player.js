@@ -136,18 +136,6 @@ var Player = function(id, x, y)
 			fosfo0.y = ((baseY + middleWorldHeight) - ((currentPlayer.y) % worldHeightPxs));
 			fosfo1.y = ((baseY + middleWorldHeight) - ((currentPlayer.y) % worldHeightPxs));
 
-			// [fosfo0, fosfo1].forEach(f => {
-			// 	f.x = ((baseX + middleWorldWidth) - ((currentPlayer.x) % worldWidthPxs));
-			// 	f.y = ((baseY + middleWorldHeight) - ((currentPlayer.y) % worldHeightPxs));
-			// });
-			// fosfo1.undraw('test1');
-			// fosfo1.undraw('test2');
-			// fosfo1.undraw('test3');
-			// fosfo1.undraw('test4');
-			// fosfo1.draw('test1', 'assets/red-pixel.png', this.x + this.speed + 12, this.y);
-			// fosfo1.draw('test2', 'assets/red-pixel.png', this.x - this.speed, this.y);
-			// fosfo1.draw('test3', 'assets/red-pixel.png', this.x, this.y - this.speed);
-			// fosfo1.draw('test4', 'assets/red-pixel.png', this.x, this.y + this.speed + 2);
 		}
 		//////////////////////////////////////////////
 		fosfo1.drawframe3("player" + this.id, 'assets/characters/' + this.skin + '.png', this.currentanim.frames[this.currentanimid], (this.x % (world.width * 32)) - (this.img.width / 2), (this.y % (world.height * 32)) - (this.img.height - 5));
@@ -163,11 +151,6 @@ var Player = function(id, x, y)
 		this.onmove = true;
 	}
 	
-	this.sendpos = function()
-	{
-		sendSocketMessage("PM1|" + this.x + "|" + this.y + "|" + this.currentanim.name + "|" + this.currentanimid);
-	}
-	
 	this.getpos = function()
 	{
 		return ({x: Math.round((Math.round(this.x) / 32) % world.width), y: Math.round((Math.round(this.y) / 32) % world.height)});
@@ -180,12 +163,7 @@ var Player = function(id, x, y)
 		this.img = img; 
 	};
 	
-	this.load2 = function()
-	{
-		fosfo1.loadimage('assets/characters/' + this.skin + '.png');
-		var img = fosfo1.setFramesToImg('assets/characters/' + this.skin + '.png', 4, 4);
-		this.img = img; 
-	};
+
 
 	this.getCurCell = function()
 	{
