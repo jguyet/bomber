@@ -2,6 +2,7 @@
 var LoadingManager = {
   totalAssets: 0,
   loadedAssets: 0,
+  loadTimeout: null,
 
   show: function() {
     var el = document.getElementById('loading-screen');
@@ -9,9 +10,22 @@ var LoadingManager = {
       el.style.display = 'flex';
       el.classList.remove('fade-out');
     }
+    // Start slow-load timeout
+    var self = this;
+    if (this.loadTimeout) clearTimeout(this.loadTimeout);
+    this.loadTimeout = setTimeout(function() {
+      if (self.loadedAssets < self.totalAssets) {
+        self.setStatus('Loading is taking longer than expected...');
+      }
+    }, 15000);
   },
 
   hide: function() {
+    // Clear slow-load timeout
+    if (this.loadTimeout) {
+      clearTimeout(this.loadTimeout);
+      this.loadTimeout = null;
+    }
     var el = document.getElementById('loading-screen');
     if (el) {
       el.classList.add('fade-out');
