@@ -239,7 +239,7 @@ var World = function(data)
 	this.addItem = function(id, type, cellX, cellY)
 	{
 		// Frame indices from 5x4 items spritesheet (assets/items/1.png)
-		var frameMap = { 'fire': 0, 'bomb': 1, 'boots': 10 };
+		var frameMap = { 'fire': 3, 'bomb': 0, 'boots': 4 };
 		var frameIndex = frameMap[type] !== undefined ? frameMap[type] : 0;
 		fosfo1.drawframe('item' + id, 'assets/items/1.png', frameIndex, cellX * 32, cellY * 32);
 		this.items.push({ id: id, type: type, cellX: cellX, cellY: cellY });
