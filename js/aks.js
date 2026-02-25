@@ -90,6 +90,19 @@ function InitializeSocket()
 							world.setPlayerSpeed(id, speed);
 						break ;
 					}
+				break ;
+				case "K":
+					switch (action)
+					{
+						case "F": // Kill feed: KF{killerId}|{killerNick}|{victimId}|{victimNick}
+							var parts = received_msg.substring(2).split("|");
+							var killEvent = { killerId: Number(parts[0]), killerNick: parts[1], victimId: Number(parts[2]), victimNick: parts[3], time: Date.now() };
+							killFeed.push(killEvent);
+							if (typeof HUD !== 'undefined') HUD.addKillFeedEntry(killEvent);
+							addKillToChat(killEvent.killerNick, killEvent.victimNick);
+						break ;
+					}
+				break ;
 				case "M":
 					switch (action)
 					{
@@ -144,6 +157,18 @@ function InitializeSocket()
 							var nickname = received_msg.substring(2).split("|")[7] || "";
 							world.moveplayer(id, x, y, dir, skin, true, bytedir, nickname);
 						break ;
+						case "K": // Player killed: PK{id}
+							var id = Number(received_msg.substring(2));
+							var player = world.getPlayer(id);
+							if (player != null) {
+								player.alive = false;
+								player.remove();
+							}
+							if (currentPlayer && id === currentPlayer.id) {
+								isSpectating = true;
+								if (typeof HUD !== 'undefined') HUD.showDeathNotice();
+							}
+						break ;
 					}
 				break ;
 				case "W":
@@ -165,6 +190,58 @@ function InitializeSocket()
 							//fosfo0.undraw(img.name);
 							world.dataimg[y][x] = fosfo0.drawframe(img.name, 'assets/maps/1.png', id, img.x, img.y);
 							world.havechange = true;
+						break ;
+					}
+				break ;
+				case "R":
+					switch (action)
+					{
+						case "S": // Round state: RS{state}|{timeRemainingMs}
+							var parts = received_msg.substring(2).split("|");
+							roundState = parts[0];
+							roundTimeRemaining = Number(parts[1]);
+							if (typeof HUD !== 'undefined') HUD.updateRoundState(roundState, roundTimeRemaining);
+						break ;
+						case "W": // Round winner: RW{winnerId}|{winnerNickname}
+							var parts = received_msg.substring(2).split("|");
+							roundWinner = { id: Number(parts[0]), nickname: parts[1] };
+						break ;
+						case "R": // Round reset: RR
+							if (typeof HUD !== 'undefined') HUD.hideResults();
+							roundWinner = null;
+							roundResults = [];
+							killFeed = [];
+							isSpectating = false;
+						break ;
+						case "E": // Round end results: RE{winnerId}|{winnerNick}|{id}|{nick}|{kills}|{deaths};...
+							var data = received_msg.substring(2);
+							var playerEntries = data.split(";");
+							var firstEntry = playerEntries[0].split("|");
+							roundWinner = { id: Number(firstEntry[0]), nickname: firstEntry[1] };
+							roundResults = [];
+							for (var i = 0; i < playerEntries.length; i++) {
+								var p = playerEntries[i].split("|");
+								if (p.length >= 6) {
+									roundResults.push({ id: Number(p[2]), nickname: p[3], kills: Number(p[4]), deaths: Number(p[5]) });
+								}
+							}
+							if (typeof HUD !== 'undefined') HUD.showResults(roundWinner, roundResults);
+						break ;
+					}
+				break ;
+				case "S":
+					switch (action)
+					{
+						case "B": // Scoreboard: SB{id}|{nick}|{kills}|{deaths};{id2}|...
+							var entries = received_msg.substring(2).split(";");
+							scoreboardData = [];
+							for (var i = 0; i < entries.length; i++) {
+								var p = entries[i].split("|");
+								if (p.length >= 4) {
+									scoreboardData.push({ id: Number(p[0]), nickname: p[1], kills: Number(p[2]), deaths: Number(p[3]) });
+								}
+							}
+							if (typeof HUD !== 'undefined') HUD.updateScoreboard(scoreboardData);
 						break ;
 					}
 				break ;
@@ -200,4 +277,14 @@ function InitializeSocket()
 			ConnectionStatus.onPermanentFailure();
 		}
 	}
+}
+
+function addKillToChat(killerNick, victimNick) {
+	var elem = document.createElement("li");
+	elem.setAttribute("class", "ng-scope kill-info");
+	elem.innerHTML = '<span class="ico bombed"></span> <b class="nickname">' + escapeHtml(killerNick) + '</b> killed <b class="nickname">' + escapeHtml(victimNick) + '</b>';
+	var chat = document.getElementById("endchat");
+	chat.parentNode.insertBefore(elem, chat);
+	var chatList = document.getElementById("listChat");
+	if (chatList) chatList.scrollTop = chatList.scrollHeight;
 }
