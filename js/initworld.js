@@ -17,7 +17,7 @@ function showLobby() {
 				img.className = 'skin-thumb' + (skinIdx === 0 ? ' selected' : '');
 				img.setAttribute('data-skin', skinIdx);
 				img.addEventListener('click', function() {
-					var all = document.querySelectorAll('.skin-thumb');
+					var all = grid.querySelectorAll('.skin-thumb');
 					for (var j = 0; j < all.length; j++) all[j].classList.remove('selected');
 					img.classList.add('selected');
 					selectedSkinId = skinIdx;
@@ -31,13 +31,15 @@ function showLobby() {
 	var playBtn = document.getElementById('play-btn');
 	if (playBtn) {
 		playBtn.onclick = function() {
-			var raw = document.getElementById('nickname-input').value;
-			var nickname = raw.trim() || 'Player';
+			var nicknameInput = document.getElementById('nickname-input');
+			var nickname = nicknameInput ? nicknameInput.value.trim() : '';
+			if (!nickname) nickname = 'Player';
 			startGame(nickname, selectedSkinId);
 		};
 	}
 }
 
+// Loading progress helpers
 function setLoadingProgress(label, pct) {
 	var fill = document.getElementById('loading-bar-fill');
 	var lbl = document.getElementById('loading-label');
@@ -51,14 +53,15 @@ function dismissLoadingOverlay() {
 }
 
 function startGame(nickname, skinId) {
-	var lobby = document.getElementById('lobby-screen');
-	if (lobby) lobby.style.display = 'none';
-	var loading = document.getElementById('loading-overlay');
-	if (loading) loading.style.display = 'flex';
-
 	// Store for reconnect
 	window._lastNickname = nickname;
 	window._lastSkinId = skinId;
+
+	// Hide lobby, show loading
+	var lobbyScreen = document.getElementById('lobby-screen');
+	if (lobbyScreen) lobbyScreen.style.display = 'none';
+	var loadingOverlay = document.getElementById('loading-overlay');
+	if (loadingOverlay) loadingOverlay.style.display = 'flex';
 
 	setLoadingProgress('Connecting…', 10);
 	InitializeSocket(nickname, skinId);

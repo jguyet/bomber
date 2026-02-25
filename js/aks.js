@@ -8,6 +8,7 @@
 // Per-player move buffer: stores latest PM data per player ID.
 // Flushed once per rAF frame by flushPendingMoves() called from interval().
 var pendingMoves = {};
+var reconnectAttempts = 0;
 
 function flushPendingMoves() {
 	if (world == null) return;
@@ -24,8 +25,6 @@ function sendSocketMessage(message)
 }
 
 // ─── Disconnect overlay helpers ───────────────────────────────────────────────
-var reconnectAttempts = 0;
-
 function showDisconnectOverlay(msg, showRefresh) {
 	var el = document.getElementById('disconnect-overlay');
 	var msgEl = document.getElementById('disconnect-msg');
@@ -55,17 +54,12 @@ function InitializeSocket(nickname, skinId)
 		hideDisconnectOverlay();
 		reconnectAttempts = 0;
 
-		// If reconnecting after a drop (world already loaded), resync without showing lobby
-		if (world != null) {
-			var nick = window._lastNickname || 'Player';
-			var skin = window._lastSkinId || 0;
-			sendSocketMessage('NI' + nick + '|' + skin);
-			sendSocketMessage('WL');
-			return;
-		}
+		// If reconnecting after a drop (world already loaded), re-send NI + WL to resync
+		var nick = window._lastNickname || nickname || 'Player';
+		var skin = (window._lastSkinId !== undefined) ? window._lastSkinId : (skinId || 0);
 
-		// First connect: send NI before WL
-		sendSocketMessage('NI' + (nickname || 'Player') + '|' + (skinId || 0));
+		// Send NI before WL so server knows nickname+skin before broadcasting PA
+		sendSocketMessage('NI' + nick + '|' + skin);
 		sendSocketMessage('WL');
 		initWorld();
 	});
