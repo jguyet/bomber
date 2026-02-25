@@ -180,8 +180,10 @@ var HUD = (function() {
       if (stateText) {
         stateText.textContent = 'YOU DIED \u2014 Spectating';
         stateText.classList.add('death-notice');
+        stateText.classList.remove('spectator-state');
       }
       // Auto-clear the death notice after 2 seconds, revert to empty if round still active
+      var self = this;
       setTimeout(function() {
         if (stateText && roundState === 'active') {
           stateText.textContent = '';
@@ -210,13 +212,32 @@ var HUD = (function() {
 
     // Show spectator badge for lobby spectators
     showSpectatorBadge: function() {
+      var timerEl = document.getElementById('round-timer');
       var stateText = document.getElementById('round-timer-state');
-      if (stateText) stateText.textContent = '\uD83D\uDC41 SPECTATING';
+      if (timerEl) timerEl.style.display = 'block';
+      if (stateText) {
+        stateText.textContent = '\uD83D\uDC41 SPECTATING';
+        stateText.classList.add('spectator-state');
+        stateText.classList.remove('death-notice');
+      }
+    },
+
+    // Hide spectator badge (called on round reset or when leaving spectator mode)
+    hideSpectatorBadge: function() {
+      var stateText = document.getElementById('round-timer-state');
+      if (stateText) {
+        stateText.classList.remove('spectator-state');
+      }
     },
 
     // Reset everything for new round
     reset: function() {
       this.hideResults();
+      this.hideSpectatorBadge();
+      var stateText = document.getElementById('round-timer-state');
+      if (stateText) {
+        stateText.classList.remove('death-notice', 'spectator-state');
+      }
       var tbody = document.getElementById('hud-scoreboard-body');
       if (tbody) tbody.innerHTML = '';
       if (timerInterval) {
