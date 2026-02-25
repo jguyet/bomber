@@ -18,12 +18,28 @@ function InitializeSocket()
 		LoadingManager.assetLoaded('Server connection');
 		LoadingManager.setStatus('Joining room...');
 
-		// Restore nickname/skin from localStorage if globals are empty (e.g. page refresh reconnect)
-		if (!playerNickname && localStorage.getItem('bomber_nickname')) {
-			playerNickname = localStorage.getItem('bomber_nickname');
+		// Restore nickname/skin from localStorage if globals are empty (e.g. page refresh or reconnect)
+		if (!playerNickname || playerNickname.length === 0) {
+			var savedNick = localStorage.getItem('bomber_nickname');
+			if (savedNick && savedNick.length > 0) {
+				playerNickname = savedNick;
+			}
 		}
-		if ((playerSkinId === undefined || playerSkinId === null) && localStorage.getItem('bomber_skinId') !== null) {
-			playerSkinId = parseInt(localStorage.getItem('bomber_skinId'), 10);
+		// playerSkinId defaults to 0 in globals — check localStorage if it's still 0, undefined, or null
+		var savedSkin = localStorage.getItem('bomber_skinId');
+		if (savedSkin !== null) {
+			var parsedSkin = parseInt(savedSkin, 10);
+			if (!isNaN(parsedSkin) && parsedSkin >= 0 && parsedSkin <= 23) {
+				playerSkinId = parsedSkin;
+			}
+		}
+		if (playerSkinId === undefined || playerSkinId === null || isNaN(playerSkinId)) {
+			playerSkinId = 0;
+		}
+
+		// Final safety: never send empty/undefined nickname to server
+		if (!playerNickname || playerNickname.length === 0) {
+			playerNickname = 'Player';
 		}
 
 		// Send nickname/skin init FIRST, then join room after server has processed it
