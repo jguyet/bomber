@@ -1,29 +1,43 @@
 # Game of Bombs
 
-Multiplayer Bomberman online game built with Node.js, WebSockets, and the [Fosfo](https://github.com/jguyet/fosfo) 2D canvas engine.
+Multiplayer Bomberman online game built with Node.js, Socket.io, and the [Fosfo](https://github.com/jguyet/fosfo) 2D canvas engine. Features a room/lobby system, competitive rounds, map themes, and real-time gameplay at 60 ticks/sec.
 
 <img src="./1.gif"/>
 
 ## Features
 
-- **Real-time multiplayer** — WebSocket-based server running at 60 ticks/sec with authoritative movement
-- **Pre-game lobby** — Pick a nickname and choose from 24 character skins before joining
-- **Bomb system** — Place bombs, destroy walls, chain explosions, and collect power-ups (extra bombs, range, speed)
-- **In-game chat** — Send messages with actual player nicknames, XSS-safe
-- **Loading overlay** — Animated progress bar tracking asset loading with per-asset feedback
+- **Room system** — Create and join game rooms via a browser UI; each room is fully isolated with its own map, players, bombs, items, and round state
+- **Map themes** — Three visual themes (Default, Winter, Moon) selectable per room, plus a Random option that re-rolls each round
+- **Real-time multiplayer** — Socket.io-based server running at 60 ticks/sec with authoritative movement and room-scoped broadcasts
+- **Pre-game lobby** — Pick a nickname and choose from 24 character skins before browsing rooms
+- **Waiting room** — See connected players with skin previews; room creator can start the game when 2+ players are ready
+- **Competitive rounds** — 3-minute timed rounds; last player standing or highest kills wins; auto-restart between rounds
+- **Kill tracking & scoreboard** — Per-player kills/deaths stats, live HUD scoreboard, kill feed in chat
+- **Power-up system** — Destroy walls to spawn BombUp, FireUp, and SpeedUp items; persist until collected or destroyed
+- **Round results screen** — Full-screen overlay at round end showing winner, all players' stats, and countdown to next round
+- **Dead player spectating** — Killed players become spectators until the next round begins
+- **Bomb system** — Place bombs, destroy walls, chain explosions with kill attribution to bomb owner
+- **In-game chat** — Messages with player nicknames, room-scoped, plus kill feed entries
+- **HUD** — Round timer with urgency states, scoreboard, room name & theme indicator
+- **Loading overlay** — Animated progress bar tracking asset loading
 - **Connection status** — Auto-reconnect with retry counter and permanent-failure state
-- **Responsive design** — Lobby adapts from desktop (6 columns) to tablet (4) to mobile (3) with glassmorphism styling
-- **SEO / Open Graph** — Proper meta tags, favicon, and social sharing cards
+- **Late-join sync** — New players receive full game state, round state, and scoreboard on connect
+- **Room persistence** — Room ID counter persisted to `.db/rooms.json` across server restarts
+- **REST API** — `GET /api/rooms` and `POST /api/rooms` for room listing and creation
+- **Responsive design** — Lobby and room browser adapt from desktop to mobile with glassmorphism styling
+- **SEO / Open Graph** — Meta tags, favicon, and social sharing cards
+- **Docker-ready** — Multi-stage Dockerfile with health check, non-root user, single-port deployment
 
 ## Tech Stack
 
 | Layer | Technology |
 |-------|-----------|
-| Server | Node.js + [Socket.io](https://socket.io/) — unified HTTP, WebSocket & API on port **9998** |
+| Server | Node.js + [Socket.io](https://socket.io) on port **9998** (HTTP + WebSocket + REST API, unified) |
 | Client engine | Fosfo (custom 2D dual-layer canvas) |
-| Client libs | jQuery 1.9, Lodash |
+| Client libs | jQuery 1.9, Lodash, Socket.io client |
 | Styling | Vanilla CSS (no framework) |
-| Protocol | Custom text-based — `^`-separated packets, 2-char prefix (`type` + `action`) |
+| Protocol | Custom text-based — `^`-separated packets, 2-char prefix (`type` + `action`) over Socket.io events |
+| Persistence | JSON files in `.db/` directory |
 
 ## Quick Start
 
@@ -31,16 +45,16 @@ Multiplayer Bomberman online game built with Node.js, WebSockets, and the [Fosfo
 # Install dependencies
 npm install
 
-# Start both servers (WebSocket + HTTP)
+# Start the server
 npm start
 ```
 
-Open [http://localhost:8060](http://localhost:8060) in your browser.
+Open [http://localhost:9998](http://localhost:9998) in your browser.
 
 ## Development
 
 ```bash
-# Start in dev mode (identical to production for this project)
+# Start in dev mode
 npm run dev
 
 # Or use the Makefile
@@ -84,46 +98,60 @@ See `.env.example`:
 
 ```
 bomber/
-  server.js            # WebSocket game server (authoritative, 60 tick)
-  http_server.js       # Static file server
-  index.html           # Main HTML (lobby + game + overlays)
-  package.json         # Node.js project config
-  Dockerfile           # Multi-stage Docker build (node:20-alpine)
-  Makefile             # Dev/build/docker shortcuts
+  server.js              # Unified server: Socket.io + REST API + static files (port 9998)
+  server/
+    roomManager.js       # Room class (isolated game state) + RoomManager
+  index.html             # Main HTML (lobby + room browser + waiting room + game + HUD)
+  package.json           # Node.js project config (v3.0.0)
+  Dockerfile             # Multi-stage Docker build (node:20-alpine)
+  Makefile               # Dev/build/docker shortcuts
+  .env.example           # Environment variable template
   css/
-    styles.css         # Game + chat styles
-    lobby.css          # Lobby screen styles
-    loading.css        # Loading overlay styles
+    styles.css           # Game + chat styles
+    lobby.css            # Lobby screen styles
+    rooms.css            # Room browser + waiting room styles
+    loading.css          # Loading overlay styles
     connection-status.css  # Connection overlay styles
-    normalize-2.1.0.css    # CSS reset
+    hud.css              # HUD: timer, scoreboard, results, room/theme indicator
+    normalize-2.1.0.css  # CSS reset
   js/
-    lobby.js           # Pre-connect lobby (nickname + skin selection)
-    loading.js         # Loading overlay manager
-    connection-status.js   # Disconnect/reconnect overlay
-    aks.js             # WebSocket client + reconnect logic
-    chat.js            # In-game chat
-    events.js          # Keyboard input handling
-    globals.js         # Shared global state
-    initworld.js       # World initialization + rendering
-    canvas/fosfo.js    # Fosfo 2D engine
-    player/player.js   # Player entity
-    bomb/bomb.js       # Bomb entity
-    item/item.js       # Item entity
-    world/world.js     # World/map logic
+    lobby.js             # Pre-connect lobby (nickname + skin selection)
+    rooms.js             # Room browser UI, create room form, waiting room
+    loading.js           # Loading overlay manager
+    connection-status.js # Disconnect/reconnect overlay
+    hud.js               # HUD: timer, scoreboard, results, room info, death notice
+    aks.js               # Socket.io client + protocol handler + reconnect
+    chat.js              # In-game chat + kill feed
+    events.js            # Keyboard input handling + spectator blocking
+    globals.js           # Shared global state (room, theme, round, scoreboard)
+    initworld.js         # World initialization + theme-aware tileset loading
+    canvas/fosfo.js      # Fosfo 2D engine
+    player/player.js     # Player entity
+    bomb/bomb.js         # Bomb entity
+    item/item.js         # Item entity
+    world/world.js       # World/map logic + theme-aware rendering
   assets/
-    characters/        # 24 character sprite sheets (0-23.png)
-    bombs/             # Bomb + explosion sprites
-    maps/              # Map tile assets
-    favicon.svg        # Site favicon
-    og-image.png       # Open Graph share image
+    characters/          # 24 character sprite sheets (0-23.png)
+    bombs/               # Bomb + explosion sprites
+    maps/                # Map tilesets: 1.png (default), 1-winter.png, tileset-moon.png
+    favicon.svg          # Site favicon
+    og-image.png         # Open Graph share image
+  .db/                   # Runtime persistence (rooms.json)
   scripts/
-    start.sh           # Bash start script
-    start.ps1          # PowerShell start script
+    start.sh             # Bash start script
+    start.ps1            # PowerShell start script
 ```
+
+## REST API
+
+| Method | Path | Body | Response |
+|--------|------|------|----------|
+| `GET` | `/api/rooms` | — | `[{ id, name, playerCount, maxPlayers, status, themeId }]` |
+| `POST` | `/api/rooms` | `{ name, maxPlayers, themeId }` | `{ id, name, maxPlayers, themeId, status }` |
 
 ## Game Protocol
 
-Packets are `^`-separated, each with a 2-character prefix:
+Packets are `^`-separated, each with a 2-character prefix, transmitted over Socket.io `'game'` events:
 
 | Prefix | Direction | Description |
 |--------|-----------|-------------|
@@ -134,15 +162,46 @@ Packets are `^`-separated, each with a 2-character prefix:
 | `WL` | Server -> Client | World load (map dimensions + cell data) |
 | `WE` | Client -> Server | Request world entities |
 | `WC` | Server -> Client | Cell update (wall destroyed) |
+| `TH` | Server -> Client | Theme ID (`default\|winter\|moon`) |
 | `PA` | Server -> Client | Player add/join |
 | `PM` | Server -> Client | Player move |
 | `PS` | Server -> Client | Player stop |
 | `PD` | Server -> Client | Player disconnect |
+| `PK` | Server -> Client | Player killed |
 | `BA` | Server -> Client | Bomb added |
 | `BE` | Server -> Client | Bomb exploded |
 | `IA` | Server -> Client | Item spawned |
 | `ID` | Server -> Client | Item despawned/picked up |
-| `IS` | Server -> Client | Item stat change (speed) |
+| `IS` | Server -> Client | Speed change |
+| `RS` | Server -> Client | Round state (`state\|timeRemainingMs`) |
+| `RW` | Server -> Client | Round winner |
+| `RR` | Server -> Client | Round reset (new map incoming) |
+| `RE` | Server -> Client | Round end results |
+| `KF` | Server -> Client | Kill feed event |
+| `SB` | Server -> Client | Scoreboard update |
+
+### Socket.io Events (non-protocol)
+
+| Event | Direction | Description |
+|-------|-----------|-------------|
+| `joinRoom` | Client -> Server | Join a room by ID |
+| `leaveRoom` | Client -> Server | Leave current room |
+| `startGame` | Client -> Server | Creator starts the game |
+| `nicknameInit` | Client -> Server | Send nickname + skin before joining |
+| `roomJoined` | Server -> Client | Room join confirmation (roomId, roomName, isCreator, themeId) |
+| `roomPlayerList` | Server -> Client | Updated player list for waiting room |
+| `roomCreatorTransfer` | Server -> Client | Notifies new creator when original leaves |
+| `roomError` | Server -> Client | Error message (room full, not found) |
+| `gameStart` | Server -> Client | Game is starting, initialize canvas |
+
+## Game Flow
+
+1. **Lobby** — Enter nickname, pick a character skin, click PLAY
+2. **Room Browser** — Browse existing rooms or create a new one (name, max players, theme)
+3. **Waiting Room** — See connected players; creator clicks START when 2+ players ready
+4. **Gameplay** — 3-minute competitive rounds with bombs, power-ups, and kills
+5. **Round End** — Results screen for 5 seconds, then map regenerates and new round begins
+6. **Between Rounds** — Theme re-randomized (if set to Random), all stats reset, players respawn
 
 ## Controls
 
