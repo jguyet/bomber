@@ -66,9 +66,11 @@ var addmessagetochat = function(nickname, data)
 		+ ':</span><span class="text">'
 		+ '<span class="ng-binding ng-scope">' + escapeHtml(data) + '</span>'
 		+ '</span>';
+	elem.setAttribute("data-category", "chat");
 	var chat = document.getElementById("endchat");
 	var parentdiv = chat.parentNode;
 	parentdiv.insertBefore(elem, chat);
+	if (typeof ChatFilters !== 'undefined') ChatFilters.onNewMessage(elem);
 	pruneOldMessages();
 	if (chatAutoScroll) {
 		var chatList = document.getElementById("listChat");
