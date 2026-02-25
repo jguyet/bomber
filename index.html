@@ -1,9 +1,30 @@
 <!doctype html>
-<html class=""><head>
-    <title ng-bind="'title' | i18n" class="ng-binding">Game of Bombs</title>
+<html lang="en"><head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Game of Bombs — Multiplayer Bomberman</title>
+
+    <!-- Favicon -->
+    <link rel="icon" type="image/svg+xml" href="./assets/favicon.svg">
+
+    <!-- Meta Description -->
+    <meta name="description" content="Game of Bombs — Free multiplayer Bomberman game. Play online with friends, place bombs, collect power-ups, and dominate the arena!">
+
+    <!-- Open Graph -->
+    <meta property="og:type" content="website">
+    <meta property="og:title" content="Game of Bombs — Multiplayer Bomberman">
+    <meta property="og:description" content="Free multiplayer Bomberman game. Play online with friends, place bombs, collect power-ups, and dominate the arena!">
+    <meta property="og:image" content="./assets/og-image.png">
+
+    <!-- Twitter Card -->
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="Game of Bombs — Multiplayer Bomberman">
+    <meta name="twitter:description" content="Free multiplayer Bomberman game. Play online with friends!">
+    <meta name="twitter:image" content="./assets/og-image.png">
+
     <link href="https://fonts.googleapis.com/css?family=Open+Sans:400,600&amp;subset=latin,cyrillic" rel="stylesheet">
-    <link rel="stylesheet" href="http://localhost/test/css/normalize-2.1.0.css">
-    <link rel="stylesheet" href="http://localhost/test/css/styles.css">
+    <link rel="stylesheet" href="./css/normalize-2.1.0.css">
+    <link rel="stylesheet" href="./css/styles.css">
 	
 	<!--JS---------------------------------->
 	<script src="//ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
@@ -20,37 +41,29 @@
 	<script src="./js/initworld.js"></script>
 	<!-------------------------------------->
 </head>
-<body class="ng-scope">
+<body>
 	
-	<div id="viewport" ng-controller="KeyboardCtrl" class="ng-scope" style="left: 0px;">
+	<div id="viewport" style="left: 0px;">
 	<div style="position: absolute; left: 0px; top: 0px; margin-left: -160px;">
 		<canvas id="layer0" width="1708" height="557" style="position: absolute; left: 160px; top: 0px;background-color: black;"></canvas>
 		<canvas id="layer1" width="1708" height="557" style="position: absolute; left: 160px; top: 0px;"></canvas>
 	</div>
 	</div>
 	
-	<div id="chat" ng-show="showGame &amp;&amp; !showMenu" ng-controller="ChatCtrl" class="ng-scope" style="display:none">
+	<div id="chat" style="display:none">
 		<div id="dropDownChat" dropdown-on-event="nicknamePopup">
 			<ul>
-            <li class="nicknameChat ng-binding" ng-click="chatClickHandler()">@ </li>
-            <!--<li ng-click="postToCommunity('showProfile')">Show profile</li>-->
-            <li ng-click="postToCommunity('createChat')">Send message</li>
-            <li ng-click="postToCommunity('addFriend')">Add friend</li>
-            <li ng-show="canShowWhoIs()" ng-click="showWhoIs()" class="ng-hide">Who is it?</li>
-			<span ng-show="canIgnore()" class="colorRed ng-hide">
-				<li ng-click="ignore(1)" style="float: left;" class="ng-binding">Ignore for 1 hour</li>
-				<li ng-click="ignore(24)" style="float: left;" class="ng-binding">/day</li>
-				<li ng-click="ignore(24*30)" class="ng-binding">/mon.</li>
-			</span>
-			<li ng-show="canStopIgnoring()" ng-click="ignore(0)" class="ng-binding ng-hide">Stop ignoring</li>			
+            <li class="nicknameChat">@ </li>
+            <li>Send message</li>
+            <li>Add friend</li>			
             </ul>
 		</div>
-		<div class="misc-top ng-scope" ng-controller="GameServersCtrl">
-			<h1 class="ng-binding">hardcore</h1>
+		<div class="misc-top">
+			<h1>hardcore</h1>
 			<div class="out_butt">
 			<div class="room">
-				<div class="butt_left_menu ng-binding" style="text-transform:none;" ng-click="showRooms()">Room: 
-					<span class="colorFoxy ng-binding">EU1</span>
+				<div class="butt_left_menu" style="text-transform:none;">Room:
+					<span class="colorFoxy">EU1</span>
 				</div>
 			</div>
 			</div>
@@ -61,7 +74,7 @@
 		</ul>
   
 		<!--<div id="chatmsg" class="chatmsg" ng-controller="ChatInputCtrl"></div>-->
-		<div class="chatmsg ng-scope" area-bottom="104" ng-controller="ChatInputCtrl">
+		<div class="chatmsg">
 			<textarea area-auto="" maxlength="140" onkeypress="onchatpress(event)" onkeydown="onchatdelete(event)" rows="1" id="msgText" style="height: 28px;" placeholder="Message" data-mentions-input="true"></textarea>
 			<div class="helperHeight" area-helper=""></div>
 			<div class="mentions-input-box"><div class="mentions"><div></div></div><div class="mentions-autocomplete-list"></div></div>

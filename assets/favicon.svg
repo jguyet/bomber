@@ -1,0 +1,26 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" width="32" height="32">
+  <!-- Bomb body -->
+  <circle cx="16" cy="18" r="11" fill="#2d2d2d" stroke="#1a1a1a" stroke-width="1"/>
+  <circle cx="16" cy="18" r="11" fill="url(#bombGrad)"/>
+  <!-- Highlight -->
+  <ellipse cx="12" cy="14" rx="3" ry="2.5" fill="rgba(255,255,255,0.15)" transform="rotate(-20 12 14)"/>
+  <!-- Fuse hole -->
+  <ellipse cx="16" cy="8" rx="3" ry="1.5" fill="#4a4a4a"/>
+  <!-- Fuse -->
+  <path d="M16 8 Q18 4 21 3 Q24 2 22 1" fill="none" stroke="#8B7355" stroke-width="1.5" stroke-linecap="round"/>
+  <!-- Spark -->
+  <circle cx="22" cy="1" r="2" fill="#FF6600" opacity="0.9"/>
+  <circle cx="22" cy="1" r="1.2" fill="#FFCC00"/>
+  <circle cx="22" cy="1" r="0.6" fill="#FFFFFF"/>
+  <!-- Spark rays -->
+  <line x1="22" y1="-2" x2="22" y2="-1" stroke="#FF6600" stroke-width="0.5" stroke-linecap="round"/>
+  <line x1="24" y1="0" x2="25" y2="0" stroke="#FF6600" stroke-width="0.5" stroke-linecap="round"/>
+  <line x1="23.5" y1="-1.5" x2="24.5" y2="-2" stroke="#FF6600" stroke-width="0.5" stroke-linecap="round"/>
+  <!-- Gradient definition -->
+  <defs>
+    <radialGradient id="bombGrad" cx="40%" cy="35%" r="60%">
+      <stop offset="0%" stop-color="#4a4a4a"/>
+      <stop offset="100%" stop-color="#1a1a1a"/>
+    </radialGradient>
+  </defs>
+</svg>
