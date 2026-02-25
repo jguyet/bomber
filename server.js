@@ -415,8 +415,9 @@ class Bomb {
         count++;
         break;
       } else if (!cell.isWalkable() && cell.ground === 80) {
-        // Damage soft block (80 → 81)
+        // Damage soft block (80 → 81) and make walkable
         cell.setGround(81);
+        cell.setWalkable(true);
         cell.sendCell(io);
         // Roll for item drop
         if (Math.random() < ITEM_DROP_CHANCE) {
