@@ -786,6 +786,7 @@
 
 #stats-btn,
 .stats-btn {
+  display: none;
   position: fixed;
   top: 60px;
   left: 10px;

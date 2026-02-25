@@ -404,6 +404,8 @@ function InitializeSocket()
 		// Room creator started the game - transition from waiting room to game
 		if (typeof RoomUI !== 'undefined') RoomUI.hideWaitingRoom();
 		document.getElementById('chat').style.display = '';
+		// Show stats button during gameplay
+		if (typeof StatsOverlay !== 'undefined' && StatsOverlay.showButton) StatsOverlay.showButton();
 		// Initialize chat smart scroll
 		if (typeof initChatScroll === 'function') initChatScroll();
 		// Show room & theme HUD

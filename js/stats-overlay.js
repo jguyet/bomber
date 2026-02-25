@@ -14,11 +14,16 @@ var StatsOverlay = (function() {
     else show();
   }
 
+  function onEscKey(e) {
+    if (e.keyCode === 27) hide();
+  }
+
   function show() {
     var overlay = document.getElementById('stats-overlay');
     if (!overlay) return;
     overlay.style.display = 'flex';
     isVisible = true;
+    document.addEventListener('keydown', onEscKey);
     fetchStats();
   }
 
@@ -26,6 +31,7 @@ var StatsOverlay = (function() {
     var overlay = document.getElementById('stats-overlay');
     if (overlay) overlay.style.display = 'none';
     isVisible = false;
+    document.removeEventListener('keydown', onEscKey);
   }
 
   function fetchStats() {
@@ -67,7 +73,7 @@ var StatsOverlay = (function() {
     setText('stats-wins', stats.wins || 0);
     var wr = stats.winRate ? (stats.winRate * 100).toFixed(1) + '%' : '0%';
     setText('stats-winrate', wr);
-    var kd = stats.deaths > 0 ? (stats.kills / stats.deaths).toFixed(2) : stats.kills.toString();
+    var kd = stats.deaths > 0 ? ((stats.kills || 0) / stats.deaths).toFixed(2) : (stats.kills || 0).toString();
     setText('stats-kd', kd);
   }
 
@@ -75,6 +81,10 @@ var StatsOverlay = (function() {
     var tbody = document.getElementById('stats-leaderboard-body');
     if (!tbody) return;
     tbody.innerHTML = '';
+    if (!data || data.length === 0) {
+      tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;opacity:0.5;padding:12px;">No data yet</td></tr>';
+      return;
+    }
     for (var i = 0; i < data.length; i++) {
       var row = document.createElement('tr');
       var isMe = data[i].nickname.toLowerCase() === (playerNickname || '').toLowerCase();
@@ -94,9 +104,21 @@ var StatsOverlay = (function() {
     if (el) el.textContent = value;
   }
 
+  function showButton() {
+    var btn = document.getElementById('stats-btn');
+    if (btn) btn.style.display = '';
+  }
+
+  function hideButton() {
+    var btn = document.getElementById('stats-btn');
+    if (btn) btn.style.display = 'none';
+    // Also close overlay if open
+    if (isVisible) hide();
+  }
+
   if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', init);
   } else { init(); }
 
-  return { show: show, hide: hide, toggle: toggle, fetchStats: fetchStats };
+  return { show: show, hide: hide, toggle: toggle, fetchStats: fetchStats, showButton: showButton, hideButton: hideButton };
 })();
