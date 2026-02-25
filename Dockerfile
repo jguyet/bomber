@@ -30,17 +30,16 @@ COPY i/ ./i/
 COPY util/ ./util/
 COPY server/ ./server/
 
-# Set ownership
-RUN chown -R bomber:bomber /app
+# Create .db directory for runtime data
+RUN mkdir -p /app/.db && chown -R bomber:bomber /app
 
 USER bomber
 
-# Expose ports: 9998 (WebSocket), 8060 (HTTP static)
-EXPOSE 9998 8060
+# Unified server: HTTP + Socket.io + API on port 9998
+EXPOSE 9998
 
-# Health check
+# Health check against the unified server
 HEALTHCHECK --interval=30s --timeout=5s --start-period=10s --retries=3 \
-  CMD wget --no-verbose --tries=1 --spider http://localhost:8060/ || exit 1
+  CMD wget --no-verbose --tries=1 --spider http://localhost:9998/ || exit 1
 
-# Start both servers
-CMD ["sh", "-c", "node server.js & node http_server.js"]
+CMD ["node", "server.js"]

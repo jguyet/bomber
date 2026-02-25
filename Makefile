@@ -11,10 +11,10 @@ install: ## Install dependencies
 	npm install
 
 dev: ## Start in development mode
-	node server.js & node http_server.js
+	node server.js
 
 start: ## Start in production mode
-	node server.js & node http_server.js
+	NODE_ENV=production node server.js
 
 build: ## Build the project (no-op for pure Node.js)
 	npm run build
@@ -26,7 +26,7 @@ docker-build: ## Build Docker image
 	docker build -t $(DOCKER_TAG) .
 
 docker-run: ## Run Docker container
-	docker run -d --name $(CONTAINER) -p 9998:9998 -p 8060:8060 $(DOCKER_TAG)
+	docker run -d --name $(CONTAINER) -p 9998:9998 $(DOCKER_TAG)
 
 docker-stop: ## Stop and remove Docker container
 	docker stop $(CONTAINER) && docker rm $(CONTAINER)

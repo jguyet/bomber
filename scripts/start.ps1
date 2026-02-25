@@ -1,5 +1,5 @@
 # Bomber — Start script (Windows PowerShell)
-# Starts both the WebSocket game server and the static HTTP server.
+# Starts the unified server (HTTP + Socket.io + API) on port 9998.
 # Usage: .\scripts\start.ps1
 
 $ErrorActionPreference = "Stop"
@@ -13,23 +13,10 @@ if (-not (Test-Path "node_modules")) {
     npm install
 }
 
-Write-Host "Starting Bomber servers..."
-Write-Host "  WebSocket server : ws://localhost:9998/echo"
-Write-Host "  HTTP server      : http://localhost:8060"
+Write-Host "Starting Bomber server..."
+Write-Host "  Game + API : http://localhost:9998"
+Write-Host "  Socket.io  : http://localhost:9998/echo"
+Write-Host "  Rooms API  : http://localhost:9998/api/rooms"
 Write-Host ""
 
-# Start WebSocket server as background job
-$wsJob = Start-Job -ScriptBlock {
-    Set-Location $using:ProjectDir
-    node server.js
-}
-
-# Start HTTP server in foreground
-try {
-    node http_server.js
-}
-finally {
-    # Clean up background job on exit
-    Stop-Job $wsJob -ErrorAction SilentlyContinue
-    Remove-Job $wsJob -ErrorAction SilentlyContinue
-}
+node server.js

@@ -9,6 +9,9 @@ Dockerfile
 docker-compose.yml
 Makefile
 README.md
+PROJECT.md
 1.gif
 *.md
 .DS_Store
+.db
+scripts

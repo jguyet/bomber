@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # Bomber — Start script (Linux / macOS)
-# Starts both the WebSocket game server and the static HTTP server.
+# Starts the unified server (HTTP + Socket.io + API) on port 9998.
 # Usage: ./scripts/start.sh
 
 set -euo pipefail
@@ -16,15 +16,12 @@ if [ ! -d "node_modules" ]; then
   npm install
 fi
 
-echo "Starting Bomber servers..."
-echo "  WebSocket server : ws://localhost:9998/echo"
-echo "  HTTP server      : http://localhost:8060"
+echo "Starting Bomber server..."
+echo "  Game + API : http://localhost:9998"
+echo "  Socket.io  : http://localhost:9998/echo"
+echo "  Rooms API  : http://localhost:9998/api/rooms"
 echo ""
 
-# Start both servers; trap to clean up background process on exit
-node server.js &
-WS_PID=$!
+trap 'echo "Shutting down..."; exit 0' INT TERM
 
-trap 'echo "Shutting down..."; kill $WS_PID 2>/dev/null; exit 0' INT TERM
-
-node http_server.js
+exec node server.js

@@ -1,17 +1,16 @@
 {
   "name": "bomber",
-  "version": "1.0.0",
-  "description": "Bomberman multiplayer online game",
+  "version": "3.0.0",
+  "description": "Bomberman multiplayer online game — rooms, rounds & themes",
   "main": "server.js",
   "scripts": {
     "start": "node server.js",
     "dev": "node server.js",
     "build": "echo 'No build step required'",
-    "server": "node server.js"
+    "serve:static": "node http_server.js"
   },
   "dependencies": {
-    "socket.io": "^4.8.3",
-    "ws": "^8.16.0"
+    "socket.io": "^4.8.3"
   },
   "engines": {
     "node": ">=18.0.0"
