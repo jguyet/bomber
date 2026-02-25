@@ -657,9 +657,13 @@ class Room {
     this.broadcastAll('WL' + MAP_WIDTH + '|' + MAP_HEIGHT + '|' + this.getMapData());
 
     // Send entity data (PA messages) for all players to each client
+    // Use io.sockets.sockets.get() instead of player.socket to handle reconnection
     for (const [socketId, player] of this.players) {
+      const socket = this.io.sockets.sockets.get(socketId);
+      if (!socket) continue;
+
       // Send self
-      this.sendTo(player.socket, 'PA' + player.id
+      this.sendTo(socket, 'PA' + player.id
         + '|' + player.x
         + '|' + player.y
         + '|' + this.getClientDirection(player)
@@ -671,7 +675,7 @@ class Room {
       // Send other players
       for (const [otherSocketId, otherPlayer] of this.players) {
         if (otherSocketId === socketId) continue;
-        this.sendTo(player.socket, 'PA' + otherPlayer.id
+        this.sendTo(socket, 'PA' + otherPlayer.id
           + '|' + otherPlayer.x
           + '|' + otherPlayer.y
           + '|' + this.getClientDirection(otherPlayer)
@@ -680,6 +684,15 @@ class Room {
           + '|0'
           + '|' + otherPlayer.nickname);
       }
+    }
+
+    // Broadcast updated player list after respawn
+    const playerList = [];
+    for (const [, p] of this.players) {
+      playerList.push({ id: p.id, nickname: p.nickname, skinId: p.skinId || 0 });
+    }
+    if (this.io) {
+      this.io.to('room:' + this.id).emit('roomPlayerList', playerList);
     }
 
     // Set state to waiting
@@ -948,8 +961,9 @@ class Room {
     }
 
     // Send other players to this client, and notify others about this player
+    // Use io.sockets.sockets.get() for reliable socket lookup (handles reconnection)
     for (const [otherSocketId, otherPlayer] of this.players) {
-      if (otherPlayer.socket === socket) continue;
+      if (otherSocketId === socket.id) continue;
 
       // Tell new client about existing player
       this.sendTo(socket, 'PA' + otherPlayer.id
@@ -962,14 +976,17 @@ class Room {
         + '|' + otherPlayer.nickname);
 
       // Tell existing player about new client
-      this.sendTo(otherPlayer.socket, 'PA' + player.id
-        + '|' + player.x
-        + '|' + player.y
-        + '|' + this.getClientDirection(player)
-        + '|' + player.skin
-        + '|' + player.speed
-        + '|0'
-        + '|' + player.nickname);
+      const otherSocket = this.io.sockets.sockets.get(otherSocketId);
+      if (otherSocket) {
+        this.sendTo(otherSocket, 'PA' + player.id
+          + '|' + player.x
+          + '|' + player.y
+          + '|' + this.getClientDirection(player)
+          + '|' + player.skin
+          + '|' + player.speed
+          + '|0'
+          + '|' + player.nickname);
+      }
     }
 
     // Send current round state to newly connected player
