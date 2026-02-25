@@ -41,27 +41,31 @@ function InitializeSocket()
 				switch (action)
 				{
 					case "A":
-						var id = Number(received_msg.substring(2).split("|")[0]);
-						var x = Number(received_msg.substring(2).split("|")[1]);
-						var y = Number(received_msg.substring(2).split("|")[2]);
-						var range = Number(received_msg.substring(2).split("|")[3]);
-						var bomb = new Bomb(id, x, y, range);
-						bomb.start();
-						world.addbomb(bomb);
+						if (world != null) {
+							var id = Number(received_msg.substring(2).split("|")[0]);
+							var x = Number(received_msg.substring(2).split("|")[1]);
+							var y = Number(received_msg.substring(2).split("|")[2]);
+							var range = Number(received_msg.substring(2).split("|")[3]);
+							var bomb = new Bomb(id, x, y, range);
+							bomb.start();
+							world.addbomb(bomb);
+						}
 					break ;
 					case "E":
-						var id = Number(received_msg.substring(2).split("|")[0]);
-						var sup = Number(received_msg.substring(2).split("|")[1]);
-						var down = Number(received_msg.substring(2).split("|")[2]);
-						var left = Number(received_msg.substring(2).split("|")[3]);
-						var right = Number(received_msg.substring(2).split("|")[4]);
-						var bomb = world.getBomb(id);
-						if (bomb != undefined) {
-							bomb.exsup = sup;
-							bomb.exleft = left;
-							bomb.exdown = down;
-							bomb.exright = right;
-							bomb.explode();
+						if (world != null) {
+							var id = Number(received_msg.substring(2).split("|")[0]);
+							var sup = Number(received_msg.substring(2).split("|")[1]);
+							var down = Number(received_msg.substring(2).split("|")[2]);
+							var left = Number(received_msg.substring(2).split("|")[3]);
+							var right = Number(received_msg.substring(2).split("|")[4]);
+							var bomb = world.getBomb(id);
+							if (bomb != undefined) {
+								bomb.exsup = sup;
+								bomb.exleft = left;
+								bomb.exdown = down;
+								bomb.exright = right;
+								bomb.explode();
+							}
 						}
 					break ;
 				}
@@ -70,28 +74,34 @@ function InitializeSocket()
 				switch (action)
 				{
 					case "A": // add item
-						var id = Number(received_msg.substring(2).split("|")[0]);
-						var templateId = Number(received_msg.substring(2).split("|")[1]);
-						var x = Number(received_msg.substring(2).split("|")[2]);
-						var y = Number(received_msg.substring(2).split("|")[3]);
-						var item = new Item(id, templateId, x, y);
-						item.start();
-						world.additem(item);
+						if (world != null) {
+							var id = Number(received_msg.substring(2).split("|")[0]);
+							var templateId = Number(received_msg.substring(2).split("|")[1]);
+							var x = Number(received_msg.substring(2).split("|")[2]);
+							var y = Number(received_msg.substring(2).split("|")[3]);
+							var item = new Item(id, templateId, x, y);
+							item.start();
+							world.additem(item);
+						}
 					break ;
 					case "D": // delete item
-						var id = Number(received_msg.substring(2).split("|")[0]);
-						var templateId = Number(received_msg.substring(2).split("|")[1]);
-						var x = Number(received_msg.substring(2).split("|")[2]);
-						var y = Number(received_msg.substring(2).split("|")[3]);
-						var item = world.getItem(id);
-						if (item != undefined) {
-							item.delete();
+						if (world != null) {
+							var id = Number(received_msg.substring(2).split("|")[0]);
+							var templateId = Number(received_msg.substring(2).split("|")[1]);
+							var x = Number(received_msg.substring(2).split("|")[2]);
+							var y = Number(received_msg.substring(2).split("|")[3]);
+							var item = world.getItem(id);
+							if (item != undefined) {
+								item.delete();
+							}
 						}
 					break ;
 					case "S": // item speed
-						var id = Number(received_msg.substring(2).split("|")[0]);
-						var speed = Number(received_msg.substring(2).split("|")[1]);
-						world.setPlayerSpeed(id, speed);
+						if (world != null) {
+							var id = Number(received_msg.substring(2).split("|")[0]);
+							var speed = Number(received_msg.substring(2).split("|")[1]);
+							world.setPlayerSpeed(id, speed);
+						}
 					break ;
 				}
 			break ;
@@ -127,50 +137,60 @@ function InitializeSocket()
 				switch (action)
 				{
 					case "A":
-						var id = Number(received_msg.substring(2).split("|")[0]);
-						var x = Number(received_msg.substring(2).split("|")[1]);
-						var y = Number(received_msg.substring(2).split("|")[2]);
-						var dir = Number(received_msg.substring(2).split("|")[3]);
-						var skin = Number(received_msg.substring(2).split("|")[4]);
-						var speed = Number(received_msg.substring(2).split("|")[5]);
-						var bcurrent = Number(received_msg.substring(2).split("|")[6]);
-						var nickname = received_msg.substring(2).split("|")[7] || "Player";
-						world.addplayer(id, x, y, dir, skin, speed, bcurrent, nickname);
+						if (world != null) {
+							var id = Number(received_msg.substring(2).split("|")[0]);
+							var x = Number(received_msg.substring(2).split("|")[1]);
+							var y = Number(received_msg.substring(2).split("|")[2]);
+							var dir = Number(received_msg.substring(2).split("|")[3]);
+							var skin = Number(received_msg.substring(2).split("|")[4]);
+							var speed = Number(received_msg.substring(2).split("|")[5]);
+							var bcurrent = Number(received_msg.substring(2).split("|")[6]);
+							var nickname = received_msg.substring(2).split("|")[7] || "Player";
+							world.addplayer(id, x, y, dir, skin, speed, bcurrent, nickname);
+						}
 					break ;
 					case "D":
-						var id = Number(received_msg.substring(2).split("|")[0]);
-						world.removeplayer(id);
+						if (world != null) {
+							var id = Number(received_msg.substring(2).split("|")[0]);
+							world.removeplayer(id);
+						}
 					break ;
 					case "M":
-						var id = Number(received_msg.substring(2).split("|")[0]);
-						var x = Number(received_msg.substring(2).split("|")[1]);
-						var y = Number(received_msg.substring(2).split("|")[2]);
-						var dir = Number(received_msg.substring(2).split("|")[3]);
-						var skin = Number(received_msg.substring(2).split("|")[4]);
-						var bytedir = Number(received_msg.substring(2).split("|")[5]);
-						var nickname = received_msg.substring(2).split("|")[7] || "";
-						world.moveplayer(id, x, y, dir, skin, false, bytedir, nickname);
+						if (world != null) {
+							var id = Number(received_msg.substring(2).split("|")[0]);
+							var x = Number(received_msg.substring(2).split("|")[1]);
+							var y = Number(received_msg.substring(2).split("|")[2]);
+							var dir = Number(received_msg.substring(2).split("|")[3]);
+							var skin = Number(received_msg.substring(2).split("|")[4]);
+							var bytedir = Number(received_msg.substring(2).split("|")[5]);
+							var nickname = received_msg.substring(2).split("|")[7] || "";
+							world.moveplayer(id, x, y, dir, skin, false, bytedir, nickname);
+						}
 					break ;
 					case "S":
-						var id = Number(received_msg.substring(2).split("|")[0]);
-						var x = Number(received_msg.substring(2).split("|")[1]);
-						var y = Number(received_msg.substring(2).split("|")[2]);
-						var dir = Number(received_msg.substring(2).split("|")[3]);
-						var skin = Number(received_msg.substring(2).split("|")[4]);
-						var bytedir = Number(received_msg.substring(2).split("|")[5]);
-						var nickname = received_msg.substring(2).split("|")[7] || "";
-						world.moveplayer(id, x, y, dir, skin, true, bytedir, nickname);
+						if (world != null) {
+							var id = Number(received_msg.substring(2).split("|")[0]);
+							var x = Number(received_msg.substring(2).split("|")[1]);
+							var y = Number(received_msg.substring(2).split("|")[2]);
+							var dir = Number(received_msg.substring(2).split("|")[3]);
+							var skin = Number(received_msg.substring(2).split("|")[4]);
+							var bytedir = Number(received_msg.substring(2).split("|")[5]);
+							var nickname = received_msg.substring(2).split("|")[7] || "";
+							world.moveplayer(id, x, y, dir, skin, true, bytedir, nickname);
+						}
 					break ;
 					case "K": // Player killed: PK{id}
-						var id = Number(received_msg.substring(2));
-						var player = world.getPlayer(id);
-						if (player != null) {
-							player.alive = false;
-							player.remove();
-						}
-						if (currentPlayer && id === currentPlayer.id) {
-							isSpectating = true;
-							if (typeof HUD !== 'undefined') HUD.showDeathNotice();
+						if (world != null) {
+							var id = Number(received_msg.substring(2));
+							var player = world.getPlayer(id);
+							if (player != null) {
+								player.alive = false;
+								player.remove();
+							}
+							if (currentPlayer && id === currentPlayer.id) {
+								isSpectating = true;
+								if (typeof HUD !== 'undefined') HUD.showDeathNotice();
+							}
 						}
 					break ;
 				}
@@ -205,21 +225,25 @@ function InitializeSocket()
 				switch (action)
 				{
 					case "L":
-						fosfo0.clear();
-						world = new World(received_msg.substring(2), currentTheme);
-						world.loadWorld();
-						LoadingManager.assetLoaded('World data');
-						LoadingManager.worldReady();
-						sendSocketMessage("WE"); // load entities
+						if (typeof fosfo0 !== 'undefined' && fosfo0) {
+							fosfo0.clear();
+							world = new World(received_msg.substring(2), currentTheme);
+							world.loadWorld();
+							LoadingManager.assetLoaded('World data');
+							LoadingManager.worldReady();
+							sendSocketMessage("WE"); // load entities
+						}
 					break ;
 					case "C":
-						var x = Number(received_msg.substring(2).split("|")[1]);
-						var y = Number(received_msg.substring(2).split("|")[2]);
-						var id = Number(received_msg.substring(2).split("|")[0]);
-						var img = world.dataimg[y][x];
-						var tilesetPath = (world && world.tilesetPath) || THEME_TILESETS[currentTheme] || THEME_TILESETS['default'];
-						world.dataimg[y][x] = fosfo0.drawframe(img.name, tilesetPath, id, img.x, img.y);
-						world.havechange = true;
+						if (world != null && typeof fosfo0 !== 'undefined' && fosfo0) {
+							var x = Number(received_msg.substring(2).split("|")[1]);
+							var y = Number(received_msg.substring(2).split("|")[2]);
+							var id = Number(received_msg.substring(2).split("|")[0]);
+							var img = world.dataimg[y][x];
+							var tilesetPath = (world && world.tilesetPath) || THEME_TILESETS[currentTheme] || THEME_TILESETS['default'];
+							world.dataimg[y][x] = fosfo0.drawframe(img.name, tilesetPath, id, img.x, img.y);
+							world.havechange = true;
+						}
 					break ;
 				}
 			break ;
