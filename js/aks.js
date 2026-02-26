@@ -173,7 +173,7 @@ function InitializeSocket(nickname, skinId)
 					case "L":
 						fosfo0.clear();
 						world = new World(received_msg.substring(2));
-						world.loadWorld();
+						// World constructor already calls createWorld → loadWorld
 						// Notify loading overlay that world is ready
 						if (typeof window.onWorldReady === 'function') window.onWorldReady();
 					break;
@@ -184,7 +184,7 @@ function InitializeSocket(nickname, skinId)
 						// x, y are TILE coordinates (grid), not pixel — no camera adjustment needed
 						if (world.dataimg[y] && world.dataimg[y][x]) {
 							var img = world.dataimg[y][x];
-							world.dataimg[y][x] = fosfo0.drawframe(img.name, 'assets/maps/1.png', ground, img.x, img.y);
+							world.dataimg[y][x] = fosfo0.drawframe(img.name, world.tileset, ground, img.x, img.y);
 							world.havechange = true;
 						}
 					break;
