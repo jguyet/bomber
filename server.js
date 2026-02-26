@@ -11,7 +11,7 @@
  *   MN[msg]    - Chat message
  *
  * Outgoing to client:
- *   WL[w|h|data]              - World data (cells: "id,ground;...")
+ *   WL[w|h|tileset|cols|rows|data] - World data (tileset path, spritesheet cols/rows, cells: "id,ground;...")
  *   WC[ground|x|y|walkable]  - Cell updated
  *   PA[id|x|y|dir|skin|bcurrent|nickname] - Player added (bcurrent=1 = "this is you")
  *   PD[id]                   - Player disconnected
@@ -56,6 +56,56 @@ const DIR = {
 function randomInt(min, max) {
   return Math.floor(Math.random() * (max - min + 1)) + min;
 }
+
+// ─── Map Templates ──────────────────────────────────────────────────────────
+// Each template defines a tileset, tile dimensions, tile indices, and soft-block density.
+// Maps follow classic Bomberman grid rules: indestructible pillars at even×even,
+// spawn corners kept clear, soft blocks filling eligible cells at the given density.
+const MAP_TEMPLATES = [
+  {
+    name: 'classic',
+    tileset: 'assets/maps/1.png',
+    tilesetCols: 8,
+    tilesetRows: 24,
+    emptyGround: 0,       // tile index for walkable floor
+    softGround: 80,       // tile index for destructible wall
+    hardGround: 104,      // tile index for indestructible wall
+    softDensity: 0.60,    // 60% soft blocks in eligible cells
+  },
+  {
+    name: 'winter',
+    tileset: 'assets/maps/1-winter.png',
+    tilesetCols: 8,
+    tilesetRows: 30,
+    emptyGround: 0,       // snow floor tile
+    softGround: 80,       // ice/snow destructible wall
+    hardGround: 104,      // frozen stone indestructible wall
+    softDensity: 0.55,    // 55% soft blocks
+  },
+  {
+    name: 'moon',
+    tileset: 'assets/maps/tileset-moon.png',
+    tilesetCols: 10,
+    tilesetRows: 32,
+    emptyGround: 0,       // dark space floor tile
+    softGround: 80,       // moon rock destructible wall
+    hardGround: 104,      // crater indestructible wall
+    softDensity: 0.50,    // 50% soft blocks (more open)
+  },
+  {
+    name: 'ruins',
+    tileset: 'assets/maps/1.png',
+    tilesetCols: 8,
+    tilesetRows: 24,
+    emptyGround: 0,       // stone/brick floor
+    softGround: 80,       // crumbling wall destructible
+    hardGround: 104,      // solid ruins indestructible wall
+    softDensity: 0.70,    // 70% soft blocks (dense map)
+  },
+];
+
+// Currently active map template (set during initializeMap)
+let currentMapTemplate = null;
 
 // ─── Game State ─────────────────────────────────────────────────────────────
 let nextPlayerId = 0;
@@ -137,20 +187,53 @@ class Case {
 }
 
 // ─── Map Initialization ─────────────────────────────────────────────────────
+
+// Check if a cell position is in one of the 4 spawn corners (3×3 area each)
+function isSpawnCorner(cx, cy) {
+  // Top-left corner
+  if (cx < 3 && cy < 3) return true;
+  // Top-right corner
+  if (cx >= MAP_WIDTH - 3 && cy < 3) return true;
+  // Bottom-left corner
+  if (cx < 3 && cy >= MAP_HEIGHT - 3) return true;
+  // Bottom-right corner
+  if (cx >= MAP_WIDTH - 3 && cy >= MAP_HEIGHT - 3) return true;
+  return false;
+}
+
 function initializeMap() {
+  // Pick a random template
+  currentMapTemplate = MAP_TEMPLATES[Math.floor(Math.random() * MAP_TEMPLATES.length)];
+
   cases.length = 0;
   let i = 0;
+
+  const { emptyGround, softGround, hardGround, softDensity } = currentMapTemplate;
+
   for (let cy = 0; cy < MAP_HEIGHT; cy++) {
     for (let cx = 0; cx < MAP_WIDTH; cx++) {
-      let ground = 0;
+      let ground = emptyGround;
       let walkable = true;
-      if (randomInt(1, 2) === 1) {
-        ground = 104;
+
+      if (isSpawnCorner(cx, cy)) {
+        // Spawn corners are always empty and walkable
+        ground = emptyGround;
+        walkable = true;
+      } else if (cx % 2 === 0 && cy % 2 === 0) {
+        // Pillar pattern: indestructible walls at even×even grid positions
+        ground = hardGround;
         walkable = false;
-      } else if (randomInt(1, 4) === 1) {
-        ground = 80;
-        walkable = false;
+      } else {
+        // Eligible cell: random chance of soft block, otherwise empty
+        if (Math.random() < softDensity) {
+          ground = softGround;
+          walkable = false;
+        } else {
+          ground = emptyGround;
+          walkable = true;
+        }
       }
+
       cases.push(new Case(i, walkable, ground, cx, cy));
       i++;
     }
@@ -407,16 +490,16 @@ class Bomb {
         }, CHAIN_EXPLOSION_DELAY_MS);
         count++;
         break;
-      } else if (!cell.isWalkable() && cell.ground === 104) {
-        // Destroy solid block
+      } else if (!cell.isWalkable() && cell.ground === currentMapTemplate.hardGround) {
+        // Destroy solid block → empty ground
         cell.setWalkable(true);
-        cell.setGround(0);
+        cell.setGround(currentMapTemplate.emptyGround);
         cell.sendCell(io);
         count++;
         break;
-      } else if (!cell.isWalkable() && cell.ground === 80) {
-        // Damage soft block (80 → 81) and make walkable
-        cell.setGround(81);
+      } else if (!cell.isWalkable() && cell.ground === currentMapTemplate.softGround) {
+        // Damage soft block (softGround → softGround+1) and make walkable
+        cell.setGround(currentMapTemplate.softGround + 1);
         cell.setWalkable(true);
         cell.sendCell(io);
         // Roll for item drop
@@ -483,8 +566,8 @@ function handleWorldLoad(socket, io) {
   const player = players.get(socket.id);
   if (!player) return;
 
-  // Send world data
-  sendTo(socket, `WL${MAP_WIDTH}|${MAP_HEIGHT}|${getMapData()}`);
+  // Send world data (includes tileset path, cols, rows for client spritesheet slicing)
+  sendTo(socket, `WL${MAP_WIDTH}|${MAP_HEIGHT}|${currentMapTemplate.tileset}|${currentMapTemplate.tilesetCols}|${currentMapTemplate.tilesetRows}|${getMapData()}`);
 
   // Send current player info (bcurrent=1 means "this is you")
   sendTo(socket, `PA${player.id}|${player.x}|${player.y}|${player.getClientDirection()}|${player.skin}|1|${player.nickname}`);
@@ -622,7 +705,7 @@ const io = new Server(httpServer, {
 
 // Initialize the map on server start
 initializeMap();
-console.log(`Map initialized: ${MAP_WIDTH}x${MAP_HEIGHT} tiles`);
+console.log(`Map initialized: ${MAP_WIDTH}x${MAP_HEIGHT} tiles — template: ${currentMapTemplate.name} (tileset: ${currentMapTemplate.tileset})`);
 
 // ─── Single shared game tick loop (~60 FPS) ───────────────────────────────────
 const TICK_MS = 16;
