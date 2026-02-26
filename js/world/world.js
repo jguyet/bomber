@@ -238,11 +238,20 @@ var World = function(data)
 
 	this.addItem = function(id, type, cellX, cellY)
 	{
-		// Frame indices from 5x4 items spritesheet (assets/items/1.png)
+		// Frame indices from 3x9 items spritesheet (assets/items/1.png)
 		var frameMap = { 'fire': 3, 'bomb': 0, 'boots': 6 };
 		var frameIndex = frameMap[type] !== undefined ? frameMap[type] : 0;
-		fosfo1.drawframe('item' + id, 'assets/items/1.png', frameIndex, cellX * 32, cellY * 32);
-		this.items.push({ id: id, type: type, cellX: cellX, cellY: cellY });
+		var ITEM_SIZE = 20;
+		var ITEM_OFFSET = (32 - ITEM_SIZE) / 2; // 6px centering offset
+		var drawX = cellX * 32 + ITEM_OFFSET;
+		var drawY = cellY * 32 + ITEM_OFFSET;
+		fosfo1.drawframe('item' + id, 'assets/items/1.png', frameIndex, drawX, drawY, ITEM_SIZE, ITEM_SIZE);
+		this.items.push({
+			id: id, type: type, cellX: cellX, cellY: cellY,
+			baseY: drawY,
+			phase: Math.random() * Math.PI * 2, // random start phase so items don't bob in sync
+			time: 0
+		});
 	};
 
 	this.removeItem = function(id)
@@ -254,6 +263,28 @@ var World = function(data)
 				fosfo1.undraw('item' + id);
 				this.items.splice(i, 1);
 				return;
+			}
+		}
+	};
+
+	this.updateItems = function()
+	{
+		var FLOAT_AMPLITUDE = 3;  // pixels up/down
+		var FLOAT_SPEED = 0.05;   // radians per frame
+		for (var i = 0; i < this.items.length; i++)
+		{
+			var item = this.items[i];
+			item.time += FLOAT_SPEED;
+			var offsetY = Math.sin(item.time + item.phase) * FLOAT_AMPLITUDE;
+			// Find the drawn image and update its Y position
+			var imgName = 'item' + item.id;
+			for (var j = 0; j < fosfo1.imagesDrawed.length; j++)
+			{
+				if (fosfo1.imagesDrawed[j].name === imgName)
+				{
+					fosfo1.imagesDrawed[j].y = item.baseY + offsetY;
+					break;
+				}
 			}
 		}
 	};
