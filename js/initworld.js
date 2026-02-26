@@ -59,7 +59,7 @@ function preload()
 		setTimeout(dismissLoadingOverlay, 400);
 	};
 
-	fosfo0.loadimage(['assets/maps/1.png']).done(function() {
+	fosfo0.loadimage(['assets/maps/1.png', 'assets/maps/1-winter.png', 'assets/maps/tileset-moon.png']).done(function() {
 		setLoadingProgress('Loading map…', 33);
 		fosfo1.loadimage(['assets/bombs/1.png', 'assets/bombs/explode/1.png', 'assets/items/1.png']).done(function() {
 			setLoadingProgress('Loading assets…', 66);
@@ -81,7 +81,8 @@ function initWorld()
 	document.addEventListener('keyup', onKeyUp, false );
 	document.addEventListener('mousewheel', onrool, false);
 	window.addEventListener( 'resize', onWindowResize, false );
-	fosfo0.setFramesToImg('assets/maps/1.png', 8, 24);
+	// Map tileset frames are now configured dynamically by World constructor
+	// after parsing tileset info from WL protocol
 	fosfo1.setFramesToImg('assets/bombs/1.png', 1, 9);
 	fosfo1.setFramesToImg('assets/bombs/explode/1.png', 4, 2);
 	fosfo1.setFramesToImg('assets/items/1.png', 3, 9);

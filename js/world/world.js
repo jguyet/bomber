@@ -1,7 +1,11 @@
 var World = function(data)
 {
-	this.width = data.split("|")[0];
-	this.height = data.split("|")[1];
+	var parts = data.split("|");
+	this.width = parts[0];
+	this.height = parts[1];
+	this.tileset = parts[2];              // e.g. 'assets/maps/1.png'
+	this.tilesetCols = Number(parts[3]);  // e.g. 8
+	this.tilesetRows = Number(parts[4]);  // e.g. 24
 	this.data = [];
 	this.dataimg = [];
 	this.bombs = [];
@@ -52,6 +56,7 @@ var World = function(data)
 
 	this.loadWorld = function()
 	{
+		fosfo0.setFramesToImg(this.tileset, this.tilesetCols, this.tilesetRows);
 		fosfo0.clear();
 		var mapW = parseInt(this.width);
 		var mapH = parseInt(this.height);
@@ -70,7 +75,7 @@ var World = function(data)
 				var c = this.data[y][x];
 				var id = c.split(",")[0];
 				var ground = c.split(",")[1];
-				tmp.push(fosfo0.drawframe("case" + id, 'assets/maps/1.png', ground, x * 32, y * 32));
+				tmp.push(fosfo0.drawframe("case" + id, this.tileset, ground, x * 32, y * 32));
 			}
 			this.dataimg[y] = tmp;
 		}
@@ -89,7 +94,7 @@ var World = function(data)
 				if (this.dataimg[y] != null && this.dataimg[y][x] != null)
 				{
 					var img = this.dataimg[y][x];
-					this.dataimg[y][x] = fosfo0.drawframe(img.name, 'assets/maps/1.png', img.id, x * 32, y * 32);
+					this.dataimg[y][x] = fosfo0.drawframe(img.name, this.tileset, img.id, x * 32, y * 32);
 				}
 			}
 		}
@@ -289,10 +294,10 @@ var World = function(data)
 		}
 	};
 
-	this.createWorld = function(data)
+	this.createWorld = function(cellData)
 	{
-		this.parseMapData(data);
+		this.parseMapData(cellData);
 		this.loadWorld();
 	};
-	this.createWorld(data.split("|")[2].split(";"));
+	this.createWorld(parts[5].split(";"));
 };
