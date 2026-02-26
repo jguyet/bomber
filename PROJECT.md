@@ -256,3 +256,37 @@ The player position is desynced between server and client due to several archite
 ### Files Modified (Sprint 5)
 - `server.js` — `getCellPos()`, `Player.getCurCell()`, `Player.getPossibleCell()`, `Bomb.explodeLine()`, new `wrapCoord()` helper, `CHAIN_EXPLOSION_DELAY_MS` constant
 - `js/player/player.js` — `getpos()` double-modulo fix
+
+---
+
+## Sprint 6 — Item Icon Polish, Coherent Maps, Favicon
+
+### Changes
+
+#### 1. Item Icon Size Reduction + Floating Animation
+- **Problem**: Item icons rendered at full 32×32 tile size, visually too large and static on the map.
+- **Fix**: Reduce item icon draw size from 32×32 to ~20×20, centered within the tile cell. Add a CSS-free floating animation (sinusoidal Y-offset oscillation) applied each frame in `world.js` `addItem()` / the render loop so items bob up and down gently in the game world.
+- **Files Modified**:
+  - `js/world/world.js` — `addItem()`: draw items at smaller size with offset; add per-item animation state (phase, amplitude). New `updateItems()` method for per-frame Y-offset update.
+  - `js/initworld.js` — call `world.updateItems()` in the game loop `interval()`.
+
+#### 2. Four Coherent Bomberman Maps
+- **Problem**: Map is generated purely randomly (50% solid, 25% soft, 25% empty) — no structure or playability design. Classic Bomberman maps have a deliberate grid pattern with indestructible pillars, open spawn corners, and controlled soft-block placement.
+- **Fix**: Replace `initializeMap()` in `server.js` with 4 hand-designed map templates that follow classic Bomberman layout rules:
+  - Indestructible walls on a regular grid (every other row+col)
+  - Open corner areas for safe spawning
+  - Soft blocks filling remaining spaces with controlled density
+  - Each map uses different tile indices from the available tilesets (1.png, 1-winter.png, tileset-moon.png)
+- **Map tileset system**: Server sends the tileset filename with `WL` message so client loads the correct spritesheet per map. New `WL` format: `WL{w}|{h}|{tileset}|{cells}`.
+- **Files Modified**:
+  - `server.js` — new `MAP_TEMPLATES` array with 4 map layouts, `initializeMap()` picks one randomly, new `currentTileset` variable, updated `WL` message format
+  - `js/world/world.js` — `World()` constructor and `loadWorld()`/`printWorld()` parse tileset from WL data, use dynamic tileset path instead of hardcoded `assets/maps/1.png`
+  - `js/aks.js` — `WC` handler uses dynamic tileset path
+  - `js/initworld.js` — `initWorld()` loads all 3 map tilesets upfront; `setFramesToImg` configured per tileset
+
+#### 3. Favicon
+- **Problem**: Current favicon.svg is a generic bomb silhouette.
+- **Fix**: Create a proper pixel-art favicon (favicon.png 32×32 + favicon.ico) of a classic Bomberman bomb with fuse, matching the game's retro pixel-art style.
+- **Files Modified**:
+  - `assets/favicon.png` — new 32×32 pixel-art bomb favicon
+  - `index.html` — update `<link rel="icon">` to reference new favicon.png

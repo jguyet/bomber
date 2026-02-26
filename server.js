@@ -37,7 +37,7 @@ const PLAYER_SPEED = 1.5;
 const BOMB_RANGE = 4;
 const BOMB_TIMER_MS = 3000;
 const CHAIN_EXPLOSION_DELAY_MS = 350; // delay between chained bomb explosions (ms)
-const ITEM_DROP_CHANCE = 0.35; // 35% chance to drop an item when a soft wall is destroyed
+const ITEM_DROP_CHANCE = 0.50; // 50% chance to drop an item when a soft wall is destroyed
 const ITEM_TYPES = ['fire', 'bomb', 'boots']; // equal probability
 const SPEED_BOOST = 0.3; // speed increase per boots pickup
 // Player hitbox: (x, y) is the top-left corner of the hitbox.
@@ -491,15 +491,11 @@ class Bomb {
         count++;
         break;
       } else if (!cell.isWalkable() && cell.ground === currentMapTemplate.hardGround) {
-        // Destroy solid block → empty ground
-        cell.setWalkable(true);
-        cell.setGround(currentMapTemplate.emptyGround);
-        cell.sendCell(io);
-        count++;
+        // Hard block — indestructible, stop explosion
         break;
       } else if (!cell.isWalkable() && cell.ground === currentMapTemplate.softGround) {
-        // Damage soft block (softGround → softGround+1) and make walkable
-        cell.setGround(currentMapTemplate.softGround + 1);
+        // Destroy soft block → empty ground
+        cell.setGround(currentMapTemplate.emptyGround);
         cell.setWalkable(true);
         cell.sendCell(io);
         // Roll for item drop
@@ -509,6 +505,7 @@ class Bomb {
           items.set(item.id, item);
           io.emit('msg', 'IA' + item.id + '|' + item.type + '|' + item.cellX + '|' + item.cellY);
         }
+        count++;
         break;
       } else if (!cell.isWalkable()) {
         break;
